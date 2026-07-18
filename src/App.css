@@ -32,6 +32,13 @@
   letter-spacing: 0.01em;
 }
 
+.scissor-logo {
+  width: 24px;
+  height: 24px;
+  color: var(--main-color);
+  transition: color 0.3s ease;
+}
+
 .logo-tag {
   width: 22px;
   height: 16px;

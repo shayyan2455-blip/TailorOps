@@ -1,16 +1,30 @@
+import { useState, useCallback } from 'react'
 import { useTheme } from '../hooks/useTheme'
+import SplashScreen from './SplashScreen'
 import '../../App.css'
 
 export default function LandingPage() {
   const { theme, toggleTheme } = useTheme()
+  const [showSplash, setShowSplash] = useState(true)
+  const hideSplash = useCallback(() => setShowSplash(false), [])
 
   return (
-    <div className="app">
-      <nav className="nav">
-        <div className="logo">
-          <span className="logo-tag" />
-          TailorOps
-        </div>
+    <>
+      {showSplash && <SplashScreen onFinish={hideSplash} />}
+      <div className="app">
+        <nav className="nav">
+          <div className="logo">
+            <svg className="scissor-logo" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <g>
+                <circle cx="10" cy="10" r="3.5" stroke="currentColor" strokeWidth="1.6" />
+                <circle cx="30" cy="10" r="3.5" stroke="currentColor" strokeWidth="1.6" />
+                <path d="M12.5 12.5L30 30" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+                <path d="M27.5 12.5L10 30" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+                <circle cx="20" cy="20" r="2" fill="currentColor" stroke="currentColor" strokeWidth="1" />
+              </g>
+            </svg>
+            TailorOps
+          </div>
         <div className="nav-right">
           <div className="nav-links">
             <a href="#features">Modules</a>
@@ -169,5 +183,6 @@ export default function LandingPage() {
         <span className="mono">BOOKED · CUTTING · STITCHING · READY · DELIVERED</span>
       </footer>
     </div>
+    </>
   )
 }
