@@ -1,0 +1,57 @@
+:root {
+  --bg-color: #080808;
+  --second-bg-color: #101010;
+  --text-color: white;
+  --main-color: #ea580c;
+  --span-color: linear-gradient(270deg, #df8908 10%, #ff1d15 100%);
+
+  --bg-color-light: #ffffff;
+  --second-bg-color-light: #f0f0f0;
+  --text-color-light: #000000;
+  --main-color-light: #4caf50;
+  --span-color-light: linear-gradient(270deg, #4caf50 10%, #388e3c 100%);
+
+  color-scheme: dark;
+}
+
+[data-theme="light"] {
+  --bg-color: #ffffff;
+  --second-bg-color: #f0f0f0;
+  --text-color: #000000;
+  --main-color: #4caf50;
+  --span-color: linear-gradient(270deg, #4caf50 10%, #388e3c 100%);
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--bg-color);
+  color: var(--text-color);
+  font-family: 'IBM Plex Sans', sans-serif;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.mono {
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+.serif {
+  font-family: 'Fraunces', serif;
+}
