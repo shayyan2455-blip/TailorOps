@@ -1,0 +1,2 @@
+-- Phase 1: Initial schema — tenants, profiles, orders, customers, etc.
+-- This migration will be written when Phase 1 is started.
