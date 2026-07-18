@@ -55,7 +55,7 @@ function App() {
             cut fabric than chase paperwork.
           </p>
           <div className="hero-ctas">
-            <a href="#" className="btn-primary">Start free →</a>
+            <a href="#" className="btn-primary">Create shop →</a>
             <a href="#features" className="btn-secondary">See how it runs</a>
           </div>
         </div>
@@ -169,7 +169,7 @@ function App() {
           <span className="gradient-text">Start tracking thread.</span>
         </h2>
         <p>Set up your shop in a few minutes — no spreadsheets required.</p>
-        <a href="#" className="btn-primary">Start your free trial →</a>
+        <a href="#" className="btn-primary">Create shop account →</a>
       </section>
 
       <footer className="footer wrap">
