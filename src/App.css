@@ -574,12 +574,15 @@
 
 .footer-service {
   color: var(--text-color);
-  opacity: 0.6;
+}
+
+.footer-service .gradient-text {
+  font-weight: 600;
 }
 
 .footer > .mono {
   color: var(--text-color);
-  opacity: 0.4;
+  opacity: 0.5;
 }
 
 @media (prefers-reduced-motion: reduce) {
