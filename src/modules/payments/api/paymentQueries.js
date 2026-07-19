@@ -12,7 +12,7 @@ export async function fetchPayments() {
 export async function fetchCustomersForPayment(tenantId) {
   const { data: customers, error } = await supabase
     .from('customers')
-    .select('id, name, mobile')
+    .select('id, name, mobile, credit')
     .order('name')
   if (error) throw error
 
@@ -33,7 +33,8 @@ export async function fetchCustomersForPayment(tenantId) {
       totalUnpaid += Number(o.total_amount) - paid
     }
 
-    result.push({ ...c, unpaid: Math.max(0, totalUnpaid) })
+    const credit = Number(c.credit || 0)
+    result.push({ ...c, unpaid: Math.max(0, totalUnpaid), credit })
   }
   return result.sort((a, b) => b.unpaid - a.unpaid)
 }

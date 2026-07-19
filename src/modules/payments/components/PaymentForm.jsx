@@ -64,7 +64,9 @@ export default function PaymentForm({ tenantId, onSave, onCancel }) {
 
       {selected && (
         <div style={{ fontSize: 12, opacity: 0.6, marginTop: -8 }}>
-          Unpaid balance: <strong>Rs. {Number(selected.unpaid).toFixed(0)}</strong> — payment auto-distributes across orders from oldest first
+          Unpaid: <strong>Rs. {Number(selected.unpaid).toFixed(0)}</strong>
+          {selected.credit > 0 && <span> · Credit: <strong style={{ color: 'var(--success)' }}>Rs. {Number(selected.credit).toFixed(0)}</strong></span>}
+          — payment auto-distributes across orders; excess becomes credit
         </div>
       )}
 

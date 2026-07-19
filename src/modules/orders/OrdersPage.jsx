@@ -84,7 +84,16 @@ export default function OrdersPage() {
           await saveMeasurement(tenantId, orderData.customer_id, orderId, measurements)
         }
 
-        showToast('Order created.')
+        const { data: creditApplied } = await supabase.rpc('apply_customer_credit', {
+          p_customer_id: orderData.customer_id,
+          p_order_id: orderId,
+          p_tenant_id: tenantId,
+        })
+        if (creditApplied && Number(creditApplied) > 0) {
+          showToast(`Order created. Rs. ${Number(creditApplied).toFixed(0)} credit auto-applied from overpayment.`)
+        } else {
+          showToast('Order created.')
+        }
       }
 
       setShowForm(false)
