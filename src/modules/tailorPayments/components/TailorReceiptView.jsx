@@ -47,9 +47,12 @@ export default function TailorReceiptView({ paymentId, onClose }) {
       .finally(() => setLoading(false))
   }, [paymentId, tenantId])
 
-  const receiptNumber = data?.payment?.id
-    ? 'RCP-' + data.payment.id.replace(/-/g, '').slice(-8).toUpperCase()
-    : 'RCP-????????'
+  const invoiceNumber = data?.payment?.invoice_number || ''
+  const receiptNumber = invoiceNumber || (
+    data?.payment?.id
+      ? 'RCP-' + data.payment.id.replace(/-/g, '').slice(-8).toUpperCase()
+      : 'RCP-????????'
+  )
 
   const buildPrintHtml = useCallback(() => {
     if (!data) return ''

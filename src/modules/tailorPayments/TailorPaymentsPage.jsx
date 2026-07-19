@@ -89,6 +89,7 @@ export default function TailorPaymentsPage() {
             <thead>
               <tr>
                 <th>Tailor</th>
+                <th>Invoice #</th>
                 <th>Amount</th>
                 <th>Date</th>
                 <th>Mode</th>
@@ -98,13 +99,14 @@ export default function TailorPaymentsPage() {
             </thead>
             <tbody>
               {payments.map(p => (
-                <tr key={p.id}>
-                  <td>{p.tailors?.name || '—'}</td>
-                  <td className="pmt-amount">Rs. {Number(p.amount).toFixed(0)}</td>
-                  <td>{p.payment_date}</td>
-                  <td><span className="pmt-mode">{p.payment_mode}</span></td>
-                  <td style={{ fontSize: 13, opacity: 0.6 }}>{p.notes || '—'}</td>
-                  <td className="c-actions">
+                  <tr key={p.id}>
+                    <td>{p.tailors?.name || '—'}</td>
+                    <td className="mono">{p.invoice_number || '—'}</td>
+                    <td className="pmt-amount">Rs. {Number(p.amount).toFixed(0)}</td>
+                    <td>{p.payment_date}</td>
+                    <td><span className="pmt-mode">{p.payment_mode}</span></td>
+                    <td style={{ fontSize: 13, opacity: 0.6 }}>{p.notes || '—'}</td>
+                    <td className="c-actions">
                     <button className="c-action-btn" onClick={() => handleReceipt(p)}>Receipt</button>
                     <button className="c-action-btn c-action-destructive" onClick={() => setConfirmDelete(p.id)}>Delete</button>
                   </td>
