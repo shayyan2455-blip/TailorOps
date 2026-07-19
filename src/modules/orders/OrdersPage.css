@@ -1,0 +1,174 @@
+/* ---------- filters ---------- */
+.o-filters {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.o-filter-item {
+  flex: 1;
+  min-width: 120px;
+}
+
+select.o-filter-item {
+  cursor: pointer;
+}
+
+/* ---------- stage badges ---------- */
+.o-stage {
+  display: inline-block;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  padding: 3px 10px;
+  border-radius: 10px;
+  background: var(--second-bg-color);
+  border: 1px solid color-mix(in srgb, var(--text-color) 12%, transparent);
+}
+
+.o-stage--booked {
+  color: #3182ce;
+  border-color: #3182ce;
+  background: color-mix(in srgb, #3182ce 10%, transparent);
+}
+
+.o-stage--cutting {
+  color: #d69e2e;
+  border-color: #d69e2e;
+  background: color-mix(in srgb, #d69e2e 10%, transparent);
+}
+
+.o-stage--stitching {
+  color: var(--main-color);
+  border-color: var(--main-color);
+  background: color-mix(in srgb, var(--main-color) 10%, transparent);
+}
+
+.o-stage--ready {
+  color: #38a169;
+  border-color: #38a169;
+  background: color-mix(in srgb, #38a169 10%, transparent);
+}
+
+.o-stage--delivered {
+  color: #718096;
+  border-color: #718096;
+  background: color-mix(in srgb, #718096 10%, transparent);
+}
+
+/* ---------- form: order items ---------- */
+.o-item-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.o-item-name {
+  flex: 1;
+}
+
+.o-item-qty {
+  width: 56px;
+  text-align: center;
+}
+
+.o-item-rate {
+  width: 90px;
+}
+
+.o-item-amount {
+  width: 60px;
+  text-align: right;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.o-item-remove {
+  background: none;
+  border: none;
+  color: #e53e3e;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 0 4px;
+  line-height: 1;
+}
+
+.o-item-add {
+  background: none;
+  border: 1px dashed color-mix(in srgb, var(--text-color) 20%, transparent);
+  color: var(--text-color);
+  opacity: 0.6;
+  font-size: 13px;
+  font-family: 'IBM Plex Sans', sans-serif;
+  padding: 6px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.o-item-add:hover {
+  opacity: 1;
+}
+
+.o-total-label {
+  font-size: 14px !important;
+  font-weight: 600 !important;
+}
+
+.o-total-amount {
+  font-size: 18px;
+  font-weight: 600;
+  font-family: 'Fraunces', serif;
+}
+
+/* ---------- form modal wider for orders ---------- */
+.o-form-modal {
+  max-width: 560px !important;
+}
+
+/* ---------- detail ---------- */
+.c-detail-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px;
+  font-size: 14px;
+}
+
+.o-detail-items {
+  margin-top: 6px;
+  font-size: 13px;
+}
+
+.o-detail-item {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 16px;
+  padding: 4px 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--text-color) 6%, transparent);
+}
+
+.o-detail-item:last-child {
+  border-bottom: none;
+}
+
+/* ---------- measurements grid ---------- */
+.meas-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.meas-field {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.meas-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.5;
+}
