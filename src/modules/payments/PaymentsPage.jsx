@@ -1,8 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import { useToast } from '../../context/ToastContext'
-import { fetchPayments, createPayment, deletePayment, fetchBalance } from './api/paymentQueries'
-import { fetchOrder } from '../orders/api/orderQueries'
+import { fetchPayments, distributePayment, deletePayment, fetchCustomerWithOrders } from './api/paymentQueries'
 import PaymentForm from './components/PaymentForm'
 import ReceiptView from './components/ReceiptView'
 import ConfirmModal from '../../shared/components/ConfirmModal'
@@ -14,7 +13,7 @@ export default function PaymentsPage() {
   const [payments, setPayments] = useState([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
-  const [receipt, setReceipt] = useState(null)
+  const [receiptData, setReceiptData] = useState(null)
   const [confirmDelete, setConfirmDelete] = useState(null)
 
   const load = useCallback(async () => {
@@ -33,7 +32,7 @@ export default function PaymentsPage() {
 
   const handleSave = async (payload) => {
     try {
-      await createPayment(tenantId, payload)
+      const result = await distributePayment(tenantId, payload)
       showToast('Payment recorded.')
       setShowForm(false)
       load()
@@ -54,10 +53,28 @@ export default function PaymentsPage() {
   }
 
   const handleReceipt = async (payment) => {
-    const order = await fetchOrder(payment.order_id)
-    const balance = await fetchBalance(payment.order_id)
-    setReceipt({ payment, order, balance })
+    try {
+      const data = await fetchCustomerWithOrders(payment.orders?.customer_id)
+      setReceiptData({ payment, customer: data.customer, orders: data.orders })
+    } catch (err) {
+      showToast(err.message, 'error')
+    }
   }
+
+  const grouped = {}
+  payments.forEach(p => {
+    const cid = p.orders?.customer_id || 'unknown'
+    if (!grouped[cid]) {
+      grouped[cid] = {
+        customer_name: p.orders?.customers?.name || 'Unknown',
+        customer_id: cid,
+        payments: [],
+        total: 0,
+      }
+    }
+    grouped[cid].payments.push(p)
+    grouped[cid].total += Number(p.amount)
+  })
 
   return (
     <div className="c-module">
@@ -77,8 +94,8 @@ export default function PaymentsPage() {
           <table className="c-table">
             <thead>
               <tr>
-                <th>Order</th>
                 <th>Customer</th>
+                <th>Order</th>
                 <th>Amount</th>
                 <th>Date</th>
                 <th>Mode</th>
@@ -88,8 +105,8 @@ export default function PaymentsPage() {
             <tbody>
               {payments.map(p => (
                 <tr key={p.id}>
-                  <td className="mono">{p.orders?.order_number || '—'}</td>
                   <td>{p.orders?.customers?.name || '—'}</td>
+                  <td className="mono">{p.orders?.order_number || '—'}</td>
                   <td className="pmt-amount">Rs. {Number(p.amount).toFixed(0)}</td>
                   <td>{p.payment_date}</td>
                   <td><span className="pmt-mode">{p.payment_mode}</span></td>
@@ -112,12 +129,12 @@ export default function PaymentsPage() {
         </div>
       )}
 
-      {receipt && (
+      {receiptData && (
         <ReceiptView
-          payment={receipt.payment}
-          order={receipt.order}
-          balance={receipt.balance}
-          onClose={() => setReceipt(null)}
+          payment={receiptData.payment}
+          customer={receiptData.customer}
+          orders={receiptData.orders}
+          onClose={() => setReceiptData(null)}
         />
       )}
 

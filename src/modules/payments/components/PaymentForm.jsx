@@ -1,11 +1,11 @@
 import { useState, useEffect, useRef } from 'react'
-import { fetchOrders } from '../../orders/api/orderQueries'
+import { fetchCustomersForPayment } from '../api/paymentQueries'
 
 const MODES = ['Cash', 'JazzCash', 'Card', 'Bank Transfer', 'Other']
 
 export default function PaymentForm({ tenantId, onSave, onCancel }) {
-  const [orders, setOrders] = useState([])
-  const [orderId, setOrderId] = useState('')
+  const [customers, setCustomers] = useState([])
+  const [customerId, setCustomerId] = useState('')
   const [amount, setAmount] = useState('')
   const [paymentDate, setPaymentDate] = useState(new Date().toISOString().slice(0, 10))
   const [paymentMode, setPaymentMode] = useState('Cash')
@@ -15,21 +15,25 @@ export default function PaymentForm({ tenantId, onSave, onCancel }) {
   const ref = useRef(null)
 
   useEffect(() => {
-    fetchOrders().then(setOrders).catch(() => {})
+    fetchCustomersForPayment(tenantId).then(setCustomers).catch(() => {})
     setTimeout(() => ref.current?.focus(), 100)
-  }, [])
+  }, [tenantId])
 
-  const selectedOrder = orders.find(o => o.id === orderId)
+  const selected = customers.find(c => c.id === customerId)
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (!orderId) { setError('Please select an order.'); return }
+    if (!customerId) { setError('Please select a customer.'); return }
     if (!amount || Number(amount) <= 0) { setError('Enter a valid amount.'); return }
+    if (selected && Number(amount) > selected.unpaid) {
+      const ok = window.confirm(`Amount (Rs. ${Number(amount).toFixed(0)}) exceeds customer's unpaid balance (Rs. ${Number(selected.unpaid).toFixed(0)}). Continue?`)
+      if (!ok) return
+    }
     setSaving(true)
     setError('')
     try {
       await onSave({
-        order_id: orderId,
+        customer_id: customerId,
         amount: Number(amount),
         payment_date: paymentDate,
         payment_mode: paymentMode,
@@ -47,20 +51,20 @@ export default function PaymentForm({ tenantId, onSave, onCancel }) {
       <h3 className="c-form-title">Record Payment</h3>
 
       <label className="c-form-field">
-        <span className="c-form-label">Order *</span>
-        <select className="c-form-input" ref={ref} value={orderId} onChange={e => setOrderId(e.target.value)}>
-          <option value="">Select an order…</option>
-          {orders.map(o => (
-            <option key={o.id} value={o.id}>
-              {o.order_number} — {o.customers?.name || '?'} — Rs.{Number(o.total_amount).toFixed(0)}
+        <span className="c-form-label">Customer *</span>
+        <select className="c-form-input" ref={ref} value={customerId} onChange={e => setCustomerId(e.target.value)}>
+          <option value="">Select a customer…</option>
+          {customers.map(c => (
+            <option key={c.id} value={c.id}>
+              {c.name} — Rs.{Number(c.unpaid).toFixed(0)} unpaid
             </option>
           ))}
         </select>
       </label>
 
-      {selectedOrder && (
-        <div className="pmt-balance">
-          <span>Total: <strong>Rs.{Number(selectedOrder.total_amount).toFixed(0)}</strong></span>
+      {selected && (
+        <div style={{ fontSize: 12, opacity: 0.6, marginTop: -8 }}>
+          Unpaid balance: <strong>Rs. {Number(selected.unpaid).toFixed(0)}</strong> — payment auto-distributes across orders from oldest first
         </div>
       )}
 
