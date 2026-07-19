@@ -17,7 +17,8 @@ ALTER TABLE tailor_payments ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS tenant_isolation ON tailor_payments;
 CREATE POLICY tenant_isolation ON tailor_payments FOR ALL USING (tenant_id = current_tenant_id());
 
-CREATE OR REPLACE FUNCTION get_tailor_ledgers(p_tenant_id UUID)
+DROP FUNCTION IF EXISTS get_tailor_ledgers(uuid);
+CREATE FUNCTION get_tailor_ledgers(p_tenant_id UUID)
 RETURNS TABLE(
   tailor_id   UUID,
   tailor_name TEXT,
@@ -61,7 +62,8 @@ AS $$
   ORDER BY t.name;
 $$;
 
-CREATE OR REPLACE FUNCTION get_tailor_ledger_detail(
+DROP FUNCTION IF EXISTS get_tailor_ledger_detail(uuid,uuid);
+CREATE FUNCTION get_tailor_ledger_detail(
   p_tailor_id UUID,
   p_tenant_id UUID
 )
