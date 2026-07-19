@@ -2,6 +2,11 @@
   white-space: nowrap;
 }
 
+.l-table th.l-num {
+  font-size: 13px;
+  letter-spacing: normal;
+}
+
 .l-num {
   text-align: right;
   white-space: nowrap;
