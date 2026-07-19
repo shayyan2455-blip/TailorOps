@@ -54,7 +54,12 @@ export default function PaymentsPage() {
 
   const handleReceipt = async (payment) => {
     try {
-      const data = await fetchCustomerWithOrders(payment.orders?.customer_id)
+      const cid = payment.customer_id || payment.orders?.customer_id
+      if (!cid) {
+        showToast('Receipt not available for this payment.', 'error')
+        return
+      }
+      const data = await fetchCustomerWithOrders(cid)
       setReceiptData({ payment, customer: data.customer, orders: data.orders })
     } catch (err) {
       showToast(err.message, 'error')
@@ -104,20 +109,25 @@ export default function PaymentsPage() {
               </tr>
             </thead>
             <tbody>
-              {payments.map(p => (
-                <tr key={p.id}>
-                  <td>{p.orders?.customers?.name || '—'}</td>
-                  <td className="mono">{p.invoice_number || '—'}</td>
-                  <td className="mono">{p.orders?.order_number || '—'}</td>
-                  <td className="pmt-amount">Rs. {Number(p.amount).toFixed(0)}</td>
-                  <td>{p.payment_date}</td>
-                  <td><span className="pmt-mode">{p.payment_mode}</span></td>
-                  <td className="c-actions">
-                    <button className="c-action-btn" onClick={() => handleReceipt(p)}>Receipt</button>
-                    <button className="c-action-btn c-action-destructive" onClick={() => setConfirmDelete(p.id)}>Delete</button>
-                  </td>
-                </tr>
-              ))}
+              {payments.map(p => {
+                const customerName = p.customers?.name || p.orders?.customers?.name || '—'
+                const orderNum = p.orders?.order_number || (p.order_id === null ? '—' : '—')
+                const isCredit = p.order_id === null && p.payment_mode === 'Credit'
+                return (
+                  <tr key={p.id} className={isCredit ? 'pmt-credit-row' : ''}>
+                    <td>{customerName}</td>
+                    <td className="mono">{p.invoice_number || '—'}</td>
+                    <td className="mono">{orderNum}{isCredit ? ' (credit)' : ''}</td>
+                    <td className="pmt-amount">Rs. {Number(p.amount).toFixed(0)}</td>
+                    <td>{p.payment_date}</td>
+                    <td><span className="pmt-mode">{p.payment_mode}</span></td>
+                    <td className="c-actions">
+                      <button className="c-action-btn" onClick={() => handleReceipt(p)}>Receipt</button>
+                      <button className="c-action-btn c-action-destructive" onClick={() => setConfirmDelete(p.id)}>Delete</button>
+                    </td>
+                  </tr>
+                )
+              })}
             </tbody>
           </table>
         </div>
