@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '../../context/AuthContext'
+import { useToast } from '../../context/ToastContext'
 import { fetchTailors } from '../tailors/api/tailorQueries'
 import { fetchProductionOrders, transitionOrder, assignTailorToOrder, unassignTailor } from './api/productionQueries'
 import './ProductionPage.css'
@@ -15,6 +16,7 @@ const STAGE_COLORS = {
 
 export default function ProductionPage() {
   const { tenantId } = useAuth()
+  const { showToast } = useToast()
   const [orders, setOrders] = useState([])
   const [tailors, setTailors] = useState([])
   const [loading, setLoading] = useState(true)
@@ -28,10 +30,12 @@ export default function ProductionPage() {
       const [o, t] = await Promise.all([fetchProductionOrders(), fetchTailors()])
       setOrders(o)
       setTailors(t.filter(t => t.active !== false))
-    } catch {} finally {
+    } catch (err) {
+      showToast(err.message, 'error')
+    } finally {
       setLoading(false)
     }
-  }, [])
+  }, [showToast])
 
   useEffect(() => { load() }, [load])
 
@@ -39,8 +43,11 @@ export default function ProductionPage() {
     setMoving(orderId)
     try {
       await transitionOrder(orderId, newStage)
+      showToast(`Moved to ${newStage}.`)
       load()
-    } catch {} finally {
+    } catch (err) {
+      showToast(err.message, 'error')
+    } finally {
       setMoving(null)
     }
   }
@@ -48,15 +55,21 @@ export default function ProductionPage() {
   const handleAssign = async (orderId, tailorId, stage) => {
     try {
       await assignTailorToOrder(tenantId, orderId, tailorId, stage)
+      showToast('Tailor assigned.')
       load()
-    } catch {}
+    } catch (err) {
+      showToast(err.message, 'error')
+    }
   }
 
   const handleUnassign = async (assignmentId) => {
     try {
       await unassignTailor(assignmentId)
+      showToast('Tailor unassigned.')
       load()
-    } catch {}
+    } catch (err) {
+      showToast(err.message, 'error')
+    }
   }
 
   const grouped = {}

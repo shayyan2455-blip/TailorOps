@@ -1,11 +1,14 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '../../context/AuthContext'
+import { useToast } from '../../context/ToastContext'
 import { fetchTailors, createTailor, updateTailor, deleteTailor, fetchWorkAssignments, removeAssignment } from './api/tailorQueries'
 import TailorForm from './components/TailorForm'
+import ConfirmModal from '../../shared/components/ConfirmModal'
 import './TailorsPage.css'
 
 export default function TailorsPage() {
   const { tenantId } = useAuth()
+  const { showToast } = useToast()
   const [tailors, setTailors] = useState([])
   const [search, setSearch] = useState('')
   const [loading, setLoading] = useState(true)
@@ -13,16 +16,19 @@ export default function TailorsPage() {
   const [editing, setEditing] = useState(null)
   const [selected, setSelected] = useState(null)
   const [assignments, setAssignments] = useState([])
+  const [confirmDelete, setConfirmDelete] = useState(null)
 
   const load = useCallback(async () => {
     try {
       setLoading(true)
       const data = await fetchTailors(search || undefined)
       setTailors(data)
-    } catch {} finally {
+    } catch (err) {
+      showToast(err.message, 'error')
+    } finally {
       setLoading(false)
     }
-  }, [search])
+  }, [search, showToast])
 
   useEffect(() => { load() }, [load])
 
@@ -30,8 +36,10 @@ export default function TailorsPage() {
     try {
       const data = await fetchWorkAssignments(tailorId)
       setAssignments(data)
-    } catch {}
-  }, [])
+    } catch (err) {
+      showToast(err.message, 'error')
+    }
+  }, [showToast])
 
   useEffect(() => {
     if (selected) loadAssignments(selected.id)
@@ -39,26 +47,42 @@ export default function TailorsPage() {
   }, [selected, loadAssignments])
 
   const handleSave = async (payload) => {
-    if (editing) {
-      await updateTailor(editing.id, payload)
-    } else {
-      await createTailor(tenantId, payload)
+    try {
+      if (editing) {
+        await updateTailor(editing.id, payload)
+        showToast('Tailor updated.')
+      } else {
+        await createTailor(tenantId, payload)
+        showToast('Tailor added.')
+      }
+      setShowForm(false)
+      setEditing(null)
+      load()
+    } catch (err) {
+      showToast(err.message, 'error')
     }
-    setShowForm(false)
-    setEditing(null)
-    load()
   }
 
   const handleDelete = async (id) => {
-    if (!confirm('Delete this tailor?')) return
-    await deleteTailor(id)
-    if (selected?.id === id) setSelected(null)
-    load()
+    try {
+      await deleteTailor(id)
+      showToast('Tailor deleted.')
+      if (selected?.id === id) setSelected(null)
+      load()
+    } catch (err) {
+      showToast(err.message, 'error')
+    }
+    setConfirmDelete(null)
   }
 
   const handleUnassign = async (assignmentId) => {
-    await removeAssignment(assignmentId)
-    loadAssignments(selected?.id)
+    try {
+      await removeAssignment(assignmentId)
+      showToast('Tailor unassigned.')
+      loadAssignments(selected?.id)
+    } catch (err) {
+      showToast(err.message, 'error')
+    }
   }
 
   return (
@@ -104,7 +128,7 @@ export default function TailorsPage() {
                   </td>
                   <td className="c-actions">
                     <button className="c-action-btn" onClick={() => { setEditing(t); setShowForm(true) }}>Edit</button>
-                    <button className="c-action-btn c-action-destructive" onClick={() => handleDelete(t.id)}>Delete</button>
+                    <button className="c-action-btn c-action-destructive" onClick={() => setConfirmDelete(t.id)}>Delete</button>
                   </td>
                 </tr>
               ))}
@@ -149,6 +173,10 @@ export default function TailorsPage() {
             <TailorForm tailor={editing} onSave={handleSave} onCancel={() => { setShowForm(false); setEditing(null) }} />
           </div>
         </div>
+      )}
+
+      {confirmDelete !== null && (
+        <ConfirmModal message="Delete this tailor?" onConfirm={() => handleDelete(confirmDelete)} onCancel={() => setConfirmDelete(null)} />
       )}
     </div>
   )

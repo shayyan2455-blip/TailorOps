@@ -1,15 +1,18 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '../../context/AuthContext'
+import { useToast } from '../../context/ToastContext'
 import { supabase } from '../../shared/lib/supabaseClient'
 import { fetchOrders, createOrder, updateOrder, deleteOrder } from './api/orderQueries'
 import { saveMeasurement } from '../measurements/api/measurementQueries'
 import OrderForm from './components/OrderForm'
+import ConfirmModal from '../../shared/components/ConfirmModal'
 import './OrdersPage.css'
 
 const STAGES = ['', 'Booked', 'Cutting', 'Stitching', 'Ready', 'Delivered']
 
 export default function OrdersPage() {
   const { tenantId } = useAuth()
+  const { showToast } = useToast()
   const [orders, setOrders] = useState([])
   const [stageFilter, setStageFilter] = useState('')
   const [dateFrom, setDateFrom] = useState('')
@@ -19,6 +22,7 @@ export default function OrdersPage() {
   const [showForm, setShowForm] = useState(false)
   const [editing, setEditing] = useState(null)
   const [detail, setDetail] = useState(null)
+  const [confirmDelete, setConfirmDelete] = useState(null)
 
   const load = useCallback(async () => {
     try {
@@ -30,60 +34,75 @@ export default function OrdersPage() {
         search: search || undefined,
       })
       setOrders(data)
-    } catch {} finally {
+    } catch (err) {
+      showToast(err.message, 'error')
+    } finally {
       setLoading(false)
     }
-  }, [stageFilter, dateFrom, dateTo, search])
+  }, [stageFilter, dateFrom, dateTo, search, showToast])
 
   useEffect(() => { load() }, [load])
 
   const handleSave = async (payload) => {
-    const { items, measurements, ...orderData } = payload
+    try {
+      const { items, measurements, ...orderData } = payload
 
-    if (editing) {
-      await updateOrder(editing.id, orderData)
+      if (editing) {
+        await updateOrder(editing.id, orderData)
 
-      if (items) {
-        await supabase.from('order_items').delete().eq('order_id', editing.id)
-        if (items.length > 0) {
+        if (items) {
+          await supabase.from('order_items').delete().eq('order_id', editing.id)
+          if (items.length > 0) {
+            await supabase.from('order_items').insert(
+              items.map(i => ({ ...i, tenant_id: tenantId, order_id: editing.id }))
+            )
+          }
+        }
+
+        if (measurements) {
+          await saveMeasurement(tenantId, orderData.customer_id, editing.id, measurements)
+        }
+
+        showToast('Order updated.')
+      } else {
+        const { data: orderNum } = await supabase.rpc('generate_order_number', { p_tenant_id: tenantId })
+
+        const { id: orderId } = await createOrder(tenantId, {
+          ...orderData,
+          order_number: orderNum,
+        })
+
+        if (items?.length > 0) {
           await supabase.from('order_items').insert(
-            items.map(i => ({ ...i, tenant_id: tenantId, order_id: editing.id }))
+            items.map(i => ({ ...i, tenant_id: tenantId, order_id: orderId }))
           )
         }
+
+        if (measurements) {
+          await saveMeasurement(tenantId, orderData.customer_id, orderId, measurements)
+        }
+
+        showToast('Order created.')
       }
 
-      if (measurements) {
-        await saveMeasurement(tenantId, orderData.customer_id, editing.id, measurements)
-      }
-    } else {
-      const { data: orderNum } = await supabase.rpc('generate_order_number', { p_tenant_id: tenantId })
-
-      const { id: orderId } = await createOrder(tenantId, {
-        ...orderData,
-        order_number: orderNum,
-      })
-
-      if (items?.length > 0) {
-        await supabase.from('order_items').insert(
-          items.map(i => ({ ...i, tenant_id: tenantId, order_id: orderId }))
-        )
-      }
-
-      if (measurements) {
-        await saveMeasurement(tenantId, orderData.customer_id, orderId, measurements)
-      }
+      setShowForm(false)
+      setEditing(null)
+      load()
+    } catch (err) {
+      showToast(err.message, 'error')
     }
-
-    setShowForm(false)
-    setEditing(null)
-    load()
   }
 
   const handleDelete = async (id) => {
-    if (!confirm('Delete this order?')) return
-    await deleteOrder(id)
-    if (detail?.id === id) setDetail(null)
-    load()
+    try {
+      await deleteOrder(id)
+      showToast('Order deleted.')
+      if (detail?.id === id) setDetail(null)
+      load()
+    } catch (err) {
+      showToast(err.message, 'error')
+    }
+    setConfirmDelete(null)
   }
 
   const stageLabel = (s) => {
@@ -140,7 +159,7 @@ export default function OrdersPage() {
                   <td>{o.delivery_date || '—'}</td>
                   <td className="c-actions">
                     <button className="c-action-btn" onClick={() => { setEditing(o); setShowForm(true) }}>Edit</button>
-                    <button className="c-action-btn c-action-destructive" onClick={() => handleDelete(o.id)}>Delete</button>
+                    <button className="c-action-btn c-action-destructive" onClick={() => setConfirmDelete(o.id)}>Delete</button>
                   </td>
                 </tr>
               ))}
@@ -185,6 +204,10 @@ export default function OrdersPage() {
             />
           </div>
         </div>
+      )}
+
+      {confirmDelete !== null && (
+        <ConfirmModal message="Delete this order?" onConfirm={() => handleDelete(confirmDelete)} onCancel={() => setConfirmDelete(null)} />
       )}
     </div>
   )

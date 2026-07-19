@@ -1,8 +1,10 @@
 import { useState, useEffect, useCallback } from 'react'
+import { useToast } from '../../context/ToastContext'
 import { fetchReadyOrders, fetchTodayDeliveries, markDelivered } from './api/deliveryQueries'
 import './DeliveryPage.css'
 
 export default function DeliveryPage() {
+  const { showToast } = useToast()
   const [tab, setTab] = useState('ready')
   const [readyOrders, setReadyOrders] = useState([])
   const [todayDeliveries, setTodayDeliveries] = useState([])
@@ -18,10 +20,12 @@ export default function DeliveryPage() {
       ])
       setReadyOrders(ready)
       setTodayDeliveries(delivered)
-    } catch {} finally {
+    } catch (err) {
+      showToast(err.message, 'error')
+    } finally {
       setLoading(false)
     }
-  }, [])
+  }, [showToast])
 
   useEffect(() => { load() }, [load])
 
@@ -29,8 +33,11 @@ export default function DeliveryPage() {
     setDelivering(orderId)
     try {
       await markDelivered(orderId)
+      showToast('Marked as delivered.')
       load()
-    } catch {} finally {
+    } catch (err) {
+      showToast(err.message, 'error')
+    } finally {
       setDelivering(null)
     }
   }

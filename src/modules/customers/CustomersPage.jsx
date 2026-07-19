@@ -1,46 +1,63 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '../../context/AuthContext'
+import { useToast } from '../../context/ToastContext'
 import { fetchCustomers, createCustomer, updateCustomer, deleteCustomer } from './api/customerQueries'
 import CustomerForm from './components/CustomerForm'
+import ConfirmModal from '../../shared/components/ConfirmModal'
 import './CustomersPage.css'
 
 export default function CustomersPage() {
   const { tenantId } = useAuth()
+  const { showToast } = useToast()
   const [customers, setCustomers] = useState([])
   const [search, setSearch] = useState('')
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [editing, setEditing] = useState(null)
   const [detail, setDetail] = useState(null)
+  const [confirmDelete, setConfirmDelete] = useState(null)
 
   const load = useCallback(async () => {
     try {
       setLoading(true)
       const data = await fetchCustomers(search || undefined)
       setCustomers(data)
-    } catch {} finally {
+    } catch (err) {
+      showToast(err.message, 'error')
+    } finally {
       setLoading(false)
     }
-  }, [search])
+  }, [search, showToast])
 
   useEffect(() => { load() }, [load])
 
   const handleSave = async (payload) => {
-    if (editing) {
-      await updateCustomer(editing.id, payload)
-    } else {
-      await createCustomer(tenantId, payload)
+    try {
+      if (editing) {
+        await updateCustomer(editing.id, payload)
+        showToast('Customer updated.')
+      } else {
+        await createCustomer(tenantId, payload)
+        showToast('Customer added.')
+      }
+      setShowForm(false)
+      setEditing(null)
+      load()
+    } catch (err) {
+      showToast(err.message, 'error')
     }
-    setShowForm(false)
-    setEditing(null)
-    load()
   }
 
   const handleDelete = async (id) => {
-    if (!confirm('Delete this customer?')) return
-    await deleteCustomer(id)
-    if (detail?.id === id) setDetail(null)
-    load()
+    try {
+      await deleteCustomer(id)
+      showToast('Customer deleted.')
+      if (detail?.id === id) setDetail(null)
+      load()
+    } catch (err) {
+      showToast(err.message, 'error')
+    }
+    setConfirmDelete(null)
   }
 
   return (
@@ -89,7 +106,7 @@ export default function CustomersPage() {
                   <td className="c-addr">{c.address || '—'}</td>
                   <td className="c-actions">
                     <button className="c-action-btn" onClick={() => { setEditing(c); setShowForm(true) }}>Edit</button>
-                    <button className="c-action-btn c-action-destructive" onClick={() => handleDelete(c.id)}>Delete</button>
+                    <button className="c-action-btn c-action-destructive" onClick={() => setConfirmDelete(c.id)}>Delete</button>
                   </td>
                 </tr>
               ))}
@@ -118,6 +135,10 @@ export default function CustomersPage() {
             />
           </div>
         </div>
+      )}
+
+      {confirmDelete !== null && (
+        <ConfirmModal message="Delete this customer?" onConfirm={() => handleDelete(confirmDelete)} onCancel={() => setConfirmDelete(null)} />
       )}
     </div>
   )
