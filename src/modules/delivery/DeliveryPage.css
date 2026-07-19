@@ -1,0 +1,76 @@
+.d-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--text-color) 10%, transparent);
+  margin-bottom: 20px;
+}
+
+.d-tab {
+  background: none;
+  border: none;
+  padding: 10px 20px;
+  font-size: 14px;
+  font-family: 'IBM Plex Sans', sans-serif;
+  color: var(--text-color);
+  opacity: 0.4;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  transition: opacity 0.15s, border-color 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.d-tab.active {
+  opacity: 1;
+  color: var(--main-color);
+  border-bottom-color: var(--main-color);
+}
+
+.d-tab:hover:not(.active) {
+  opacity: 0.7;
+}
+
+.d-tab-count {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  background: color-mix(in srgb, var(--text-color) 8%, transparent);
+  padding: 1px 8px;
+  border-radius: 10px;
+}
+
+.d-tab.active .d-tab-count {
+  background: color-mix(in srgb, var(--main-color) 12%, transparent);
+  color: var(--main-color);
+}
+
+.d-mobile {
+  font-size: 11px;
+  opacity: 0.4;
+  margin-top: 1px;
+}
+
+.d-items {
+  font-size: 12px;
+}
+
+.d-item-line {
+  opacity: 0.6;
+  line-height: 1.5;
+}
+
+.d-total {
+  font-family: 'Fraunces', serif;
+  font-weight: 500;
+}
+
+.d-date {
+  font-size: 13px;
+}
+
+.d-delivered-badge {
+  font-size: 12px;
+  color: #38a169;
+  font-weight: 500;
+}
