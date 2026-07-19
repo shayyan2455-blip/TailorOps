@@ -32,3 +32,15 @@ export async function unassignTailor(assignmentId) {
   const { error } = await supabase.from('work_assignments').delete().eq('id', assignmentId)
   if (error) throw error
 }
+
+export async function setWorkAssignmentAmount(orderId, stage, amount) {
+  const { data, error } = await supabase
+    .from('work_assignments')
+    .update({ amount })
+    .eq('order_id', orderId)
+    .eq('stage', stage)
+    .select()
+    .single()
+  if (error) throw error
+  return data
+}

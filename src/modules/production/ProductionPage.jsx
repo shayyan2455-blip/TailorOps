@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import { useToast } from '../../context/ToastContext'
 import { fetchTailors } from '../tailors/api/tailorQueries'
-import { fetchProductionOrders, transitionOrder, assignTailorToOrder, unassignTailor } from './api/productionQueries'
+import { fetchProductionOrders, transitionOrder, assignTailorToOrder, unassignTailor, setWorkAssignmentAmount } from './api/productionQueries'
 import './ProductionPage.css'
 
 const STAGES = ['Booked', 'Cutting', 'Stitching', 'Ready', 'Delivered']
@@ -14,8 +14,6 @@ const STAGE_COLORS = {
   Delivered: '--delivered',
 }
 
-const ASSIGN_REQUIRED_STAGES = ['Cutting', 'Stitching']
-
 export default function ProductionPage() {
   const { tenantId } = useAuth()
   const { showToast } = useToast()
@@ -25,7 +23,7 @@ export default function ProductionPage() {
   const [detail, setDetail] = useState(null)
   const [moving, setMoving] = useState(null)
   const [assigning, setAssigning] = useState(null)
-  const [assignModal, setAssignModal] = useState(null)
+  const [moveModal, setMoveModal] = useState(null)
 
   const load = useCallback(async () => {
     try {
@@ -55,26 +53,45 @@ export default function ProductionPage() {
   }
 
   const handleMoveClick = (order, nextStage) => {
-    if (ASSIGN_REQUIRED_STAGES.includes(nextStage)) {
-      setAssignModal({ order, stage: nextStage, tailorId: '' })
-    } else {
-      handleTransition(order.id, nextStage)
+    const currentStage = order.current_stage
+    if (currentStage === 'Booked') {
+      setMoveModal({ order, fromStage: 'Booked', toStage: 'Cutting', tailorId: '', amount: '', needsTailor: true })
+    } else if (currentStage === 'Cutting') {
+      const hasStitchingTailor = order.work_assignments?.some(wa => wa.stage === 'Stitching')
+      setMoveModal({ order, fromStage: 'Cutting', toStage: 'Stitching', tailorId: '', amount: '', needsTailor: !hasStitchingTailor })
+    } else if (currentStage === 'Stitching') {
+      setMoveModal({ order, fromStage: 'Stitching', toStage: 'Ready', tailorId: '', amount: '', needsTailor: false })
     }
   }
 
-  const handleAssignAndMove = async () => {
-    if (!assignModal || !assignModal.tailorId) {
+  const handleMoveConfirm = async () => {
+    if (!moveModal) return
+    const { order, fromStage, toStage, tailorId, amount, needsTailor } = moveModal
+    if (needsTailor && !tailorId) {
       showToast('Please select a tailor.', 'error')
       return
     }
+    if ((fromStage === 'Cutting' || fromStage === 'Stitching') && (!amount || Number(amount) <= 0)) {
+      showToast(`Enter the amount for ${fromStage} work.`, 'error')
+      return
+    }
+
+    setMoving(order.id)
     try {
-      await assignTailorToOrder(tenantId, assignModal.order.id, assignModal.tailorId, assignModal.stage)
-      await transitionOrder(assignModal.order.id, assignModal.stage)
-      showToast(`Moved to ${assignModal.stage} with tailor assigned.`)
-      setAssignModal(null)
+      if (needsTailor) {
+        await assignTailorToOrder(tenantId, order.id, tailorId, toStage)
+      }
+      if (fromStage === 'Cutting' || fromStage === 'Stitching') {
+        await setWorkAssignmentAmount(order.id, fromStage, Number(amount))
+      }
+      await transitionOrder(order.id, toStage)
+      showToast(`Moved to ${toStage}.`)
+      setMoveModal(null)
       load()
     } catch (err) {
       showToast(err.message, 'error')
+    } finally {
+      setMoving(null)
     }
   }
 
@@ -183,6 +200,7 @@ export default function ProductionPage() {
                   <tr>
                     <th>Tailor</th>
                     <th>Stage</th>
+                    <th>Amount</th>
                     <th>Action</th>
                   </tr>
                 </thead>
@@ -191,6 +209,7 @@ export default function ProductionPage() {
                     <tr key={wa.id}>
                       <td>{wa.tailors?.name || '—'}</td>
                       <td><span className={`o-stage o-stage--${wa.stage?.toLowerCase()}`}>{wa.stage}</span></td>
+                      <td>{wa.amount ? `Rs. ${Number(wa.amount).toFixed(0)}` : '—'}</td>
                       <td><button className="c-action-btn c-action-destructive" onClick={() => handleUnassign(wa.id)}>Remove</button></td>
                     </tr>
                   ))}
@@ -226,29 +245,46 @@ export default function ProductionPage() {
           </div>
         </div>
       )}
-      {assignModal && (
-        <div className="c-backdrop" onClick={() => setAssignModal(null)}>
-          <div className="c-form-modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 400 }}>
-            <h3 className="c-form-title" style={{ marginBottom: 16 }}>
-              Assign Tailor for <span className="mono">{assignModal.order.order_number}</span>
+
+      {moveModal && (
+        <div className="c-backdrop" onClick={() => setMoveModal(null)}>
+          <div className="c-form-modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 420 }}>
+            <h3 className="c-form-title" style={{ marginBottom: 12 }}>
+              Moving <span className="mono">{moveModal.order.order_number}</span> to {moveModal.toStage}
             </h3>
-            <p style={{ fontSize: 14, opacity: 0.7, marginBottom: 16 }}>
-              This order is moving to <strong>{assignModal.stage}</strong>. Select a tailor to assign to this stage.
-            </p>
-            <label className="c-form-field">
-              <span className="c-form-label">Tailor</span>
-              <select
-                className="c-form-input"
-                value={assignModal.tailorId}
-                onChange={e => setAssignModal(p => ({ ...p, tailorId: e.target.value }))}
-              >
-                <option value="">Select a tailor…</option>
-                {tailors.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
-              </select>
-            </label>
-            <div className="c-form-actions" style={{ marginTop: 20 }}>
-              <button className="c-form-cancel" onClick={() => setAssignModal(null)}>Cancel</button>
-              <button className="c-form-save" onClick={handleAssignAndMove}>Assign & Move</button>
+
+            {moveModal.needsTailor && (
+              <label className="c-form-field" style={{ marginBottom: 16 }}>
+                <span className="c-form-label">Assign Tailor for {moveModal.toStage}</span>
+                <select
+                  className="c-form-input"
+                  value={moveModal.tailorId}
+                  onChange={e => setMoveModal(p => ({ ...p, tailorId: e.target.value }))}
+                >
+                  <option value="">Select a tailor…</option>
+                  {tailors.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+                </select>
+              </label>
+            )}
+
+            {(moveModal.fromStage === 'Cutting' || moveModal.fromStage === 'Stitching') && (
+              <label className="c-form-field" style={{ marginBottom: 16 }}>
+                <span className="c-form-label">Amount for {moveModal.fromStage} work (Rs.)</span>
+                <input
+                  className="c-form-input"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={moveModal.amount}
+                  onChange={e => setMoveModal(p => ({ ...p, amount: e.target.value }))}
+                  placeholder="e.g. 1500"
+                />
+              </label>
+            )}
+
+            <div className="c-form-actions" style={{ marginTop: 8 }}>
+              <button className="c-form-cancel" onClick={() => setMoveModal(null)}>Cancel</button>
+              <button className="c-form-save" onClick={handleMoveConfirm}>Move to {moveModal.toStage}</button>
             </div>
           </div>
         </div>

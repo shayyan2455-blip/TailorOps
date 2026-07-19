@@ -17,6 +17,9 @@ ALTER TABLE tailor_payments ENABLE ROW LEVEL SECURITY;
 DROP POLICY IF EXISTS tenant_isolation ON tailor_payments;
 CREATE POLICY tenant_isolation ON tailor_payments FOR ALL USING (tenant_id = current_tenant_id());
 
+-- Add amount column to work_assignments for stage-level work value
+ALTER TABLE work_assignments ADD COLUMN IF NOT EXISTS amount NUMERIC(10,2);
+
 DROP FUNCTION IF EXISTS get_tailor_ledgers(uuid);
 CREATE FUNCTION get_tailor_ledgers(p_tenant_id UUID)
 RETURNS TABLE(
@@ -34,10 +37,9 @@ AS $$
   WITH work_value AS (
     SELECT
       wa.tailor_id,
-      COALESCE(SUM(o.total_amount), 0) AS total
+      COALESCE(SUM(wa.amount), 0) AS total
     FROM work_assignments wa
-    JOIN orders o ON o.id = wa.order_id
-    WHERE o.tenant_id = p_tenant_id
+    WHERE wa.tenant_id = p_tenant_id
     GROUP BY wa.tailor_id
   ),
   pay_total AS (
@@ -83,9 +85,9 @@ AS $$
   WITH combined AS (
     SELECT
       wa.assigned_at::DATE AS date,
-      'Work assignment' AS description,
+      ('Work - ' || wa.stage) AS description,
       o.order_number AS ref,
-      o.total_amount AS debit,
+      COALESCE(wa.amount, 0) AS debit,
       0::NUMERIC AS credit,
       wa.assigned_at AS sort_key,
       'assignment' AS entry_type
