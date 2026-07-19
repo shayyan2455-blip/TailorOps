@@ -3,7 +3,7 @@ import { supabase } from '../../../shared/lib/supabaseClient'
 export async function fetchPayments() {
   const { data, error } = await supabase
     .from('payments')
-    .select('*, orders!inner(order_number, total_amount, customer_id, customers!inner(name))')
+    .select('*, orders(order_number, total_amount, customer_id, customers(name))')
     .order('created_at', { ascending: false })
   if (error) throw error
   return data
