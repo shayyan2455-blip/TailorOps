@@ -63,7 +63,6 @@ export default function LedgerPage() {
                 <th>Customer</th>
                 <th className="l-num mono">Total Amount</th>
                 <th className="l-num mono">Total Paid</th>
-                <th className="l-num mono">Credit Bal.</th>
                 <th className="l-num mono">Balance</th>
               </tr>
             </thead>
@@ -84,7 +83,6 @@ export default function LedgerPage() {
                       </td>
                       <td className="l-num mono">Rs. {Number(row.total_orders).toFixed(0)}</td>
                       <td className="l-num mono">Rs. {Number(row.total_paid).toFixed(0)}</td>
-                      <td className="l-num mono">Rs. {Number(row.credit_balance).toFixed(0)}</td>
                       <td className={`l-num mono l-bal ${isExcess ? 'l-excess' : 'l-due'}`}>
                         {isExcess
                           ? `Rs. ${Math.abs(bal).toFixed(0)} excess`
@@ -96,7 +94,7 @@ export default function LedgerPage() {
                     </tr>
                     {expanded === row.customer_id && (
                       <tr key={`${row.customer_id}-detail`}>
-                        <td colSpan={5} className="l-detail-cell">
+                        <td colSpan={4} className="l-detail-cell">
                           {detailLoading ? (
                             <p className="l-detail-loading">Loading...</p>
                           ) : !detail || detail.length === 0 ? (
