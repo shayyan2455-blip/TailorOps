@@ -12,6 +12,7 @@ const navItems = [
   { label: 'Payments', path: '/dashboard/payments', icon: '₨' },
   { label: 'Delivery', path: '/dashboard/delivery', icon: '◫' },
   { label: 'Reports', path: '/dashboard/reports', icon: '▦' },
+  { label: 'Settings', path: '/dashboard/settings', icon: '⚙' },
 ]
 
 export default function DashboardLayout() {
