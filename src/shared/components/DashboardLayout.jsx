@@ -16,7 +16,7 @@ const navItems = [
 
 export default function DashboardLayout() {
   const [collapsed, setCollapsed] = useState(false)
-  const { user, loading, signOut } = useAuth()
+  const { user, profile, loading, signOut } = useAuth()
 
   if (loading) return null
   if (!user) return <Navigate to="/" replace />
@@ -55,7 +55,7 @@ export default function DashboardLayout() {
             <div className="dash-avatar" />
             {!collapsed && (
               <div className="dash-user-info">
-                <span className="dash-user-name">Shop Owner</span>
+                <span className="dash-user-name">{profile?.full_name || 'Shop Owner'}</span>
                 <button className="dash-signout" onClick={handleSignOut}>Sign out</button>
               </div>
             )}
