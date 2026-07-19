@@ -11,6 +11,8 @@ import DeliveryPage from '../modules/delivery/DeliveryPage'
 import ReportsPage from '../modules/reports/ReportsPage'
 import SettingsPage from '../modules/settings/SettingsPage'
 import LedgerPage from '../modules/ledger/LedgerPage'
+import TailorPaymentsPage from '../modules/tailorPayments/TailorPaymentsPage'
+import TailorLedgerPage from '../modules/tailorLedger/TailorLedgerPage'
 
 export default function AppRoutes() {
   return (
@@ -27,6 +29,8 @@ export default function AppRoutes() {
         <Route path="reports" element={<ReportsPage />} />
         <Route path="settings" element={<SettingsPage />} />
         <Route path="ledger" element={<LedgerPage />} />
+        <Route path="tailor-payments" element={<TailorPaymentsPage />} />
+        <Route path="tailor-ledger" element={<TailorLedgerPage />} />
       </Route>
     </Routes>
   )

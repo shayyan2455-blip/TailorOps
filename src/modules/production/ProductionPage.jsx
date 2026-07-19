@@ -14,6 +14,8 @@ const STAGE_COLORS = {
   Delivered: '--delivered',
 }
 
+const ASSIGN_REQUIRED_STAGES = ['Cutting', 'Stitching']
+
 export default function ProductionPage() {
   const { tenantId } = useAuth()
   const { showToast } = useToast()
@@ -23,6 +25,7 @@ export default function ProductionPage() {
   const [detail, setDetail] = useState(null)
   const [moving, setMoving] = useState(null)
   const [assigning, setAssigning] = useState(null)
+  const [assignModal, setAssignModal] = useState(null)
 
   const load = useCallback(async () => {
     try {
@@ -43,12 +46,35 @@ export default function ProductionPage() {
     setMoving(orderId)
     try {
       await transitionOrder(orderId, newStage)
-      showToast(`Moved to ${newStage}.`)
       load()
     } catch (err) {
       showToast(err.message, 'error')
     } finally {
       setMoving(null)
+    }
+  }
+
+  const handleMoveClick = (order, nextStage) => {
+    if (ASSIGN_REQUIRED_STAGES.includes(nextStage)) {
+      setAssignModal({ order, stage: nextStage, tailorId: '' })
+    } else {
+      handleTransition(order.id, nextStage)
+    }
+  }
+
+  const handleAssignAndMove = async () => {
+    if (!assignModal || !assignModal.tailorId) {
+      showToast('Please select a tailor.', 'error')
+      return
+    }
+    try {
+      await assignTailorToOrder(tenantId, assignModal.order.id, assignModal.tailorId, assignModal.stage)
+      await transitionOrder(assignModal.order.id, assignModal.stage)
+      showToast(`Moved to ${assignModal.stage} with tailor assigned.`)
+      setAssignModal(null)
+      load()
+    } catch (err) {
+      showToast(err.message, 'error')
     }
   }
 
@@ -112,12 +138,9 @@ export default function ProductionPage() {
                     <div className="p-card-customer">{order.customers?.name || '—'}</div>
                     {order.delivery_date && <div className="p-card-delivery">Due {order.delivery_date}</div>}
                     <div className="p-card-actions">
-                      {stage !== 'Booked' && (
-                        <button className="p-card-btn p-card-btn--prev" onClick={(e) => { e.stopPropagation(); handleTransition(order.id, STAGES[STAGES.indexOf(stage) - 1]) }} disabled={moving === order.id}>←</button>
-                      )}
                       <span className="p-card-stage-label">{stage}</span>
                       {stage !== 'Delivered' && (
-                        <button className="p-card-btn p-card-btn--next" onClick={(e) => { e.stopPropagation(); handleTransition(order.id, STAGES[STAGES.indexOf(stage) + 1]) }} disabled={moving === order.id}>→</button>
+                        <button className="p-card-btn p-card-btn--next" onClick={(e) => { e.stopPropagation(); handleMoveClick(order, STAGES[STAGES.indexOf(stage) + 1]) }} disabled={moving === order.id}>→</button>
                       )}
                     </div>
                   </div>
@@ -199,6 +222,33 @@ export default function ProductionPage() {
               >
                 Assign to current stage
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {assignModal && (
+        <div className="c-backdrop" onClick={() => setAssignModal(null)}>
+          <div className="c-form-modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 400 }}>
+            <h3 className="c-form-title" style={{ marginBottom: 16 }}>
+              Assign Tailor for <span className="mono">{assignModal.order.order_number}</span>
+            </h3>
+            <p style={{ fontSize: 14, opacity: 0.7, marginBottom: 16 }}>
+              This order is moving to <strong>{assignModal.stage}</strong>. Select a tailor to assign to this stage.
+            </p>
+            <label className="c-form-field">
+              <span className="c-form-label">Tailor</span>
+              <select
+                className="c-form-input"
+                value={assignModal.tailorId}
+                onChange={e => setAssignModal(p => ({ ...p, tailorId: e.target.value }))}
+              >
+                <option value="">Select a tailor…</option>
+                {tailors.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+              </select>
+            </label>
+            <div className="c-form-actions" style={{ marginTop: 20 }}>
+              <button className="c-form-cancel" onClick={() => setAssignModal(null)}>Cancel</button>
+              <button className="c-form-save" onClick={handleAssignAndMove}>Assign & Move</button>
             </div>
           </div>
         </div>
