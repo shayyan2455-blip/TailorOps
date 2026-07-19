@@ -3,7 +3,7 @@ import { supabase } from '../../../shared/lib/supabaseClient'
 export async function fetchProductionOrders() {
   const { data, error } = await supabase
     .from('orders')
-    .select('*, customers(name, mobile), order_items(*)')
+    .select('*, customers(name, mobile), order_items(*), work_assignments(*, tailors(name))')
     .order('created_at', { ascending: false })
   if (error) throw error
   return data
@@ -16,4 +16,19 @@ export async function transitionOrder(orderId, newStage) {
   })
   if (error) throw error
   return data
+}
+
+export async function assignTailorToOrder(tenantId, orderId, tailorId, stage) {
+  const { data, error } = await supabase
+    .from('work_assignments')
+    .insert({ tenant_id: tenantId, order_id: orderId, tailor_id: tailorId, stage })
+    .select('*, tailors(name)')
+    .single()
+  if (error) throw error
+  return data
+}
+
+export async function unassignTailor(assignmentId) {
+  const { error } = await supabase.from('work_assignments').delete().eq('id', assignmentId)
+  if (error) throw error
 }

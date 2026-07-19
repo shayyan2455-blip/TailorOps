@@ -1,5 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
-import { fetchProductionOrders, transitionOrder } from './api/productionQueries'
+import { useAuth } from '../../context/AuthContext'
+import { fetchTailors } from '../tailors/api/tailorQueries'
+import { fetchProductionOrders, transitionOrder, assignTailorToOrder, unassignTailor } from './api/productionQueries'
 import './ProductionPage.css'
 
 const STAGES = ['Booked', 'Cutting', 'Stitching', 'Ready', 'Delivered']
@@ -12,16 +14,20 @@ const STAGE_COLORS = {
 }
 
 export default function ProductionPage() {
+  const { tenantId } = useAuth()
   const [orders, setOrders] = useState([])
+  const [tailors, setTailors] = useState([])
   const [loading, setLoading] = useState(true)
   const [detail, setDetail] = useState(null)
   const [moving, setMoving] = useState(null)
+  const [assigning, setAssigning] = useState(null)
 
   const load = useCallback(async () => {
     try {
       setLoading(true)
-      const data = await fetchProductionOrders()
-      setOrders(data)
+      const [o, t] = await Promise.all([fetchProductionOrders(), fetchTailors()])
+      setOrders(o)
+      setTailors(t.filter(t => t.active !== false))
     } catch {} finally {
       setLoading(false)
     }
@@ -37,6 +43,20 @@ export default function ProductionPage() {
     } catch {} finally {
       setMoving(null)
     }
+  }
+
+  const handleAssign = async (orderId, tailorId, stage) => {
+    try {
+      await assignTailorToOrder(tenantId, orderId, tailorId, stage)
+      load()
+    } catch {}
+  }
+
+  const handleUnassign = async (assignmentId) => {
+    try {
+      await unassignTailor(assignmentId)
+      load()
+    } catch {}
   }
 
   const grouped = {}
@@ -65,9 +85,7 @@ export default function ProductionPage() {
                 <span className="p-col-count">{grouped[stage].length}</span>
               </div>
               <div className="p-col-cards">
-                {grouped[stage].length === 0 && (
-                  <div className="p-col-empty">No orders</div>
-                )}
+                {grouped[stage].length === 0 && <div className="p-col-empty">No orders</div>}
                 {grouped[stage].map(order => (
                   <div
                     key={order.id}
@@ -79,29 +97,14 @@ export default function ProductionPage() {
                       <span className="p-card-total">Rs.{Number(order.total_amount).toFixed(0)}</span>
                     </div>
                     <div className="p-card-customer">{order.customers?.name || '—'}</div>
-                    {order.delivery_date && (
-                      <div className="p-card-delivery">Due {order.delivery_date}</div>
-                    )}
-
+                    {order.delivery_date && <div className="p-card-delivery">Due {order.delivery_date}</div>}
                     <div className="p-card-actions">
                       {stage !== 'Booked' && (
-                        <button
-                          className="p-card-btn p-card-btn--prev"
-                          onClick={(e) => { e.stopPropagation(); handleTransition(order.id, STAGES[STAGES.indexOf(stage) - 1]) }}
-                          disabled={moving === order.id}
-                        >
-                          ←
-                        </button>
+                        <button className="p-card-btn p-card-btn--prev" onClick={(e) => { e.stopPropagation(); handleTransition(order.id, STAGES[STAGES.indexOf(stage) - 1]) }} disabled={moving === order.id}>←</button>
                       )}
                       <span className="p-card-stage-label">{stage}</span>
                       {stage !== 'Delivered' && (
-                        <button
-                          className="p-card-btn p-card-btn--next"
-                          onClick={(e) => { e.stopPropagation(); handleTransition(order.id, STAGES[STAGES.indexOf(stage) + 1]) }}
-                          disabled={moving === order.id}
-                        >
-                          →
-                        </button>
+                        <button className="p-card-btn p-card-btn--next" onClick={(e) => { e.stopPropagation(); handleTransition(order.id, STAGES[STAGES.indexOf(stage) + 1]) }} disabled={moving === order.id}>→</button>
                       )}
                     </div>
                   </div>
@@ -135,6 +138,56 @@ export default function ProductionPage() {
               </div>
             </div>
           )}
+
+          <div className="p-assign-section" style={{ marginTop: 16 }}>
+            <span className="c-detail-label">Assigned Tailors</span>
+            {detail.work_assignments?.length > 0 ? (
+              <table className="c-table" style={{ marginTop: 6 }}>
+                <thead>
+                  <tr>
+                    <th>Tailor</th>
+                    <th>Stage</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {detail.work_assignments.map(wa => (
+                    <tr key={wa.id}>
+                      <td>{wa.tailors?.name || '—'}</td>
+                      <td><span className={`o-stage o-stage--${wa.stage?.toLowerCase()}`}>{wa.stage}</span></td>
+                      <td><button className="c-action-btn c-action-destructive" onClick={() => handleUnassign(wa.id)}>Remove</button></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <p style={{ fontSize: 13, opacity: 0.5, marginTop: 4 }}>No tailors assigned yet.</p>
+            )}
+
+            <div className="p-assign-form" style={{ marginTop: 10 }}>
+              <select
+                className="c-form-input"
+                style={{ width: 'auto', minWidth: 180, display: 'inline-block' }}
+                value={assigning?.tailorId || ''}
+                onChange={e => setAssigning(p => ({ ...p, tailorId: e.target.value }))}
+              >
+                <option value="">Select tailor…</option>
+                {tailors.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
+              </select>
+              <button
+                className="c-action-btn"
+                style={{ marginLeft: 8 }}
+                onClick={() => {
+                  if (assigning?.tailorId) {
+                    handleAssign(detail.id, assigning.tailorId, detail.current_stage)
+                    setAssigning({ tailorId: '' })
+                  }
+                }}
+              >
+                Assign to current stage
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
