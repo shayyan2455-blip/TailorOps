@@ -63,6 +63,7 @@ export default function TailorLedgerPage() {
                 <th>Tailor</th>
                 <th className="l-num mono">Total Amount</th>
                 <th className="l-num mono">Total Paid</th>
+                <th className="l-num mono">Credit Bal.</th>
                 <th className="l-num mono">Balance</th>
               </tr>
             </thead>
@@ -83,13 +84,14 @@ export default function TailorLedgerPage() {
                       </td>
                       <td className="l-num mono">Rs. {Number(row.total_amount).toFixed(0)}</td>
                       <td className="l-num mono">Rs. {Number(row.total_paid).toFixed(0)}</td>
+                      <td className="l-num mono">Rs. {Number(row.credit_balance).toFixed(0)}</td>
                       <td className={`l-num mono l-bal ${isDue ? 'l-due' : ''}`}>
                         {isDue ? `Rs. ${bal.toFixed(0)} due` : 'Rs. 0'}
                       </td>
                     </tr>
                     {expanded === row.tailor_id && (
                       <tr key={`${row.tailor_id}-detail`}>
-                        <td colSpan={4} className="l-detail-cell">
+                        <td colSpan={5} className="l-detail-cell">
                           {detailLoading ? (
                             <p className="l-detail-loading">Loading...</p>
                           ) : !detail || detail.length === 0 ? (

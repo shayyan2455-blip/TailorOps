@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import { useToast } from '../../context/ToastContext'
+import { supabase } from '../../shared/lib/supabaseClient'
 import { fetchTailors } from '../tailors/api/tailorQueries'
 import { fetchProductionOrders, transitionOrder, assignTailorToOrder, unassignTailor, setWorkAssignmentAmount } from './api/productionQueries'
 import './ProductionPage.css'
@@ -82,7 +83,18 @@ export default function ProductionPage() {
         await assignTailorToOrder(tenantId, order.id, tailorId, toStage)
       }
       if (fromStage === 'Cutting' || fromStage === 'Stitching') {
-        await setWorkAssignmentAmount(order.id, fromStage, Number(amount))
+        const assignment = await setWorkAssignmentAmount(order.id, fromStage, Number(amount))
+        if (assignment?.tailor_id) {
+          const { data: creditApplied } = await supabase.rpc('apply_tailor_credit', {
+            p_tailor_id: assignment.tailor_id,
+            p_order_id: order.id,
+            p_stage: fromStage,
+            p_tenant_id: tenantId,
+          })
+          if (creditApplied && Number(creditApplied) > 0) {
+            showToast(`Rs. ${Number(creditApplied).toFixed(0)} credit auto-applied.`)
+          }
+        }
       }
       await transitionOrder(order.id, toStage)
       showToast(`Moved to ${toStage}.`)

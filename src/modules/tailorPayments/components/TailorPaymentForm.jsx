@@ -1,9 +1,11 @@
 import { useState, useEffect, useRef } from 'react'
+import { useAuth } from '../../../context/AuthContext'
 import { fetchTailorsForPayment } from '../api/tailorPaymentQueries'
 
 const MODES = ['Cash', 'JazzCash', 'Card', 'Bank Transfer', 'Other']
 
 export default function TailorPaymentForm({ onSave, onCancel }) {
+  const { tenantId } = useAuth()
   const [tailors, setTailors] = useState([])
   const [tailorId, setTailorId] = useState('')
   const [amount, setAmount] = useState('')
@@ -15,14 +17,20 @@ export default function TailorPaymentForm({ onSave, onCancel }) {
   const ref = useRef(null)
 
   useEffect(() => {
-    fetchTailorsForPayment().then(setTailors).catch(e => setError(e.message))
+    fetchTailorsForPayment(tenantId).then(setTailors).catch(e => setError(e.message))
     setTimeout(() => ref.current?.focus(), 100)
-  }, [])
+  }, [tenantId])
+
+  const selected = tailors.find(t => t.id === tailorId)
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     if (!tailorId) { setError('Please select a tailor.'); return }
     if (!amount || Number(amount) <= 0) { setError('Enter a valid amount.'); return }
+    if (selected && Number(amount) > Math.max(0, selected.balance)) {
+      const ok = window.confirm(`Amount (Rs. ${Number(amount).toFixed(0)}) exceeds tailor's outstanding balance (Rs. ${Math.max(0, selected.balance).toFixed(0)}). Excess will become credit. Continue?`)
+      if (!ok) return
+    }
     setSaving(true)
     setError('')
     try {
@@ -53,6 +61,14 @@ export default function TailorPaymentForm({ onSave, onCancel }) {
           ))}
         </select>
       </label>
+
+      {selected && (
+        <div style={{ fontSize: 12, opacity: 0.6, marginTop: -8 }}>
+          Outstanding: <strong>Rs. {Math.max(0, selected.balance).toFixed(0)}</strong>
+          {selected.credit > 0 && <span> · Credit: <strong style={{ color: 'var(--success)' }}>Rs. {Number(selected.credit).toFixed(0)}</strong></span>}
+          — excess payment becomes credit
+        </div>
+      )}
 
       <label className="c-form-field">
         <span className="c-form-label">Amount *</span>

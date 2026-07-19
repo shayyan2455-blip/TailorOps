@@ -9,14 +9,16 @@ export async function fetchTailorPayments() {
   return data
 }
 
-export async function fetchTailorsForPayment() {
-  const { data, error } = await supabase
-    .from('tailors')
-    .select('id, name, mobile')
-    .eq('active', true)
-    .order('name')
+export async function fetchTailorsForPayment(tenantId) {
+  const { data: ledgers, error } = await supabase.rpc('get_tailor_ledgers', { p_tenant_id: tenantId })
   if (error) throw error
-  return data
+  return (ledgers || []).map(l => ({
+    id: l.tailor_id,
+    name: l.tailor_name,
+    mobile: l.mobile,
+    balance: Number(l.balance),
+    credit: Number(l.credit_balance),
+  })).filter(t => t.balance !== undefined)
 }
 
 export async function recordTailorPayment(tenantId, payload) {

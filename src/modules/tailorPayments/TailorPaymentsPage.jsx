@@ -32,11 +32,19 @@ export default function TailorPaymentsPage() {
   const handleSave = async (payload) => {
     try {
       const result = await recordTailorPayment(tenantId, payload)
-      showToast('Payment recorded.')
+      const r = result?.[0]
+      if (r) {
+        const msgs = []
+        if (Number(r.applied_amount) > 0) msgs.push(`Rs. ${Number(r.applied_amount).toFixed(0)} applied`)
+        if (Number(r.credit_stored) > 0) msgs.push(`Rs. ${Number(r.credit_stored).toFixed(0)} stored as credit`)
+        showToast(msgs.length ? 'Payment recorded. ' + msgs.join(', ') + '.' : 'Payment recorded.')
+      } else {
+        showToast('Payment recorded.')
+      }
       setShowForm(false)
       load()
-      if (result && result.length > 0 && result[0].payment_id) {
-        setReceiptData({ paymentId: result[0].payment_id })
+      if (r?.payment_id) {
+        setReceiptData({ paymentId: r.payment_id })
       }
     } catch (err) {
       showToast(err.message, 'error')
