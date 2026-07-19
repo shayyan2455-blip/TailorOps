@@ -1,5 +1,6 @@
 import { NavLink, Outlet, Navigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
+import { useTheme } from '../../shared/hooks/useTheme'
 import './DashboardLayout.css'
 
 const navGroups = [
@@ -31,6 +32,7 @@ const navGroups = [
 
 export default function DashboardLayout() {
   const { user, profile, loading, signOut } = useAuth()
+  const { theme, toggleTheme } = useTheme()
 
   if (loading) return null
   if (!user) return <Navigate to="/" replace />
@@ -73,7 +75,10 @@ export default function DashboardLayout() {
         <div className="sidebar-foot">
           <div className="foot-shop">{profile?.full_name || 'Shop Owner'}</div>
           <div className="foot-role">Owner</div>
-          <button className="foot-signout" onClick={handleSignOut}>Sign out</button>
+          <div className="foot-actions">
+            <button className="foot-btn" onClick={toggleTheme}>{theme === 'dark' ? '☀️ Light' : '🌙 Dark'}</button>
+            <button className="foot-btn foot-signout" onClick={handleSignOut}>Sign out</button>
+          </div>
         </div>
       </aside>
 

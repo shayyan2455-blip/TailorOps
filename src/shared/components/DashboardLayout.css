@@ -113,7 +113,13 @@
   font-size: 12px;
 }
 
-.foot-signout {
+.foot-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.foot-btn {
   background: none;
   border: none;
   color: var(--text-dim);
@@ -121,8 +127,11 @@
   font-family: 'IBM Plex Sans', sans-serif;
   cursor: pointer;
   padding: 0;
-  margin-top: 8px;
   transition: color 0.15s;
+}
+
+.foot-btn:hover {
+  color: var(--text-color);
 }
 
 .foot-signout:hover {
