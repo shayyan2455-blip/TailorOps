@@ -65,7 +65,9 @@ export default function OrdersPage() {
 
         showToast('Order updated.')
       } else {
-        const { data: orderNum } = await supabase.rpc('generate_order_number', { p_tenant_id: tenantId })
+        const { data: orderNum, error: numErr } = await supabase.rpc('generate_order_number', { p_tenant_id: tenantId })
+        if (numErr) throw new Error(numErr.message)
+        if (!orderNum) throw new Error('generate_order_number returned null')
 
         const { id: orderId } = await createOrder(tenantId, {
           ...orderData,
