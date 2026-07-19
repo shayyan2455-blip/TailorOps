@@ -1,210 +1,149 @@
-.dash {
-  display: flex;
+.shell {
+  display: grid;
+  grid-template-columns: 240px 1fr;
   min-height: 100vh;
 }
 
-.dash-sidebar {
-  width: 240px;
-  background: var(--second-bg-color);
-  border-right: 1px solid color-mix(in srgb, var(--text-color) 10%, transparent);
+/* ---------- SIDEBAR ---------- */
+.sidebar {
+  background: var(--sidebar-bg);
+  border-right: 1px solid var(--border-color);
+  padding: 26px 18px;
   display: flex;
   flex-direction: column;
-  transition: width 0.2s ease;
-  flex-shrink: 0;
 }
 
-.dash--collapsed .dash-sidebar {
-  width: 64px;
+.sidebar-inner {
+  flex: 1;
 }
 
-.dash-sidebar-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 20px 16px;
-  border-bottom: 1px solid color-mix(in srgb, var(--text-color) 10%, transparent);
-}
-
-.dash-logo {
+.brand {
   display: flex;
   align-items: center;
   gap: 10px;
   font-family: 'Fraunces', serif;
   font-weight: 600;
   font-size: 18px;
-  overflow: hidden;
-  white-space: nowrap;
+  margin-bottom: 38px;
+  padding: 0 6px;
 }
 
-.dash-logo-tag {
+.brand-tag {
   width: 20px;
-  height: 14px;
-  border: 1.5px solid var(--main-color);
+  height: 15px;
+  border: 1.4px solid var(--main-color);
   border-radius: 2px 5px 2px 2px;
   position: relative;
   transform: rotate(-6deg);
   flex-shrink: 0;
 }
 
-.dash-logo-tag::before {
+.brand-tag::before {
   content: "";
   position: absolute;
-  top: 3px;
-  left: 3px;
-  width: 3px;
-  height: 3px;
+  top: 2.5px;
+  left: 2.5px;
+  width: 3.5px;
+  height: 3.5px;
   border-radius: 50%;
   border: 1px solid var(--main-color);
-  background: var(--bg-color);
+  background: var(--sidebar-bg);
 }
 
-.dash-collapse-btn {
-  background: none;
-  border: 1px solid color-mix(in srgb, var(--text-color) 15%, transparent);
-  color: var(--text-color);
-  border-radius: 4px;
-  padding: 4px 8px;
-  cursor: pointer;
-  font-size: 12px;
-  flex-shrink: 0;
-  transition: border-color 0.2s;
+.nav-group {
+  margin-bottom: 26px;
 }
 
-.dash-collapse-btn:hover {
-  border-color: var(--text-color);
+.nav-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--label);
+  padding: 0 10px;
+  margin-bottom: 10px;
 }
 
-.dash-nav {
-  flex: 1;
-  padding: 12px 8px;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.dash-nav-item {
+.nav-item {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 10px 12px;
+  gap: 11px;
+  padding: 9px 10px;
   border-radius: 8px;
-  text-decoration: none;
-  color: var(--text-color);
-  opacity: 0.6;
   font-size: 14px;
-  transition: opacity 0.15s, background 0.15s;
-  white-space: nowrap;
-  overflow: hidden;
+  color: var(--text-dim);
+  text-decoration: none;
+  margin-bottom: 2px;
+  transition: background 0.15s, color 0.15s;
 }
 
-.dash-nav-item:hover {
-  opacity: 1;
+.nav-item:hover {
   background: color-mix(in srgb, var(--text-color) 5%, transparent);
+  color: var(--text-color);
 }
 
-.dash-nav-item.active {
-  opacity: 1;
+.nav-item.active {
+  background: color-mix(in srgb, var(--main-color) 12%, transparent);
   color: var(--main-color);
-  background: color-mix(in srgb, var(--main-color) 10%, transparent);
 }
 
-.dash-nav-icon {
-  font-size: 16px;
-  width: 20px;
-  text-align: center;
-  flex-shrink: 0;
-}
-
-.dash-sidebar-footer {
-  padding: 16px;
-  border-top: 1px solid color-mix(in srgb, var(--text-color) 10%, transparent);
-}
-
-.dash-user {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  overflow: hidden;
-}
-
-.dash-avatar {
-  width: 32px;
-  height: 32px;
+.nav-dot {
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
-  background: var(--main-color);
+  background: currentColor;
+  opacity: 0.6;
   flex-shrink: 0;
 }
 
-.dash-user-info {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.dash-user-name {
+.sidebar-foot {
+  padding: 14px 10px;
+  border-top: 1px solid var(--border-color);
   font-size: 13px;
-  white-space: nowrap;
 }
 
-.dash-signout {
+.foot-shop {
+  font-family: 'Fraunces', serif;
+  font-size: 15px;
+  margin-bottom: 2px;
+}
+
+.foot-role {
+  color: var(--label);
+  font-size: 12px;
+}
+
+.foot-signout {
   background: none;
   border: none;
+  color: var(--text-dim);
   font-size: 11px;
-  color: var(--text-color);
-  opacity: 0.4;
+  font-family: 'IBM Plex Sans', sans-serif;
   cursor: pointer;
   padding: 0;
-  text-align: left;
-  font-family: 'IBM Plex Sans', sans-serif;
-  transition: opacity 0.15s;
+  margin-top: 8px;
+  transition: color 0.15s;
 }
 
-.dash-signout:hover {
-  opacity: 1;
+.foot-signout:hover {
+  color: var(--danger);
 }
 
-.dash-main {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-}
-
-.dash-topbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 16px 32px;
-  border-bottom: 1px solid color-mix(in srgb, var(--text-color) 10%, transparent);
-}
-
-.dash-page-title {
-  font-family: 'Fraunces', serif;
-  font-weight: 500;
-  font-size: 22px;
-  margin: 0;
-}
-
-.dash-topbar-right {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.dash-back-link {
-  font-size: 13px;
-  color: var(--text-color);
-  opacity: 0.5;
-  text-decoration: none;
-  transition: opacity 0.2s;
-}
-
-.dash-back-link:hover {
-  opacity: 1;
-}
-
-.dash-content {
-  flex: 1;
-  padding: 32px;
+/* ---------- MAIN ---------- */
+.main {
+  padding: 30px 38px 50px;
   overflow-y: auto;
+  max-height: 100vh;
+}
+
+@media (max-width: 1100px) {
+  .shell {
+    grid-template-columns: 1fr;
+  }
+  .sidebar {
+    display: none;
+  }
+  .main {
+    padding: 20px;
+  }
 }

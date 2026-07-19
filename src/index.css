@@ -1,15 +1,16 @@
 :root {
   --bg-color: #080808;
   --second-bg-color: #101010;
+  --sidebar-bg: #050505;
+  --card-bg: #0c0c0c;
   --text-color: white;
+  --text-dim: rgba(255,255,255,0.5);
   --main-color: #ea580c;
+  --border-color: rgba(255,255,255,0.08);
+  --danger: #dc2626;
+  --success: #38a169;
+  --label: rgba(255,255,255,0.35);
   --span-color: linear-gradient(270deg, #df8908 10%, #ff1d15 100%);
-
-  --bg-color-light: #ffffff;
-  --second-bg-color-light: #f0f0f0;
-  --text-color-light: #000000;
-  --main-color-light: #4caf50;
-  --span-color-light: linear-gradient(270deg, #4caf50 10%, #388e3c 100%);
 
   color-scheme: dark;
 }
@@ -17,8 +18,15 @@
 [data-theme="light"] {
   --bg-color: #ffffff;
   --second-bg-color: #f0f0f0;
+  --sidebar-bg: #e8e8e8;
+  --card-bg: #f5f5f5;
   --text-color: #000000;
+  --text-dim: rgba(0,0,0,0.5);
   --main-color: #4caf50;
+  --border-color: rgba(0,0,0,0.08);
+  --danger: #dc2626;
+  --success: #38a169;
+  --label: rgba(0,0,0,0.35);
   --span-color: linear-gradient(270deg, #4caf50 10%, #388e3c 100%);
   color-scheme: light;
 }
