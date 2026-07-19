@@ -2,7 +2,8 @@
 ALTER TABLE customers ADD COLUMN IF NOT EXISTS credit NUMERIC NOT NULL DEFAULT 0;
 
 -- 2. Updated distribute_customer_payment — stores excess as customer credit
-CREATE OR REPLACE FUNCTION distribute_customer_payment(
+DROP FUNCTION IF EXISTS distribute_customer_payment(uuid,numeric,date,text,text,uuid);
+CREATE FUNCTION distribute_customer_payment(
   p_customer_id UUID,
   p_amount      NUMERIC,
   p_payment_date DATE,
@@ -97,7 +98,8 @@ END;
 $$;
 
 -- 3. Apply stored credit to a newly created order
-CREATE OR REPLACE FUNCTION apply_customer_credit(
+DROP FUNCTION IF EXISTS apply_customer_credit(uuid,uuid,uuid);
+CREATE FUNCTION apply_customer_credit(
   p_customer_id UUID,
   p_order_id    UUID,
   p_tenant_id   UUID
