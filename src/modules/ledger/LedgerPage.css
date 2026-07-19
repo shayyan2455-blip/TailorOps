@@ -1,0 +1,108 @@
+.l-table th {
+  white-space: nowrap;
+}
+
+.l-num {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.l-row {
+  cursor: pointer;
+}
+
+.l-row:hover {
+  background: color-mix(in srgb, var(--text-color) 3%, transparent) !important;
+}
+
+.l-row--open {
+  background: color-mix(in srgb, var(--main-color) 6%, transparent) !important;
+}
+
+.l-expand {
+  display: inline-block;
+  font-size: 9px;
+  margin-right: 8px;
+  opacity: 0.4;
+  transition: transform 0.15s;
+}
+
+.l-expand--open {
+  transform: rotate(90deg);
+}
+
+.l-bal {
+  font-weight: 500;
+}
+
+.l-excess {
+  color: var(--success);
+}
+
+.l-due {
+  color: var(--danger);
+}
+
+.l-detail-cell {
+  padding: 0 !important;
+  background: color-mix(in srgb, var(--bg-color) 60%, var(--card-bg));
+}
+
+.l-detail-loading {
+  text-align: center;
+  padding: 20px;
+  opacity: 0.4;
+  font-size: 13px;
+}
+
+.l-subtable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+}
+
+.l-subtable th {
+  text-align: left;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--label);
+  font-weight: 400;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.l-subtable td {
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.l-subtable tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.l-subtable .l-num {
+  text-align: right;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+}
+
+.l-entry--order {
+  background: color-mix(in srgb, var(--main-color) 2%, transparent);
+}
+
+.l-entry--payment {
+  background: color-mix(in srgb, var(--success) 3%, transparent);
+}
+
+.l-entry-desc {
+  display: block;
+  font-size: 12.5px;
+}
+
+.l-entry-ref {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  opacity: 0.5;
+}

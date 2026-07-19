@@ -10,6 +10,7 @@ import PaymentsPage from '../modules/payments/PaymentsPage'
 import DeliveryPage from '../modules/delivery/DeliveryPage'
 import ReportsPage from '../modules/reports/ReportsPage'
 import SettingsPage from '../modules/settings/SettingsPage'
+import LedgerPage from '../modules/ledger/LedgerPage'
 
 export default function AppRoutes() {
   return (
@@ -25,6 +26,7 @@ export default function AppRoutes() {
         <Route path="delivery" element={<DeliveryPage />} />
         <Route path="reports" element={<ReportsPage />} />
         <Route path="settings" element={<SettingsPage />} />
+        <Route path="ledger" element={<LedgerPage />} />
       </Route>
     </Routes>
   )

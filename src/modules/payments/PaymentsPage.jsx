@@ -95,6 +95,7 @@ export default function PaymentsPage() {
             <thead>
               <tr>
                 <th>Customer</th>
+                <th>Invoice #</th>
                 <th>Order</th>
                 <th>Amount</th>
                 <th>Date</th>
@@ -106,6 +107,7 @@ export default function PaymentsPage() {
               {payments.map(p => (
                 <tr key={p.id}>
                   <td>{p.orders?.customers?.name || '—'}</td>
+                  <td className="mono">{p.invoice_number || '—'}</td>
                   <td className="mono">{p.orders?.order_number || '—'}</td>
                   <td className="pmt-amount">Rs. {Number(p.amount).toFixed(0)}</td>
                   <td>{p.payment_date}</td>

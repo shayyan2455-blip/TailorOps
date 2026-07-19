@@ -25,6 +25,7 @@ const navGroups = [
       { label: 'Customers', path: '/dashboard/customers' },
       { label: 'Tailors', path: '/dashboard/tailors' },
       { label: 'Payments', path: '/dashboard/payments' },
+      { label: 'Ledger', path: '/dashboard/ledger' },
       { label: 'Settings', path: '/dashboard/settings' },
     ],
   },
