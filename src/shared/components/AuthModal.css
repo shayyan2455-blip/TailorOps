@@ -1,0 +1,255 @@
+.auth-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  background: color-mix(in srgb, #000 60%, transparent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  animation: authFadeIn 0.15s ease;
+}
+
+@keyframes authFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.auth-modal {
+  background: var(--bg-color);
+  border: 1px solid color-mix(in srgb, var(--text-color) 12%, transparent);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 420px;
+  padding: 36px 32px 28px;
+  position: relative;
+  animation: authSlideIn 0.2s ease;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+@keyframes authSlideIn {
+  from { opacity: 0; transform: translateY(12px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.auth-close {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  background: none;
+  border: none;
+  color: var(--text-color);
+  opacity: 0.4;
+  font-size: 24px;
+  cursor: pointer;
+  line-height: 1;
+  padding: 4px;
+  transition: opacity 0.15s;
+}
+
+.auth-close:hover {
+  opacity: 1;
+}
+
+.auth-tabs {
+  display: flex;
+  margin-bottom: 28px;
+  border-bottom: 1px solid color-mix(in srgb, var(--text-color) 10%, transparent);
+}
+
+.auth-tab {
+  flex: 1;
+  background: none;
+  border: none;
+  padding: 10px 0 12px;
+  font-size: 15px;
+  font-weight: 500;
+  font-family: 'IBM Plex Sans', sans-serif;
+  color: var(--text-color);
+  opacity: 0.4;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: opacity 0.15s, border-color 0.15s;
+  margin-bottom: -1px;
+}
+
+.auth-tab.active {
+  opacity: 1;
+  color: var(--main-color);
+  border-bottom-color: var(--main-color);
+}
+
+.auth-tab:hover:not(.active) {
+  opacity: 0.7;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.auth-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.auth-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-color);
+  opacity: 0.8;
+}
+
+.auth-input {
+  width: 100%;
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--text-color) 15%, transparent);
+  background: var(--second-bg-color);
+  color: var(--text-color);
+  font-size: 14px;
+  font-family: 'IBM Plex Sans', sans-serif;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.auth-input::placeholder {
+  color: var(--text-color);
+  opacity: 0.3;
+}
+
+.auth-input:focus {
+  border-color: var(--main-color);
+}
+
+.auth-pw-wrap {
+  position: relative;
+}
+
+.auth-pw-wrap .auth-input {
+  padding-right: 40px;
+}
+
+.auth-eye {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 4px;
+  line-height: 1;
+}
+
+.auth-error {
+  font-size: 12px;
+  color: #e53e3e;
+}
+
+.auth-show-pw {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text-color);
+  opacity: 0.6;
+  cursor: pointer;
+}
+
+.auth-show-pw input {
+  accent-color: var(--main-color);
+}
+
+.auth-server-error {
+  background: color-mix(in srgb, #e53e3e 10%, transparent);
+  border: 1px solid color-mix(in srgb, #e53e3e 30%, transparent);
+  color: #e53e3e;
+  font-size: 13px;
+  padding: 10px 14px;
+  border-radius: 8px;
+}
+
+.auth-submit {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 24px;
+  background: var(--main-color);
+  color: white;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: 'IBM Plex Sans', sans-serif;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.1s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.auth-submit:hover:not(:disabled) {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+.auth-submit:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.auth-spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid color-mix(in srgb, white 30%, transparent);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: authSpin 0.6s linear infinite;
+}
+
+@keyframes authSpin {
+  to { transform: rotate(360deg); }
+}
+
+.auth-forgot {
+  display: block;
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-color);
+  opacity: 0.5;
+  text-decoration: none;
+  margin-top: -4px;
+  transition: opacity 0.15s;
+}
+
+.auth-forgot:hover {
+  opacity: 1;
+}
+
+.auth-switch {
+  text-align: center;
+  font-size: 14px;
+  color: var(--text-color);
+  opacity: 0.6;
+  margin: 24px 0 0;
+}
+
+.auth-link {
+  background: none;
+  border: none;
+  color: var(--main-color);
+  font-size: 14px;
+  font-family: 'IBM Plex Sans', sans-serif;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+}
+
+.auth-link:hover {
+  opacity: 0.8;
+}

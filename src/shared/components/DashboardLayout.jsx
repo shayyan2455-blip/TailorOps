@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { NavLink, Outlet } from 'react-router-dom'
+import { NavLink, Outlet, Navigate } from 'react-router-dom'
+import { useAuth } from '../../context/AuthContext'
 import './DashboardLayout.css'
 
 const navItems = [
@@ -15,6 +16,14 @@ const navItems = [
 
 export default function DashboardLayout() {
   const [collapsed, setCollapsed] = useState(false)
+  const { user, loading, signOut } = useAuth()
+
+  if (loading) return null
+  if (!user) return <Navigate to="/" replace />
+
+  const handleSignOut = async () => {
+    try { await signOut() } catch {}
+  }
 
   return (
     <div className={`dash ${collapsed ? 'dash--collapsed' : ''}`}>
@@ -44,7 +53,12 @@ export default function DashboardLayout() {
         <div className="dash-sidebar-footer">
           <div className="dash-user">
             <div className="dash-avatar" />
-            {!collapsed && <span className="dash-user-name">Shop Owner</span>}
+            {!collapsed && (
+              <div className="dash-user-info">
+                <span className="dash-user-name">Shop Owner</span>
+                <button className="dash-signout" onClick={handleSignOut}>Sign out</button>
+              </div>
+            )}
           </div>
         </div>
       </aside>

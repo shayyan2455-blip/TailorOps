@@ -135,9 +135,32 @@
   flex-shrink: 0;
 }
 
+.dash-user-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
 .dash-user-name {
   font-size: 13px;
   white-space: nowrap;
+}
+
+.dash-signout {
+  background: none;
+  border: none;
+  font-size: 11px;
+  color: var(--text-color);
+  opacity: 0.4;
+  cursor: pointer;
+  padding: 0;
+  text-align: left;
+  font-family: 'IBM Plex Sans', sans-serif;
+  transition: opacity 0.15s;
+}
+
+.dash-signout:hover {
+  opacity: 1;
 }
 
 .dash-main {

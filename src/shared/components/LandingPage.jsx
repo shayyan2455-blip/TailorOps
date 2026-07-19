@@ -1,16 +1,22 @@
 import { useState, useCallback } from 'react'
 import { useTheme } from '../hooks/useTheme'
 import SplashScreen from './SplashScreen'
+import AuthModal from './AuthModal'
 import '../../App.css'
 
 export default function LandingPage() {
   const { theme, toggleTheme } = useTheme()
   const [showSplash, setShowSplash] = useState(true)
   const hideSplash = useCallback(() => setShowSplash(false), [])
+  const [authOpen, setAuthOpen] = useState(false)
+  const [authMode, setAuthMode] = useState('signin')
+  const openAuth = (mode) => { setAuthMode(mode); setAuthOpen(true) }
+  const closeAuth = () => setAuthOpen(false)
 
   return (
     <>
       {showSplash && <SplashScreen onFinish={hideSplash} />}
+      <AuthModal open={authOpen} onClose={closeAuth} initialMode={authMode} />
       <div className="app">
         <nav className="nav">
           <div className="logo">
@@ -37,8 +43,8 @@ export default function LandingPage() {
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
             )}
           </button>
-          <a href="#" className="btn-ghost">Sign in</a>
-          <a href="#" className="btn-primary">Create shop account →</a>
+          <button className="btn-ghost" onClick={() => openAuth('signin')}>Sign in</button>
+          <button className="btn-primary" onClick={() => openAuth('create')}>Create shop account →</button>
         </div>
       </nav>
 
@@ -58,7 +64,7 @@ export default function LandingPage() {
             cut fabric than chase paperwork.
           </p>
           <div className="hero-ctas">
-            <a href="#" className="btn-primary">Create shop →</a>
+            <button className="btn-primary" onClick={() => openAuth('create')}>Create shop →</button>
             <a href="#features" className="btn-secondary">See how it runs</a>
           </div>
         </div>
@@ -172,7 +178,7 @@ export default function LandingPage() {
           <span className="gradient-text">Start tracking thread.</span>
         </h2>
         <p>Set up your shop in a few minutes — no spreadsheets required.</p>
-        <a href="#" className="btn-primary">Create shop account →</a>
+        <button className="btn-primary" onClick={() => openAuth('create')}>Create shop account →</button>
       </section>
 
       <footer className="footer wrap">
