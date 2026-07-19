@@ -21,9 +21,6 @@
 }
 
 .r-close-btn {
-  position: absolute;
-  top: 14px;
-  right: 14px;
   background: none;
   border: none;
   color: var(--text-dim);
@@ -34,7 +31,7 @@
   align-items: center;
   justify-content: center;
   transition: color 0.15s, background 0.15s;
-  z-index: 1;
+  margin-right: 8px;
 }
 
 .r-close-btn:hover {
@@ -46,7 +43,13 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 24px 24px 0;
+  padding: 20px 24px 0;
+}
+
+.r-header-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .r-header-title {
@@ -66,21 +69,21 @@
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  background: none;
-  border: 1px solid color-mix(in srgb, var(--text-color) 18%, transparent);
-  color: var(--text-color);
+  border: none;
+  background: var(--span-color);
+  color: #fff;
   font-size: 13px;
   font-family: 'IBM Plex Sans', sans-serif;
-  padding: 8px 16px;
+  padding: 8px 18px;
   border-radius: 20px;
   cursor: pointer;
-  transition: border-color 0.15s, background 0.15s;
+  transition: opacity 0.15s;
   white-space: nowrap;
+  font-weight: 500;
 }
 
 .r-print-btn:hover {
-  border-color: var(--text-color);
-  background: color-mix(in srgb, var(--text-color) 5%, transparent);
+  opacity: 0.9;
 }
 
 .r-body {
@@ -204,7 +207,6 @@
   font-size: 14px;
 }
 
-/* Stripe animation for Print/PDF button */
 @media print {
   .r-backdrop {
     position: static;
@@ -224,6 +226,9 @@
     display: none !important;
   }
   .r-header {
-    padding-top: 16px;
+    padding: 16px 0 0;
+  }
+  .r-body {
+    padding: 16px 0 0;
   }
 }

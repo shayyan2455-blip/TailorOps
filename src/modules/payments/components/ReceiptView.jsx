@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '../../../context/AuthContext'
 import { fetchPaymentForReceipt } from '../api/paymentQueries'
 import { fetchTenant } from '../../settings/api/settingsQueries'
+import { useToast } from '../../../context/ToastContext'
 import './ReceiptView.css'
 
 const CloseX = () => (
@@ -28,6 +29,7 @@ function todayStr() {
 
 export default function ReceiptView({ paymentId, onClose }) {
   const { tenantId } = useAuth()
+  const { showToast } = useToast()
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -49,8 +51,8 @@ export default function ReceiptView({ paymentId, onClose }) {
     ? 'RCP-' + data.payment.id.replace(/-/g, '').slice(-8).toUpperCase()
     : 'RCP-????????'
 
-  const handlePrint = () => {
-    if (!data) return
+  const buildPrintHtml = useCallback(() => {
+    if (!data) return ''
     const { payment, tenant } = data
     const c = payment.customers || {}
     const o = payment.orders || {}
@@ -58,7 +60,10 @@ export default function ReceiptView({ paymentId, onClose }) {
     const balance = data.balance || 0
     const orderNum = o?.order_number || (payment.order_id === null ? '—' : '—')
 
-    const printHtml = `<!DOCTYPE html>
+    const amt = Number(payment.amount).toLocaleString('en-PK', { minimumFractionDigits: 0, maximumFractionDigits: 0 })
+    const bal = Number(balance).toLocaleString('en-PK', { minimumFractionDigits: 0, maximumFractionDigits: 0 })
+
+    return `<!DOCTYPE html>
 <html>
 <head>
   <title>Receipt ${receiptNumber}</title>
@@ -68,29 +73,28 @@ export default function ReceiptView({ paymentId, onClose }) {
     body {
       font-family: 'Georgia', 'Times New Roman', serif;
       font-size: 13px;
-      color: #000;
+      color: #111;
       background: #fff;
       line-height: 1.5;
       max-width: 420px;
       margin: 0 auto;
     }
     .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; padding-top: 4px; }
-    .header-left { font-size: 14px; font-weight: 700; }
-    .header-right { font-size: 11px; color: #666; font-family: 'Courier New', monospace; }
+    .header-left { font-size: 14px; font-weight: 700; color: #111; }
+    .header-right { font-size: 11px; color: #555; font-family: 'Courier New', monospace; }
     .identity { text-align: center; padding: 8px 0 12px; }
-    .shop-name { font-size: 22px; font-weight: 700; letter-spacing: 0.01em; margin-bottom: 2px; }
-    .receipt-id { font-size: 10px; color: #888; font-family: 'Courier New', monospace; margin-top: 4px; }
-    hr { border: none; border-top: 1px solid #ddd; margin: 0; }
+    .shop-name { font-size: 22px; font-weight: 700; color: #111; letter-spacing: 0.01em; margin-bottom: 2px; }
+    .receipt-id { font-size: 10px; color: #666; font-family: 'Courier New', monospace; margin-top: 4px; }
+    hr { border: none; border-top: 1px solid #ccc; margin: 0; }
     .section { padding: 10px 0; }
-    .section-title { font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: #999; margin-bottom: 6px; font-family: 'Courier New', monospace; }
+    .section-title { font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: #666; margin-bottom: 6px; font-family: 'Courier New', monospace; }
     .row { display: flex; justify-content: space-between; padding: 3px 0; font-size: 13px; }
-    .row-label { color: #666; }
-    .row-value { text-align: right; }
-    .amount-value { font-size: 18px; font-weight: 700; }
-    .direction { font-size: 12px; color: #666; text-align: right; }
-    .balance { color: #e53e3e; font-weight: 600; }
-    .footer { text-align: center; font-size: 10px; color: #999; padding-top: 8px; border-top: 1px solid #ddd; margin-top: 8px; }
-    @media print { body { padding: 0; } }
+    .row-label { color: #444; }
+    .row-value { text-align: right; color: #111; }
+    .amount-value { font-size: 18px; font-weight: 700; color: #000; }
+    .direction { font-size: 12px; color: #555; text-align: right; }
+    .balance { color: #c0392b; font-weight: 600; }
+    .footer { text-align: center; font-size: 10px; color: #666; padding-top: 8px; border-top: 1px solid #ccc; margin-top: 8px; }
   </style>
 </head>
 <body>
@@ -116,24 +120,48 @@ export default function ReceiptView({ paymentId, onClose }) {
 
   <div class="section">
     <div class="section-title">Payment Details</div>
-    <div class="row"><span class="row-label">Amount</span><span class="row-value amount-value">${currency} ${Number(payment.amount).toLocaleString('en-PK', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</span></div>
+    <div class="row"><span class="row-label">Amount</span><span class="row-value amount-value">${currency} ${amt}</span></div>
     <div class="row" style="justify-content:flex-end"><span class="direction">Received from customer</span></div>
     <div class="row"><span class="row-label">Method</span><span class="row-value">${payment.payment_mode || '—'}</span></div>
     <div class="row"><span class="row-label">Date</span><span class="row-value">${formatDate(payment.payment_date)}</span></div>
     <div class="row"><span class="row-label">Order</span><span class="row-value">${orderNum}</span></div>
-    <div class="row"><span class="row-label">Balance remaining</span><span class="row-value balance">${currency} ${Number(balance).toLocaleString('en-PK', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</span></div>
+    <div class="row"><span class="row-label">Balance remaining</span><span class="row-value balance">${currency} ${bal}</span></div>
   </div>
 
   <div class="footer">Generated on ${todayStr()} &middot; TailorOps</div>
 </body>
 </html>`
+  }, [data, receiptNumber])
 
-    const printWin = window.open('', '_blank')
-    if (!printWin) return
-    printWin.document.write(printHtml)
-    printWin.document.close()
-    printWin.focus()
-    setTimeout(() => printWin.print(), 300)
+  const handlePrint = () => {
+    const html = buildPrintHtml()
+    if (!html) return
+
+    const iframe = document.createElement('iframe')
+    iframe.style.position = 'fixed'
+    iframe.style.width = '0'
+    iframe.style.height = '0'
+    iframe.style.border = 'none'
+    iframe.style.opacity = '0'
+    iframe.style.pointerEvents = 'none'
+    document.body.appendChild(iframe)
+
+    const doc = iframe.contentDocument || iframe.contentWindow.document
+    doc.open()
+    doc.write(html)
+    doc.close()
+
+    iframe.contentWindow.focus()
+    setTimeout(() => {
+      try {
+        iframe.contentWindow.print()
+      } catch (e) {
+        showToast('Could not print. Try allowing popups for this site.', 'error')
+      }
+      setTimeout(() => {
+        if (iframe.parentNode) iframe.parentNode.removeChild(iframe)
+      }, 1000)
+    }, 300)
   }
 
   const c = data?.payment?.customers || {}
@@ -146,8 +174,6 @@ export default function ReceiptView({ paymentId, onClose }) {
     <div className="r-backdrop" onClick={onClose}>
       <div className="r-modal" onClick={e => e.stopPropagation()}>
 
-        <button className="r-close-btn" onClick={onClose} aria-label="Close receipt"><CloseX /></button>
-
         {loading && <div className="r-loading">Loading receipt...</div>}
 
         {error && <div className="r-loading" style={{ color: 'var(--danger)' }}>{error}</div>}
@@ -155,9 +181,12 @@ export default function ReceiptView({ paymentId, onClose }) {
         {data && !loading && (
           <>
             <div className="r-header">
-              <div>
-                <div className="r-header-title">Receipt</div>
-                <div className="r-header-num">{receiptNumber}</div>
+              <div className="r-header-left">
+                <button className="r-close-btn" onClick={onClose} aria-label="Close receipt"><CloseX /></button>
+                <div>
+                  <div className="r-header-title">Receipt</div>
+                  <div className="r-header-num">{receiptNumber}</div>
+                </div>
               </div>
               <button className="r-print-btn" onClick={handlePrint}><PrinterIcon /> Print / PDF</button>
             </div>
