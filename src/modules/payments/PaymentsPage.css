@@ -1,0 +1,20 @@
+.pmt-amount {
+  font-family: 'Fraunces', serif;
+  font-weight: 500;
+  font-size: 15px;
+}
+
+.pmt-mode {
+  display: inline-block;
+  font-size: 12px;
+  padding: 3px 10px;
+  border-radius: 8px;
+  background: var(--second-bg-color);
+  border: 1px solid color-mix(in srgb, var(--text-color) 10%, transparent);
+}
+
+.pmt-balance {
+  font-size: 13px;
+  opacity: 0.7;
+  margin-bottom: 4px;
+}
