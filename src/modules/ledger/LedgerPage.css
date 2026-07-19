@@ -2,13 +2,17 @@
   white-space: nowrap;
 }
 
-.l-table th.l-num {
+.l-table th.l-num,
+.l-table td.l-num {
+  text-align: center;
   font-size: 13px;
+}
+
+.l-table th.l-num {
   letter-spacing: normal;
 }
 
 .l-num {
-  text-align: right;
   white-space: nowrap;
 }
 
