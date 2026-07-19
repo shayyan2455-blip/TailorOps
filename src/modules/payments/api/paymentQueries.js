@@ -20,9 +20,8 @@ export async function fetchCustomersForPayment(tenantId) {
   for (const c of customers) {
     const { data: orders } = await supabase
       .from('orders')
-      .select('id, total_amount')
+      .select('id, total_amount, current_stage')
       .eq('customer_id', c.id)
-      .neq('current_stage', 'Delivered')
 
     let totalUnpaid = 0
     for (const o of orders || []) {
@@ -34,9 +33,9 @@ export async function fetchCustomersForPayment(tenantId) {
       totalUnpaid += Number(o.total_amount) - paid
     }
 
-    result.push({ ...c, unpaid: totalUnpaid })
+    result.push({ ...c, unpaid: Math.max(0, totalUnpaid) })
   }
-  return result.filter(c => c.unpaid > 0).sort((a, b) => b.unpaid - a.unpaid)
+  return result.sort((a, b) => b.unpaid - a.unpaid)
 }
 
 export async function distributePayment(tenantId, payload) {

@@ -15,7 +15,7 @@ export default function PaymentForm({ tenantId, onSave, onCancel }) {
   const ref = useRef(null)
 
   useEffect(() => {
-    fetchCustomersForPayment(tenantId).then(setCustomers).catch(() => {})
+    fetchCustomersForPayment(tenantId).then(setCustomers).catch(e => setError(e.message))
     setTimeout(() => ref.current?.focus(), 100)
   }, [tenantId])
 
