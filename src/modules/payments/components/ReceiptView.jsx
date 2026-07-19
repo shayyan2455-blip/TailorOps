@@ -1,96 +1,209 @@
-import { useRef } from 'react'
+import { useState, useEffect } from 'react'
+import { useAuth } from '../../../context/AuthContext'
+import { fetchPaymentForReceipt } from '../api/paymentQueries'
+import { fetchTenant } from '../../settings/api/settingsQueries'
+import './ReceiptView.css'
 
-export default function ReceiptView({ payment, customer, orders, onClose }) {
-  const ref = useRef(null)
+const CloseX = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+  </svg>
+)
+
+const PrinterIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="6 9 6 2 18 2 18 9" /><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" /><rect x="6" y="14" width="12" height="8" />
+  </svg>
+)
+
+function formatDate(dateStr) {
+  if (!dateStr) return '—'
+  const d = new Date(dateStr + 'T00:00:00')
+  return d.toLocaleDateString('en-PK', { year: 'numeric', month: 'short', day: 'numeric' })
+}
+
+function todayStr() {
+  return new Date().toLocaleDateString('en-PK', { year: 'numeric', month: 'short', day: 'numeric' })
+}
+
+export default function ReceiptView({ paymentId, onClose }) {
+  const { tenantId } = useAuth()
+  const [data, setData] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+
+  useEffect(() => {
+    if (!paymentId || !tenantId) return
+    setLoading(true)
+    setError(null)
+    Promise.all([
+      fetchPaymentForReceipt(paymentId),
+      fetchTenant(tenantId),
+    ])
+      .then(([receipt, tenant]) => setData({ ...receipt, tenant }))
+      .catch(err => setError(err.message))
+      .finally(() => setLoading(false))
+  }, [paymentId, tenantId])
+
+  const receiptNumber = data?.payment?.id
+    ? 'RCP-' + data.payment.id.replace(/-/g, '').slice(-8).toUpperCase()
+    : 'RCP-????????'
 
   const handlePrint = () => {
+    if (!data) return
+    const { payment, tenant } = data
+    const c = payment.customers || {}
+    const o = payment.orders || {}
+    const currency = tenant?.currency || 'Rs.'
+    const balance = data.balance || 0
+    const orderNum = o?.order_number || (payment.order_id === null ? '—' : '—')
+
+    const printHtml = `<!DOCTYPE html>
+<html>
+<head>
+  <title>Receipt ${receiptNumber}</title>
+  <style>
+    @page { size: A5; margin: 12mm; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Georgia', 'Times New Roman', serif;
+      font-size: 13px;
+      color: #000;
+      background: #fff;
+      line-height: 1.5;
+      max-width: 420px;
+      margin: 0 auto;
+    }
+    .header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; padding-top: 4px; }
+    .header-left { font-size: 14px; font-weight: 700; }
+    .header-right { font-size: 11px; color: #666; font-family: 'Courier New', monospace; }
+    .identity { text-align: center; padding: 8px 0 12px; }
+    .shop-name { font-size: 22px; font-weight: 700; letter-spacing: 0.01em; margin-bottom: 2px; }
+    .receipt-id { font-size: 10px; color: #888; font-family: 'Courier New', monospace; margin-top: 4px; }
+    hr { border: none; border-top: 1px solid #ddd; margin: 0; }
+    .section { padding: 10px 0; }
+    .section-title { font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: #999; margin-bottom: 6px; font-family: 'Courier New', monospace; }
+    .row { display: flex; justify-content: space-between; padding: 3px 0; font-size: 13px; }
+    .row-label { color: #666; }
+    .row-value { text-align: right; }
+    .amount-value { font-size: 18px; font-weight: 700; }
+    .direction { font-size: 12px; color: #666; text-align: right; }
+    .balance { color: #e53e3e; font-weight: 600; }
+    .footer { text-align: center; font-size: 10px; color: #999; padding-top: 8px; border-top: 1px solid #ddd; margin-top: 8px; }
+    @media print { body { padding: 0; } }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="header-left">Receipt</div>
+    <div class="header-right">${receiptNumber}</div>
+  </div>
+
+  <div class="identity">
+    <div class="shop-name">${tenant?.name || 'Tailor Shop'}</div>
+    <div class="receipt-id">${receiptNumber}</div>
+  </div>
+  <hr />
+
+  <div class="section">
+    <div class="section-title">Party Details</div>
+    <div class="row"><span class="row-label">Name</span><span class="row-value">${c?.name || '—'}</span></div>
+    <div class="row"><span class="row-label">Phone</span><span class="row-value">${c?.mobile || '—'}</span></div>
+    <div class="row"><span class="row-label">Address</span><span class="row-value">${c?.address || '—'}</span></div>
+    <div class="row"><span class="row-label">Type</span><span class="row-value">Customer</span></div>
+  </div>
+  <hr />
+
+  <div class="section">
+    <div class="section-title">Payment Details</div>
+    <div class="row"><span class="row-label">Amount</span><span class="row-value amount-value">${currency} ${Number(payment.amount).toLocaleString('en-PK', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</span></div>
+    <div class="row" style="justify-content:flex-end"><span class="direction">Received from customer</span></div>
+    <div class="row"><span class="row-label">Method</span><span class="row-value">${payment.payment_mode || '—'}</span></div>
+    <div class="row"><span class="row-label">Date</span><span class="row-value">${formatDate(payment.payment_date)}</span></div>
+    <div class="row"><span class="row-label">Order</span><span class="row-value">${orderNum}</span></div>
+    <div class="row"><span class="row-label">Balance remaining</span><span class="row-value balance">${currency} ${Number(balance).toLocaleString('en-PK', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</span></div>
+  </div>
+
+  <div class="footer">Generated on ${todayStr()} &middot; TailorOps</div>
+</body>
+</html>`
+
     const printWin = window.open('', '_blank')
     if (!printWin) return
-    const orderRows = (orders || []).map(o => `
-      <tr><td>${o.order_number}</td><td class="right">Rs. ${Number(o.total_amount).toFixed(0)}</td><td class="right">Rs. ${Number(o.paid).toFixed(0)}</td><td class="right">Rs. ${Math.max(0, o.balance).toFixed(0)}</td></tr>
-    `).join('')
-    const totalPaid = (orders || []).reduce((s, o) => s + Number(o.paid), 0)
-    const totalBalance = (orders || []).reduce((s, o) => s + Math.max(0, o.balance), 0)
-    printWin.document.write(`
-      <html><head><title>Receipt - ${customer?.name || ''}</title>
-      <style>
-        body { font-family: 'Courier New', monospace; font-size: 13px; max-width: 380px; margin: 0 auto; padding: 20px; color: #000; }
-        h2 { text-align: center; font-size: 18px; margin-bottom: 4px; }
-        .line { border-top: 1px dashed #999; margin: 12px 0; }
-        .row { display: flex; justify-content: space-between; padding: 2px 0; }
-        .label { font-weight: 600; }
-        table { width: 100%; border-collapse: collapse; margin-top: 6px; }
-        th, td { text-align: left; padding: 4px 0; font-size: 12px; }
-        th { border-bottom: 1px solid #999; font-weight: 600; }
-        .right { text-align: right; }
-        .center { text-align: center; }
-        .total { font-size: 16px; font-weight: 700; margin-top: 8px; }
-        @media print { body { margin: 0; padding: 16px; } }
-      </style></head><body>
-        <h2>TailorOps</h2>
-        <p class="center" style="margin:0 0 4px">Payment Receipt</p>
-        <div class="line"></div>
-        <div class="row"><span class="label">Customer</span><span>${customer?.name || ''}</span></div>
-        <div class="row"><span class="label">Date</span><span>${payment?.payment_date || ''}</span></div>
-        <div class="row"><span class="label">Mode</span><span>${payment?.payment_mode || ''}</span></div>
-        <div class="line"></div>
-        <div class="row" style="font-size:16px;font-weight:700"><span>Amount Paid</span><span>Rs. ${Number(payment?.amount || 0).toFixed(0)}</span></div>
-        <div class="line"></div>
-        <p style="margin:0 0 4px;font-weight:600">Order Breakdown</p>
-        <table>
-          <tr><th>Order</th><th class="right">Total</th><th class="right">Paid</th><th class="right">Balance</th></tr>
-          ${orderRows}
-        </table>
-        <div class="line"></div>
-        <div class="row"><span>Total paid across orders</span><span>Rs. ${Number(totalPaid).toFixed(0)}</span></div>
-        <div class="row" style="font-weight:600"><span>Remaining balance</span><span>Rs. ${Number(totalBalance).toFixed(0)}</span></div>
-        <div class="line"></div>
-        ${payment?.notes ? `<p style="font-size:11px;color:#666">Note: ${payment.notes}</p>` : ''}
-        <p class="center" style="font-size:11px;color:#666">Thank you for your business!</p>
-      </body></html>
-    `)
+    printWin.document.write(printHtml)
     printWin.document.close()
     printWin.focus()
     setTimeout(() => printWin.print(), 300)
   }
 
-  const totalPaid = (orders || []).reduce((s, o) => s + Number(o.paid || 0), 0)
-  const totalBalance = (orders || []).reduce((s, o) => s + Math.max(0, Number(o.balance || 0)), 0)
+  const c = data?.payment?.customers || {}
+  const o = data?.payment?.orders || {}
+  const currency = data?.tenant?.currency || 'Rs.'
+  const balance = data?.balance || 0
+  const orderNum = o?.order_number || (data?.payment?.order_id === null ? '—' : '—')
 
   return (
-    <div className="c-backdrop" onClick={onClose}>
-      <div className="c-form-modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 440 }}>
-        <div ref={ref} style={{ fontFamily: "'Courier New', monospace", fontSize: 13, lineHeight: 1.6 }}>
-          <h3 style={{ textAlign: 'center', margin: '0 0 4px', fontFamily: "'Fraunces', serif" }}>TailorOps</h3>
-          <p style={{ textAlign: 'center', margin: '0 0 12px', opacity: 0.6, fontSize: 11 }}>Payment Receipt</p>
-          <div style={{ borderTop: '1px dashed', opacity: 0.2, margin: '8px 0' }} />
-          <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ fontWeight: 600 }}>Customer</span><span>{customer?.name}</span></div>
-          <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ fontWeight: 600 }}>Date</span><span>{payment?.payment_date}</span></div>
-          <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ fontWeight: 600 }}>Mode</span><span>{payment?.payment_mode}</span></div>
-          <div style={{ borderTop: '1px dashed', opacity: 0.2, margin: '8px 0' }} />
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 16, fontWeight: 700 }}>
-            <span>Amount Paid</span><span>Rs. {Number(payment?.amount || 0).toFixed(0)}</span>
-          </div>
-          <div style={{ borderTop: '1px dashed', opacity: 0.2, margin: '8px 0' }} />
-          <p style={{ margin: '0 0 6px', fontWeight: 600, fontSize: 12 }}>Order Breakdown</p>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, opacity: 0.5, borderBottom: '1px solid', paddingBottom: 4, marginBottom: 4 }}>
-            <span>Order</span><span>Total → Paid → Bal</span>
-          </div>
-          {orders?.map(o => (
-            <div key={o.id} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, padding: '2px 0' }}>
-              <span className="mono" style={{ fontSize: 11 }}>{o.order_number}</span>
-              <span>Rs.{Number(o.total_amount).toFixed(0)} → Rs.{Number(o.paid).toFixed(0)} → Rs.{Math.max(0, o.balance).toFixed(0)}</span>
+    <div className="r-backdrop" onClick={onClose}>
+      <div className="r-modal" onClick={e => e.stopPropagation()}>
+
+        <button className="r-close-btn" onClick={onClose} aria-label="Close receipt"><CloseX /></button>
+
+        {loading && <div className="r-loading">Loading receipt...</div>}
+
+        {error && <div className="r-loading" style={{ color: 'var(--danger)' }}>{error}</div>}
+
+        {data && !loading && (
+          <>
+            <div className="r-header">
+              <div>
+                <div className="r-header-title">Receipt</div>
+                <div className="r-header-num">{receiptNumber}</div>
+              </div>
+              <button className="r-print-btn" onClick={handlePrint}><PrinterIcon /> Print / PDF</button>
             </div>
-          ))}
-          <div style={{ borderTop: '1px dashed', opacity: 0.2, margin: '8px 0' }} />
-          <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Total paid</span><span>Rs. {Number(totalPaid).toFixed(0)}</span></div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 600 }}><span>Remaining balance</span><span>Rs. {Number(totalBalance).toFixed(0)}</span></div>
-          {payment?.notes && <p style={{ fontSize: 11, opacity: 0.5, marginTop: 8 }}>Note: {payment.notes}</p>}
-        </div>
-        <div className="c-form-actions" style={{ marginTop: 16 }}>
-          <button className="c-form-cancel" onClick={onClose}>Close</button>
-          <button className="c-form-save" onClick={handlePrint}>Print / Save PDF</button>
-        </div>
+
+            <div className="r-body">
+              <div className="r-identity">
+                <div className="r-shop-name">{data?.tenant?.name || 'Tailor Shop'}</div>
+                <div className="r-receipt-id">{receiptNumber}</div>
+              </div>
+              <hr className="r-divider" />
+
+              <div className="r-section">
+                <div className="r-section-title">Party Details</div>
+                <div className="r-row"><span className="r-row-label">Name</span><span className="r-row-value">{c?.name || '—'}</span></div>
+                <div className="r-row"><span className="r-row-label">Phone</span><span className="r-row-value">{c?.mobile || '—'}</span></div>
+                <div className="r-row"><span className="r-row-label">Address</span><span className="r-row-value">{c?.address || '—'}</span></div>
+                <div className="r-row"><span className="r-row-label">Type</span><span className="r-row-value">Customer</span></div>
+              </div>
+              <hr className="r-divider" />
+
+              <div className="r-section">
+                <div className="r-section-title">Payment Details</div>
+                <div className="r-row">
+                  <span className="r-row-label">Amount</span>
+                  <span className="r-row-value r-amount-value">{currency} {Number(data?.payment?.amount || 0).toLocaleString('en-PK', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</span>
+                </div>
+                <div className="r-row" style={{ justifyContent: 'flex-end' }}>
+                  <span className="r-direction">Received from customer</span>
+                </div>
+                <div className="r-row"><span className="r-row-label">Method</span><span className="r-row-value">{data?.payment?.payment_mode || '—'}</span></div>
+                <div className="r-row"><span className="r-row-label">Date</span><span className="r-row-value">{formatDate(data?.payment?.payment_date)}</span></div>
+                <div className="r-row"><span className="r-row-label">Order</span><span className="r-row-value">{orderNum}</span></div>
+                <div className="r-row">
+                  <span className="r-row-label">Balance remaining</span>
+                  <span className="r-row-value r-balance-remaining">{currency} {Number(balance).toLocaleString('en-PK', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</span>
+                </div>
+              </div>
+
+              <div className="r-footer">Generated on {todayStr()} · TailorOps</div>
+            </div>
+
+            <div className="r-close-bottom">
+              <button className="r-close-bottom-btn" onClick={onClose}>Close</button>
+            </div>
+          </>
+        )}
       </div>
     </div>
   )

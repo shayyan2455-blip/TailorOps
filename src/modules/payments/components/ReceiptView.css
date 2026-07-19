@@ -1,0 +1,229 @@
+.r-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 8000;
+  background: color-mix(in srgb, #000 50%, transparent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.r-modal {
+  background: var(--bg-color);
+  border: 1px solid color-mix(in srgb, var(--text-color) 12%, transparent);
+  border-radius: 14px;
+  width: 100%;
+  max-width: 520px;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+}
+
+.r-close-btn {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s, background 0.15s;
+  z-index: 1;
+}
+
+.r-close-btn:hover {
+  color: var(--text-color);
+  background: color-mix(in srgb, var(--text-color) 8%, transparent);
+}
+
+.r-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 24px 0;
+}
+
+.r-header-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.r-header-num {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  color: var(--text-dim);
+  margin-top: 2px;
+}
+
+.r-print-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: none;
+  border: 1px solid color-mix(in srgb, var(--text-color) 18%, transparent);
+  color: var(--text-color);
+  font-size: 13px;
+  font-family: 'IBM Plex Sans', sans-serif;
+  padding: 8px 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  white-space: nowrap;
+}
+
+.r-print-btn:hover {
+  border-color: var(--text-color);
+  background: color-mix(in srgb, var(--text-color) 5%, transparent);
+}
+
+.r-body {
+  padding: 20px 24px 24px;
+}
+
+.r-identity {
+  text-align: center;
+  padding: 12px 0 16px;
+}
+
+.r-shop-name {
+  font-family: 'Fraunces', serif;
+  font-size: 24px;
+  font-weight: 600;
+  color: var(--text-color);
+  letter-spacing: 0.01em;
+  line-height: 1.2;
+}
+
+.r-receipt-id {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-top: 6px;
+}
+
+.r-divider {
+  border: none;
+  border-top: 1px solid color-mix(in srgb, var(--text-color) 12%, transparent);
+  margin: 0;
+}
+
+.r-section {
+  padding: 16px 0;
+}
+
+.r-section-title {
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--label);
+  margin-bottom: 10px;
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+.r-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 4px 0;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.r-row-label {
+  color: var(--text-dim);
+  flex-shrink: 0;
+  margin-right: 16px;
+}
+
+.r-row-value {
+  color: var(--text-color);
+  text-align: right;
+  word-break: break-word;
+}
+
+.r-amount-value {
+  font-family: 'Fraunces', serif;
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.r-direction {
+  font-size: 13px;
+  color: var(--text-dim);
+  text-align: right;
+}
+
+.r-balance-remaining {
+  color: var(--main-color);
+  font-weight: 600;
+}
+
+.r-footer {
+  text-align: center;
+  padding: 12px 0 0;
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+.r-close-bottom {
+  display: flex;
+  justify-content: center;
+  padding-top: 16px;
+}
+
+.r-close-bottom-btn {
+  background: none;
+  border: 1px solid color-mix(in srgb, var(--text-color) 15%, transparent);
+  color: var(--text-color);
+  font-size: 13px;
+  font-family: 'IBM Plex Sans', sans-serif;
+  padding: 8px 28px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.r-close-bottom-btn:hover {
+  border-color: var(--text-color);
+}
+
+.r-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  color: var(--text-dim);
+  font-size: 14px;
+}
+
+/* Stripe animation for Print/PDF button */
+@media print {
+  .r-backdrop {
+    position: static;
+    background: none;
+    padding: 0;
+  }
+  .r-modal {
+    border: none;
+    border-radius: 0;
+    max-width: 100%;
+    max-height: 100%;
+    box-shadow: none;
+  }
+  .r-close-btn,
+  .r-print-btn,
+  .r-close-bottom {
+    display: none !important;
+  }
+  .r-header {
+    padding-top: 16px;
+  }
+}

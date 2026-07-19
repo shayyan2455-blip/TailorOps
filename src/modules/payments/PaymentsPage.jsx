@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import { useToast } from '../../context/ToastContext'
-import { fetchPayments, distributePayment, deletePayment, fetchCustomerWithOrders } from './api/paymentQueries'
+import { fetchPayments, distributePayment, deletePayment, fetchPaymentForReceipt } from './api/paymentQueries'
+import { fetchTenant } from '../settings/api/settingsQueries'
 import PaymentForm from './components/PaymentForm'
 import ReceiptView from './components/ReceiptView'
 import ConfirmModal from '../../shared/components/ConfirmModal'
@@ -36,6 +37,9 @@ export default function PaymentsPage() {
       showToast('Payment recorded.')
       setShowForm(false)
       load()
+      if (result && result.length > 0 && result[0].payment_id) {
+        setReceiptData({ paymentId: result[0].payment_id })
+      }
     } catch (err) {
       showToast(err.message, 'error')
     }
@@ -53,17 +57,11 @@ export default function PaymentsPage() {
   }
 
   const handleReceipt = async (payment) => {
-    try {
-      const cid = payment.customer_id || payment.orders?.customer_id
-      if (!cid) {
-        showToast('Receipt not available for this payment.', 'error')
-        return
-      }
-      const data = await fetchCustomerWithOrders(cid)
-      setReceiptData({ payment, customer: data.customer, orders: data.orders })
-    } catch (err) {
-      showToast(err.message, 'error')
+    if (!payment.id) {
+      showToast('Receipt not available.', 'error')
+      return
     }
+    setReceiptData({ paymentId: payment.id })
   }
 
   const grouped = {}
@@ -143,9 +141,7 @@ export default function PaymentsPage() {
 
       {receiptData && (
         <ReceiptView
-          payment={receiptData.payment}
-          customer={receiptData.customer}
-          orders={receiptData.orders}
+          paymentId={receiptData.paymentId}
           onClose={() => setReceiptData(null)}
         />
       )}

@@ -83,3 +83,24 @@ export async function fetchCustomerWithOrders(customerId) {
 
   return { customer, orders: ordersWithBalance }
 }
+
+export async function fetchPaymentForReceipt(paymentId) {
+  const { data: payment, error } = await supabase
+    .from('payments')
+    .select('*, customers(name, mobile, address), orders(order_number, total_amount)')
+    .eq('id', paymentId)
+    .single()
+  if (error) throw error
+
+  let balance = 0
+  if (payment.orders) {
+    const { data: orderPayments } = await supabase
+      .from('payments')
+      .select('amount')
+      .eq('order_id', payment.order_id)
+    const paid = (orderPayments || []).reduce((s, p) => s + Number(p.amount), 0)
+    balance = Math.max(0, Number(payment.orders.total_amount) - paid)
+  }
+
+  return { payment, balance }
+}
