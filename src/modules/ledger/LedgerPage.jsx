@@ -61,9 +61,9 @@ export default function LedgerPage() {
             <thead>
               <tr>
                 <th>Customer</th>
-                <th className="l-num">Total Orders</th>
-                <th className="l-num">Total Paid</th>
-                <th className="l-num">Balance</th>
+                <th className="l-num mono">Total Amount</th>
+                <th className="l-num mono">Total Paid</th>
+                <th className="l-num mono">Balance</th>
               </tr>
             </thead>
             <tbody>

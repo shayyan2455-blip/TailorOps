@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import { useToast } from '../../context/ToastContext'
-import { fetchTailorLedgers, fetchTailorLedger } from './api/tailorLedgerQueries'
+import { fetchTailorLedgers, fetchTailorLedgerDetail } from './api/tailorLedgerQueries'
 import '../ledger/LedgerPage.css'
 
 export default function TailorLedgerPage() {
@@ -36,7 +36,7 @@ export default function TailorLedgerPage() {
     setExpanded(tailorId)
     setDetailLoading(true)
     try {
-      const data = await fetchTailorLedger(tailorId, tenantId)
+      const data = await fetchTailorLedgerDetail(tailorId, tenantId)
       setDetail(data)
     } catch (err) {
       showToast(err.message, 'error')
@@ -61,59 +61,77 @@ export default function TailorLedgerPage() {
             <thead>
               <tr>
                 <th>Tailor</th>
-                <th className="l-num">Total Paid</th>
-                <th>Mobile</th>
+                <th className="l-num mono">Total Amount</th>
+                <th className="l-num mono">Total Paid</th>
+                <th className="l-num mono">Balance</th>
               </tr>
             </thead>
             <tbody>
-              {ledgers.map(row => (
-                <>
-                  <tr
-                    key={row.tailor_id}
-                    className={`l-row ${expanded === row.tailor_id ? 'l-row--open' : ''}`}
-                    onClick={() => toggleExpand(row.tailor_id)}
-                  >
-                    <td>
-                      <span className={`l-expand ${expanded === row.tailor_id ? 'l-expand--open' : ''}`}>▶</span>
-                      {row.tailor_name}
-                    </td>
-                    <td className="l-num mono">Rs. {Number(row.total_paid).toFixed(0)}</td>
-                    <td>{row.mobile || '—'}</td>
-                  </tr>
-                  {expanded === row.tailor_id && (
-                    <tr key={`${row.tailor_id}-detail`}>
-                      <td colSpan={3} className="l-detail-cell">
-                        {detailLoading ? (
-                          <p className="l-detail-loading">Loading...</p>
-                        ) : !detail || detail.length === 0 ? (
-                          <p className="l-detail-loading">No payments recorded.</p>
-                        ) : (
-                          <table className="l-subtable">
-                            <thead>
-                              <tr>
-                                <th>Date</th>
-                                <th>Description</th>
-                                <th className="l-num">Amount (Rs.)</th>
-                                <th>Mode</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {detail.map((entry, i) => (
-                                <tr key={i} className="l-entry l-entry--payment">
-                                  <td>{entry.date}</td>
-                                  <td>{entry.description}</td>
-                                  <td className="l-num">Rs. {Number(entry.amount).toFixed(0)}</td>
-                                  <td><span className="pmt-mode">{entry.mode}</span></td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        )}
+              {ledgers.map(row => {
+                const bal = Number(row.balance)
+                const isDue = bal > 0
+                return (
+                  <>
+                    <tr
+                      key={row.tailor_id}
+                      className={`l-row ${expanded === row.tailor_id ? 'l-row--open' : ''}`}
+                      onClick={() => toggleExpand(row.tailor_id)}
+                    >
+                      <td>
+                        <span className={`l-expand ${expanded === row.tailor_id ? 'l-expand--open' : ''}`}>▶</span>
+                        {row.tailor_name}
+                      </td>
+                      <td className="l-num mono">Rs. {Number(row.total_amount).toFixed(0)}</td>
+                      <td className="l-num mono">Rs. {Number(row.total_paid).toFixed(0)}</td>
+                      <td className={`l-num mono l-bal ${isDue ? 'l-due' : ''}`}>
+                        {isDue ? `Rs. ${bal.toFixed(0)} due` : 'Rs. 0'}
                       </td>
                     </tr>
-                  )}
-                </>
-              ))}
+                    {expanded === row.tailor_id && (
+                      <tr key={`${row.tailor_id}-detail`}>
+                        <td colSpan={4} className="l-detail-cell">
+                          {detailLoading ? (
+                            <p className="l-detail-loading">Loading...</p>
+                          ) : !detail || detail.length === 0 ? (
+                            <p className="l-detail-loading">No entries.</p>
+                          ) : (
+                            <table className="l-subtable">
+                              <thead>
+                                <tr>
+                                  <th>Date</th>
+                                  <th>Description</th>
+                                  <th className="l-num">Debit (Rs.)</th>
+                                  <th className="l-num">Credit (Rs.)</th>
+                                  <th className="l-num">Balance (Rs.)</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {detail.map((entry, i) => {
+                                  const entryBal = Number(entry.running_balance)
+                                  return (
+                                    <tr key={i} className={`l-entry l-entry--${entry.entry_type}`}>
+                                      <td>{entry.date}</td>
+                                      <td>
+                                        <span className="l-entry-desc">{entry.description}</span>
+                                        <span className="l-entry-ref">{entry.ref}</span>
+                                      </td>
+                                      <td className="l-num">{entry.debit > 0 ? `Rs. ${Number(entry.debit).toFixed(0)}` : '—'}</td>
+                                      <td className="l-num">{entry.credit > 0 ? `Rs. ${Number(entry.credit).toFixed(0)}` : '—'}</td>
+                                      <td className={`l-num ${entryBal > 0 ? 'l-due' : ''}`}>
+                                        Rs. {entryBal.toFixed(0)}
+                                      </td>
+                                    </tr>
+                                  )
+                                })}
+                              </tbody>
+                            </table>
+                          )}
+                        </td>
+                      </tr>
+                    )}
+                  </>
+                )
+              })}
             </tbody>
           </table>
         </div>
