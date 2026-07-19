@@ -5,10 +5,14 @@ import './AuthModal.css'
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
+const REQUIRED_SIGNIN = ['email', 'password']
+const REQUIRED_CREATE = ['shopName', 'ownerName', 'email', 'password', 'confirmPassword']
+
 function validate(fields, mode) {
   const errors = {}
-  for (const [key, val] of Object.entries(fields)) {
-    if (!val || !val.trim()) {
+  const required = mode === 'signin' ? REQUIRED_SIGNIN : REQUIRED_CREATE
+  for (const key of required) {
+    if (!fields[key] || !fields[key].trim()) {
       errors[key] = 'This field is required'
     }
   }
