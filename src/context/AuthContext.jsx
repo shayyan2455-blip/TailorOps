@@ -43,14 +43,23 @@ export function AuthProvider({ children }) {
     const { data, error } = await supabase.auth.signUp({ email, password })
     if (error) throw error
 
+    const userId = data.user?.id
+    if (!userId) throw new Error('Sign-up succeeded but user ID was not returned.')
+
     const { error: rpcError } = await supabase.rpc('create_tenant_and_profile', {
       tenant_name: shopName,
       owner_name: ownerName,
+      user_id: userId,
     })
     if (rpcError) throw rpcError
 
+    // Manually set state in case onAuthStateChange hasn't fired yet
+    setUser(data.user)
+    setSession(data.session)
+    if (data.user) fetchProfile(data.user.id)
+
     return data
-  }, [])
+  }, [fetchProfile])
 
   const signOut = useCallback(async () => {
     const { error } = await supabase.auth.signOut()

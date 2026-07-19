@@ -2,11 +2,14 @@
 -- Phase 2 — Auth helper functions (SECURITY DEFINER)
 -- ============================================================
 
--- Creates a tenant + links the calling user as owner.
+-- Creates a tenant + links the specified user as owner.
 -- Called from the frontend after supabase.auth.signUp().
+-- user_id is passed explicitly because auth.uid() may not yet
+-- be available in the session immediately after sign-up.
 CREATE OR REPLACE FUNCTION create_tenant_and_profile(
   tenant_name TEXT,
-  owner_name  TEXT
+  owner_name  TEXT,
+  user_id     UUID
 )
 RETURNS UUID
 LANGUAGE plpgsql
@@ -33,7 +36,7 @@ BEGIN
   RETURNING id INTO new_tenant_id;
 
   INSERT INTO profiles (id, tenant_id, role, full_name)
-  VALUES (auth.uid(), new_tenant_id, 'owner', owner_name);
+  VALUES (user_id, new_tenant_id, 'owner', owner_name);
 
   RETURN new_tenant_id;
 END;
