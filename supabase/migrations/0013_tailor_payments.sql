@@ -2,7 +2,7 @@
 -- 0013 — Tailor payments table + ledger functions
 -- ============================================================
 
-CREATE TABLE tailor_payments (
+CREATE TABLE IF NOT EXISTS tailor_payments (
   id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   tenant_id     UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
   tailor_id     UUID NOT NULL REFERENCES tailors(id) ON DELETE CASCADE,
@@ -14,6 +14,7 @@ CREATE TABLE tailor_payments (
 );
 
 ALTER TABLE tailor_payments ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS tenant_isolation ON tailor_payments;
 CREATE POLICY tenant_isolation ON tailor_payments FOR ALL USING (tenant_id = current_tenant_id());
 
 CREATE OR REPLACE FUNCTION get_tailor_ledgers(p_tenant_id UUID)
@@ -115,6 +116,7 @@ AS $$
   ORDER BY c.sort_key, c.date;
 $$;
 
+DROP FUNCTION IF EXISTS record_tailor_payment(uuid,uuid,numeric,date,text,text);
 CREATE OR REPLACE FUNCTION record_tailor_payment(
   p_tenant_id    UUID,
   p_tailor_id    UUID,
