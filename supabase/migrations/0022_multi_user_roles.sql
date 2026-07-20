@@ -6,10 +6,7 @@
 ALTER TYPE user_role ADD VALUE 'admin';
 ALTER TYPE user_role ADD VALUE 'tailor';
 
--- 2. Migrate existing 'staff' rows to 'admin'
-UPDATE profiles SET role = 'admin' WHERE role = 'staff';
-
--- 3. Add tailor_id to profiles (nullable, only for tailor role)
+-- 2. Add tailor_id to profiles (nullable, only for tailor role)
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS tailor_id UUID REFERENCES tailors(id) ON DELETE SET NULL;
 
 -- 4. Add invited flag to tailors
