@@ -1,6 +1,6 @@
 .shell {
   display: grid;
-  grid-template-columns: 240px 1fr;
+  grid-template-columns: 210px 1fr;
   min-height: 100vh;
 }
 
@@ -8,7 +8,7 @@
 .sidebar {
   background: var(--sidebar-bg);
   border-right: 1px solid var(--border-color);
-  padding: 18px 16px;
+  padding: 22px 18px;
   display: flex;
   flex-direction: column;
 }
@@ -20,11 +20,11 @@
 .brand {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   font-family: 'Fraunces', serif;
   font-weight: 600;
-  font-size: 16px;
-  margin-bottom: 24px;
+  font-size: 17px;
+  margin-bottom: 30px;
   padding: 0 6px;
 }
 
@@ -51,26 +51,26 @@
 }
 
 .nav-group {
-  margin-bottom: 18px;
+  margin-bottom: 22px;
 }
 
 .nav-label {
   font-family: 'IBM Plex Mono', monospace;
   font-size: 10px;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--label);
   padding: 0 10px;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
 }
 
 .nav-item {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 6px 10px;
+  padding: 8px 10px;
   border-radius: 6px;
-  font-size: 12px;
+  font-size: 13px;
   color: var(--text-dim);
   text-decoration: none;
   margin-bottom: 1px;
@@ -97,15 +97,15 @@
 }
 
 .sidebar-foot {
-  padding: 10px 10px 4px;
+  padding: 12px 10px 4px;
   border-top: 1px solid var(--border-color);
   font-size: 12px;
 }
 
 .foot-shop {
   font-family: 'Fraunces', serif;
-  font-size: 13px;
-  margin-bottom: 1px;
+  font-size: 14px;
+  margin-bottom: 2px;
 }
 
 .foot-role {
