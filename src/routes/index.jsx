@@ -34,7 +34,9 @@ function TenantStatusGuard({ children }) {
   if (loading) return null
   if (!user) return <Navigate to="/" replace />
 
-  if (!isAdmin && tenantStatus) {
+  if (isAdmin) return <Navigate to="/admin" replace />
+
+  if (tenantStatus) {
     if (tenantStatus.status === 'pending') {
       return <Navigate to="/pending-approval" replace />
     }
