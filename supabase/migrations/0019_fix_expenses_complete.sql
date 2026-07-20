@@ -3,8 +3,25 @@
 -- Ensures all columns + functions exist regardless of 0018 state
 -- ============================================================
 
--- Ensure all columns exist on expenses
+-- Ensure expenses table exists with all columns (standalone-safe)
+CREATE TABLE IF NOT EXISTS expenses (
+  id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  tenant_id     UUID NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+  description   TEXT NOT NULL,
+  payee_name    TEXT NOT NULL,
+  total_amount  NUMERIC(10,2) NOT NULL,
+  amount_paid   NUMERIC(10,2) NOT NULL DEFAULT 0,
+  credit        NUMERIC(10,2) NOT NULL DEFAULT 0,
+  created_at    TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+ALTER TABLE expenses ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS tenant_isolation ON expenses;
+CREATE POLICY tenant_isolation ON expenses FOR ALL USING (tenant_id = current_tenant_id());
+
+-- Add any missing columns (in case table existed without them)
 ALTER TABLE expenses ADD COLUMN IF NOT EXISTS payee_name TEXT;
+ALTER TABLE expenses ADD COLUMN IF NOT EXISTS total_amount NUMERIC(10,2) NOT NULL DEFAULT 0;
 ALTER TABLE expenses ADD COLUMN IF NOT EXISTS amount_paid NUMERIC(10,2) NOT NULL DEFAULT 0;
 ALTER TABLE expenses ADD COLUMN IF NOT EXISTS credit NUMERIC(10,2) NOT NULL DEFAULT 0;
 
