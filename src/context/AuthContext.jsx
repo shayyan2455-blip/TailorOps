@@ -3,13 +3,12 @@ import { supabase } from '../shared/lib/supabaseClient'
 
 const AuthContext = createContext(null)
 
-const ADMIN_EMAIL = 'liberaltech.official@gmail.com'
-
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
   const [session, setSession] = useState(null)
   const [profile, setProfile] = useState(null)
   const [tenantStatus, setTenantStatus] = useState(null)
+  const [isAdmin, setIsAdmin] = useState(false)
   const [loading, setLoading] = useState(true)
 
   const fetchProfile = useCallback(async (userId) => {
@@ -26,16 +25,11 @@ export function AuthProvider({ children }) {
     }
   }, [])
 
-  const refreshAuthState = useCallback(async (userId, userEmail) => {
-    if (!userId) {
-      setProfile(null)
-      setTenantStatus(null)
-      setLoading(false)
-      return
-    }
-    await fetchProfile(userId)
-    setLoading(false)
-  }, [fetchProfile])
+  const checkAdmin = useCallback(async () => {
+    const { data, error } = await supabase.rpc('check_is_admin')
+    if (!error) setIsAdmin(!!data)
+    else setIsAdmin(false)
+  }, [])
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -43,6 +37,7 @@ export function AuthProvider({ children }) {
       setUser(session?.user ?? null)
       if (session?.user) {
         fetchProfile(session.user.id)
+        checkAdmin()
       }
       setLoading(false)
     })
@@ -52,12 +47,13 @@ export function AuthProvider({ children }) {
       setUser(session?.user ?? null)
       if (session?.user) {
         fetchProfile(session.user.id)
+        checkAdmin()
       }
       setLoading(false)
     })
 
     return () => subscription.unsubscribe()
-  }, [fetchProfile])
+  }, [fetchProfile, checkAdmin])
 
   useEffect(() => {
     if (profile?.tenant_id) {
@@ -94,11 +90,11 @@ export function AuthProvider({ children }) {
   }, [fetchProfile])
 
   const signOut = useCallback(async () => {
+    setIsAdmin(false)
     const { error } = await supabase.auth.signOut()
     if (error) throw error
   }, [])
 
-  const isAdmin = user?.email === ADMIN_EMAIL
   const tenantId = profile?.tenant_id || null
 
   const value = {

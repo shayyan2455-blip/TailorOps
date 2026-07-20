@@ -29,12 +29,12 @@ import ShopDetailPage from '../modules/admin/ShopDetailPage'
 import AuditLogPage from '../modules/admin/AuditLogPage'
 
 function TenantStatusGuard({ children }) {
-  const { user, tenantStatus, loading } = useAuth()
+  const { user, tenantStatus, loading, isAdmin } = useAuth()
 
   if (loading) return null
   if (!user) return <Navigate to="/" replace />
 
-  if (tenantStatus) {
+  if (!isAdmin && tenantStatus) {
     if (tenantStatus.status === 'pending') {
       return <Navigate to="/pending-approval" replace />
     }
@@ -50,8 +50,6 @@ function TenantStatusGuard({ children }) {
 }
 
 export default function AppRoutes() {
-  const { isAdmin } = useAuth()
-
   return (
     <Routes>
       <Route path="/" element={<LandingPage />} />

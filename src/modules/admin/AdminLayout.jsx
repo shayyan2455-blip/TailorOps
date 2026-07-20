@@ -1,10 +1,8 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { NavLink, Outlet, Navigate, useNavigate } from 'react-router-dom'
 import { supabase } from '../../shared/lib/supabaseClient'
 import { useAuth } from '../../context/AuthContext'
 import './AdminLayout.css'
-
-const ADMIN_EMAIL = 'liberaltech.official@gmail.com'
 
 const navItems = [
   { label: 'Metrics', path: '/admin' },
@@ -15,11 +13,29 @@ const navItems = [
 
 export default function AdminLayout() {
   const { user, loading } = useAuth()
+  const [checking, setChecking] = useState(true)
+  const [authorized, setAuthorized] = useState(false)
   const navigate = useNavigate()
 
-  if (loading) return null
+  useEffect(() => {
+    if (loading) return
+    if (!user) {
+      setAuthorized(false)
+      setChecking(false)
+      return
+    }
+    supabase.rpc('check_is_admin').then(({ data }) => {
+      setAuthorized(!!data)
+      setChecking(false)
+    }).catch(() => {
+      setAuthorized(false)
+      setChecking(false)
+    })
+  }, [user, loading])
 
-  if (!user || user.email !== ADMIN_EMAIL) {
+  if (loading || checking) return null
+
+  if (!user || !authorized) {
     return <Navigate to="/admin/login" replace />
   }
 

@@ -2,8 +2,6 @@ import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../shared/lib/supabaseClient'
 
-const ADMIN_EMAIL = 'liberaltech.official@gmail.com'
-
 export default function AdminLoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -13,9 +11,10 @@ export default function AdminLoginPage() {
   const ref = useRef(null)
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user?.email === ADMIN_EMAIL) {
-        navigate('/admin', { replace: true })
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (session?.user) {
+        const { data: isAdmin } = await supabase.rpc('check_is_admin')
+        if (isAdmin) navigate('/admin', { replace: true })
       }
     })
     setTimeout(() => ref.current?.focus(), 100)
@@ -24,14 +23,19 @@ export default function AdminLoginPage() {
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
-    if (email !== ADMIN_EMAIL) {
-      setError('Access denied. This portal is for platform administrators only.')
-      return
-    }
     setLoading(true)
     try {
       const { data, error: signInError } = await supabase.auth.signInWithPassword({ email, password })
       if (signInError) throw signInError
+
+      const { data: isAdmin } = await supabase.rpc('check_is_admin')
+      if (!isAdmin) {
+        await supabase.auth.signOut()
+        setError('Access denied. This portal is for platform administrators only.')
+        setLoading(false)
+        return
+      }
+
       navigate('/admin', { replace: true })
     } catch (err) {
       setError(err.message || 'Invalid credentials')
@@ -83,7 +87,7 @@ export default function AdminLoginPage() {
             type="email"
             value={email}
             onChange={e => setEmail(e.target.value)}
-            placeholder="liberaltech.official@gmail.com"
+            placeholder="you@example.com"
             autoComplete="email"
             style={{
               padding: '10px 14px',
