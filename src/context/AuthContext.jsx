@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, useCallback } from 'react'
+import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react'
 import { supabase } from '../shared/lib/supabaseClient'
 
 const AuthContext = createContext(null)
@@ -10,62 +10,73 @@ export function AuthProvider({ children }) {
   const [tenantStatus, setTenantStatus] = useState(null)
   const [isAdmin, setIsAdmin] = useState(false)
   const [loading, setLoading] = useState(true)
+  const ready = useRef(false)
 
-  const fetchProfile = useCallback(async (userId) => {
-    if (!userId) { setProfile(null); return }
-    const { data } = await supabase.from('profiles').select('*').eq('id', userId).single()
-    setProfile(data)
-  }, [])
+  const resolveState = useCallback(async (session) => {
+    const u = session?.user ?? null
+    setUser(u)
+    setSession(session)
 
-  const fetchTenantStatus = useCallback(async (tenantId) => {
-    if (!tenantId) { setTenantStatus(null); return }
-    const { data, error } = await supabase.rpc('get_my_tenant_status')
-    if (!error && data && data.length > 0) {
-      setTenantStatus(data[0])
+    if (!u) {
+      setProfile(null)
+      setTenantStatus(null)
+      setIsAdmin(false)
+      setLoading(false)
+      ready.current = true
+      return
     }
-  }, [])
 
-  const checkAdmin = useCallback(async () => {
-    const { data, error } = await supabase.rpc('check_is_admin')
-    if (!error) setIsAdmin(!!data)
-    else setIsAdmin(false)
+    const [profResult, adminResult] = await Promise.allSettled([
+      supabase.from('profiles').select('*').eq('id', u.id).single(),
+      supabase.rpc('check_is_admin'),
+    ])
+
+    if (profResult.status === 'fulfilled') {
+      setProfile(profResult.value.data)
+    } else {
+      setProfile(null)
+    }
+
+    if (adminResult.status === 'fulfilled') {
+      setIsAdmin(!!adminResult.value.data)
+    } else {
+      setIsAdmin(false)
+    }
+
+    const tenantId = profResult.status === 'fulfilled' ? profResult.value.data?.tenant_id : null
+    if (tenantId) {
+      const { data } = await supabase.rpc('get_my_tenant_status')
+      if (data && data.length > 0) {
+        setTenantStatus(data[0])
+      }
+    }
+
+    setLoading(false)
+    ready.current = true
   }, [])
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session)
-      setUser(session?.user ?? null)
-      if (session?.user) {
-        fetchProfile(session.user.id)
-        checkAdmin()
-      }
-      setLoading(false)
+      resolveState(session)
     })
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session)
-      setUser(session?.user ?? null)
-      if (session?.user) {
-        fetchProfile(session.user.id)
-        checkAdmin()
-      }
-      setLoading(false)
+      ready.current = false
+      setLoading(true)
+      resolveState(session)
     })
 
     return () => subscription.unsubscribe()
-  }, [fetchProfile, checkAdmin])
-
-  useEffect(() => {
-    if (profile?.tenant_id) {
-      fetchTenantStatus(profile.tenant_id)
-    }
-  }, [profile, fetchTenantStatus])
+  }, [resolveState])
 
   const signIn = useCallback(async (email, password) => {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) throw error
+    ready.current = false
+    setLoading(true)
+    await resolveState(data.session)
     return data
-  }, [])
+  }, [resolveState])
 
   const signUp = useCallback(async (email, password, shopName, ownerName) => {
     const { data, error } = await supabase.auth.signUp({ email, password })
@@ -81,13 +92,12 @@ export function AuthProvider({ children }) {
     })
     if (rpcError) throw rpcError
 
-    setUser(data.user)
-    setSession(data.session)
-    if (data.user) fetchProfile(data.user.id)
-    setTenantStatus({ status: 'pending', rejection_reason: null, tenant_name: shopName })
+    ready.current = false
+    setLoading(true)
+    await resolveState(data.session)
 
     return data
-  }, [fetchProfile])
+  }, [resolveState])
 
   const signOut = useCallback(async () => {
     setIsAdmin(false)
