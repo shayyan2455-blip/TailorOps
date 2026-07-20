@@ -13,6 +13,9 @@ import SettingsPage from '../modules/settings/SettingsPage'
 import LedgerPage from '../modules/ledger/LedgerPage'
 import TailorPaymentsPage from '../modules/tailorPayments/TailorPaymentsPage'
 import TailorLedgerPage from '../modules/tailorLedger/TailorLedgerPage'
+import ExpensesPage from '../modules/expenses/ExpensesPage'
+import ExpensePaymentsPage from '../modules/expensePayments/ExpensePaymentsPage'
+import ExpenseLedgerPage from '../modules/expenseLedger/ExpenseLedgerPage'
 
 export default function AppRoutes() {
   return (
@@ -31,6 +34,9 @@ export default function AppRoutes() {
         <Route path="ledger" element={<LedgerPage />} />
         <Route path="tailor-payments" element={<TailorPaymentsPage />} />
         <Route path="tailor-ledger" element={<TailorLedgerPage />} />
+        <Route path="expenses" element={<ExpensesPage />} />
+        <Route path="expense-payments" element={<ExpensePaymentsPage />} />
+        <Route path="expense-ledger" element={<ExpenseLedgerPage />} />
       </Route>
     </Routes>
   )

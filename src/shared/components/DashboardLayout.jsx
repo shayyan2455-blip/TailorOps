@@ -31,6 +31,14 @@ const navGroups = [
       { label: 'Settings', path: '/dashboard/settings' },
     ],
   },
+  {
+    label: 'Expenses',
+    items: [
+      { label: 'Expenses', path: '/dashboard/expenses' },
+      { label: 'Expense Payments', path: '/dashboard/expense-payments' },
+      { label: 'Expense Ledger', path: '/dashboard/expense-ledger' },
+    ],
+  },
 ]
 
 export default function DashboardLayout() {
