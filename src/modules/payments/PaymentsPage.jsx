@@ -83,7 +83,7 @@ export default function PaymentsPage() {
     <div className="c-module">
       <header className="c-header">
         <div className="c-header-row">
-          <h3 className="c-title">Payments</h3>
+          <h3 className="c-title">Customer Payments</h3>
           <button className="c-add-btn" onClick={() => setShowForm(true)}>+ Record Payment</button>
         </div>
       </header>

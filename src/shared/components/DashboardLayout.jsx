@@ -9,6 +9,7 @@ const navGroups = [
     items: [
       { label: 'Dashboard', path: '/dashboard' },
       { label: 'Reports', path: '/dashboard/reports' },
+      { label: 'Settings', path: '/dashboard/settings' },
     ],
   },
   {
@@ -20,15 +21,19 @@ const navGroups = [
     ],
   },
   {
-    label: 'Records',
+    label: 'Customers',
     items: [
       { label: 'Customers', path: '/dashboard/customers' },
-      { label: 'Tailors', path: '/dashboard/tailors' },
-      { label: 'Payments', path: '/dashboard/payments' },
-      { label: 'Tailor Payments', path: '/dashboard/tailor-payments' },
+      { label: 'Customer Payments', path: '/dashboard/payments' },
       { label: 'Customer Ledger', path: '/dashboard/ledger' },
+    ],
+  },
+  {
+    label: 'Tailor',
+    items: [
+      { label: 'Tailors', path: '/dashboard/tailors' },
+      { label: 'Tailor Payments', path: '/dashboard/tailor-payments' },
       { label: 'Tailor Ledger', path: '/dashboard/tailor-ledger' },
-      { label: 'Settings', path: '/dashboard/settings' },
     ],
   },
   {
