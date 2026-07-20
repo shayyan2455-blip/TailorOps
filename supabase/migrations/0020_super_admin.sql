@@ -98,7 +98,7 @@ STABLE
 SECURITY DEFINER
 SET search_path = public
 AS $$
-  SELECT auth.email() = 'admin@tailorops.com';
+  SELECT auth.email() = 'liberaltech.official@gmail.com';
 $$;
 
 -- 8. Admin: approve a tenant

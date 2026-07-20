@@ -3,7 +3,7 @@ import { supabase } from '../shared/lib/supabaseClient'
 
 const AuthContext = createContext(null)
 
-const ADMIN_EMAIL = 'admin@tailorops.com'
+const ADMIN_EMAIL = 'liberaltech.official@gmail.com'
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)

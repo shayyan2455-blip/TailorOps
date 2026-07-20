@@ -4,7 +4,7 @@ import { supabase } from '../../shared/lib/supabaseClient'
 import { useAuth } from '../../context/AuthContext'
 import './AdminLayout.css'
 
-const ADMIN_EMAIL = 'admin@tailorops.com'
+const ADMIN_EMAIL = 'liberaltech.official@gmail.com'
 
 const navItems = [
   { label: 'Metrics', path: '/admin' },

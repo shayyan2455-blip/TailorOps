@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../shared/lib/supabaseClient'
 
-const ADMIN_EMAIL = 'admin@tailorops.com'
+const ADMIN_EMAIL = 'liberaltech.official@gmail.com'
 
 export default function AdminLoginPage() {
   const [email, setEmail] = useState('')
@@ -83,7 +83,7 @@ export default function AdminLoginPage() {
             type="email"
             value={email}
             onChange={e => setEmail(e.target.value)}
-            placeholder="admin@tailorops.com"
+            placeholder="liberaltech.official@gmail.com"
             autoComplete="email"
             style={{
               padding: '10px 14px',
