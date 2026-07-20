@@ -106,9 +106,10 @@ export function AuthProvider({ children }) {
   }, [])
 
   const tenantId = profile?.tenant_id || null
+  const role = profile?.role || null
 
   const value = {
-    user, session, profile, tenantId, tenantStatus,
+    user, session, profile, tenantId, tenantStatus, role,
     loading, isAdmin,
     signIn, signUp, signOut,
   }

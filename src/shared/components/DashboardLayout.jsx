@@ -90,7 +90,7 @@ export default function DashboardLayout() {
 
         <div className="sidebar-foot">
           <div className="foot-shop">{profile?.full_name || 'Shop Owner'}</div>
-          <div className="foot-role">Owner</div>
+          <div className="foot-role">{profile?.role || 'Owner'}</div>
           <div className="foot-actions">
             <button className="foot-btn" onClick={toggleTheme}>{theme === 'dark' ? '☀️ Light' : '🌙 Dark'}</button>
             <button className="foot-btn foot-signout" onClick={handleSignOut}>Sign out</button>

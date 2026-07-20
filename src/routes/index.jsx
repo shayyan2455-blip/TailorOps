@@ -27,6 +27,10 @@ import PendingApprovalsPage from '../modules/admin/PendingApprovalsPage'
 import AllShopsPage from '../modules/admin/AllShopsPage'
 import ShopDetailPage from '../modules/admin/ShopDetailPage'
 import AuditLogPage from '../modules/admin/AuditLogPage'
+import TailorLayout from '../modules/tailorPortal/TailorLayout'
+import MyWorkPage from '../modules/tailorPortal/MyWorkPage'
+import MyHistoryPage from '../modules/tailorPortal/MyHistoryPage'
+import MyEarningsPage from '../modules/tailorPortal/MyEarningsPage'
 
 function TenantStatusGuard({ children }) {
   const { user, tenantStatus, loading, isAdmin } = useAuth()
@@ -51,6 +55,17 @@ function TenantStatusGuard({ children }) {
   return children
 }
 
+function RoleGuard({ children }) {
+  const { user, role, loading } = useAuth()
+
+  if (loading) return null
+  if (!user) return <Navigate to="/" replace />
+
+  if (role === 'tailor') return <Navigate to="/tailor" replace />
+
+  return children
+}
+
 export default function AppRoutes() {
   return (
     <Routes>
@@ -62,7 +77,9 @@ export default function AppRoutes() {
 
       <Route path="/dashboard" element={
         <TenantStatusGuard>
-          <DashboardLayout />
+          <RoleGuard>
+            <DashboardLayout />
+          </RoleGuard>
         </TenantStatusGuard>
       }>
         <Route index element={<DashboardHome />} />
@@ -89,6 +106,16 @@ export default function AppRoutes() {
         <Route path="shops" element={<AllShopsPage />} />
         <Route path="shops/:tenantId" element={<ShopDetailPage />} />
         <Route path="audit" element={<AuditLogPage />} />
+      </Route>
+
+      <Route path="/tailor" element={
+        <TenantStatusGuard>
+          <TailorLayout />
+        </TenantStatusGuard>
+      }>
+        <Route index element={<MyWorkPage />} />
+        <Route path="history" element={<MyHistoryPage />} />
+        <Route path="earnings" element={<MyEarningsPage />} />
       </Route>
     </Routes>
   )

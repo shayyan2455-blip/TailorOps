@@ -28,3 +28,92 @@
   font-size: 13px;
   opacity: 0.4;
 }
+
+.s-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0;
+}
+
+.s-tab {
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 10px 16px;
+  font-size: 13px;
+  font-family: 'IBM Plex Sans', sans-serif;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s;
+  margin-bottom: -1px;
+}
+
+.s-tab:hover {
+  color: var(--text-color);
+}
+
+.s-tab.active {
+  color: var(--main-color);
+  border-bottom-color: var(--main-color);
+}
+
+/* Shared form styles for team invite modal */
+.c-form-input {
+  padding: 10px 14px;
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--text-color) 15%, transparent);
+  background: var(--second-bg-color);
+  color: var(--text-color);
+  font-size: 14px;
+  font-family: 'IBM Plex Sans', sans-serif;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.c-form-input::placeholder {
+  opacity: 0.3;
+}
+
+.c-form-input:focus {
+  border-color: var(--main-color);
+}
+
+.c-form-cancel {
+  background: none;
+  border: 1px solid color-mix(in srgb, var(--text-color) 15%, transparent);
+  color: var(--text-color);
+  font-size: 14px;
+  font-family: 'IBM Plex Sans', sans-serif;
+  padding: 10px 20px;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.c-form-cancel:hover {
+  border-color: var(--text-color);
+}
+
+.c-form-save {
+  background: var(--main-color);
+  color: white;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: 'IBM Plex Sans', sans-serif;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.c-form-save:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.c-form-save:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
