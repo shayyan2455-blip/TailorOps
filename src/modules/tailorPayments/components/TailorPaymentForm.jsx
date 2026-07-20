@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useAuth } from '../../../context/AuthContext'
 import { fetchTailorsForPayment } from '../api/tailorPaymentQueries'
+import SearchSelect from '../../../shared/components/SearchSelect'
 
 const MODES = ['Cash', 'JazzCash', 'Card', 'Bank Transfer', 'Other']
 
@@ -54,12 +55,14 @@ export default function TailorPaymentForm({ onSave, onCancel }) {
 
       <label className="c-form-field">
         <span className="c-form-label">Tailor *</span>
-        <select className="c-form-input" ref={ref} value={tailorId} onChange={e => setTailorId(e.target.value)}>
-          <option value="">Select a tailor…</option>
-          {tailors.map(t => (
-            <option key={t.id} value={t.id}>{t.name}{t.mobile ? ` — ${t.mobile}` : ''}</option>
-          ))}
-        </select>
+        <SearchSelect
+          options={tailors}
+          value={tailorId}
+          onChange={setTailorId}
+          placeholder="Search tailor…"
+          labelKey="name"
+          renderItem={t => `${t.name}${t.mobile ? ` — ${t.mobile}` : ''}`}
+        />
       </label>
 
       {selected && (

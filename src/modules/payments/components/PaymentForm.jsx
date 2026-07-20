@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { fetchCustomersForPayment } from '../api/paymentQueries'
+import SearchSelect from '../../../shared/components/SearchSelect'
 
 const MODES = ['Cash', 'JazzCash', 'Card', 'Bank Transfer', 'Other']
 
@@ -52,14 +53,14 @@ export default function PaymentForm({ tenantId, onSave, onCancel }) {
 
       <label className="c-form-field">
         <span className="c-form-label">Customer *</span>
-        <select className="c-form-input" ref={ref} value={customerId} onChange={e => setCustomerId(e.target.value)}>
-          <option value="">Select a customer…</option>
-          {customers.map(c => (
-            <option key={c.id} value={c.id}>
-              {c.name} — Rs.{Number(c.unpaid).toFixed(0)} unpaid
-            </option>
-          ))}
-        </select>
+        <SearchSelect
+          options={customers}
+          value={customerId}
+          onChange={setCustomerId}
+          placeholder="Search customer…"
+          labelKey="name"
+          renderItem={c => `${c.name} — Rs.${Number(c.unpaid).toFixed(0)} unpaid`}
+        />
       </label>
 
       {selected && (

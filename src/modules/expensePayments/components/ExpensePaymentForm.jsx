@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useAuth } from '../../../context/AuthContext'
 import { fetchExpensesForPayment } from '../api/expensePaymentQueries'
+import SearchSelect from '../../../shared/components/SearchSelect'
 
 const MODES = ['Cash', 'JazzCash', 'Card', 'Bank Transfer', 'Other']
 
@@ -54,14 +55,14 @@ export default function ExpensePaymentForm({ onSave, onCancel }) {
 
       <label className="c-form-field">
         <span className="c-form-label">Expense *</span>
-        <select className="c-form-input" ref={ref} value={expenseId} onChange={e => setExpenseId(e.target.value)}>
-          <option value="">Select an expense…</option>
-          {expenses.map(e => (
-            <option key={e.id} value={e.id}>
-              {e.description} ({e.payee_name}) — Rs.{Number(e.balance).toFixed(0)} due
-            </option>
-          ))}
-        </select>
+        <SearchSelect
+          options={expenses}
+          value={expenseId}
+          onChange={setExpenseId}
+          placeholder="Search expense…"
+          labelKey="description"
+          renderItem={e => `${e.description} (${e.payee_name}) — Rs.${Number(e.balance).toFixed(0)} due`}
+        />
       </label>
 
       {selected && (
