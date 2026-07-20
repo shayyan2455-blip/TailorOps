@@ -8,7 +8,7 @@
 .sidebar {
   background: var(--sidebar-bg);
   border-right: 1px solid var(--border-color);
-  padding: 26px 18px;
+  padding: 18px 16px;
   display: flex;
   flex-direction: column;
 }
@@ -20,11 +20,11 @@
 .brand {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   font-family: 'Fraunces', serif;
   font-weight: 600;
-  font-size: 18px;
-  margin-bottom: 38px;
+  font-size: 16px;
+  margin-bottom: 24px;
   padding: 0 6px;
 }
 
@@ -51,29 +51,29 @@
 }
 
 .nav-group {
-  margin-bottom: 26px;
+  margin-bottom: 18px;
 }
 
 .nav-label {
   font-family: 'IBM Plex Mono', monospace;
-  font-size: 10.5px;
-  letter-spacing: 0.1em;
+  font-size: 10px;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--label);
   padding: 0 10px;
-  margin-bottom: 10px;
+  margin-bottom: 6px;
 }
 
 .nav-item {
   display: flex;
   align-items: center;
-  gap: 11px;
-  padding: 9px 10px;
-  border-radius: 8px;
-  font-size: 14px;
+  gap: 10px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 12px;
   color: var(--text-dim);
   text-decoration: none;
-  margin-bottom: 2px;
+  margin-bottom: 1px;
   transition: background 0.15s, color 0.15s;
 }
 
@@ -97,26 +97,26 @@
 }
 
 .sidebar-foot {
-  padding: 14px 10px;
+  padding: 10px 10px 4px;
   border-top: 1px solid var(--border-color);
-  font-size: 13px;
+  font-size: 12px;
 }
 
 .foot-shop {
   font-family: 'Fraunces', serif;
-  font-size: 15px;
-  margin-bottom: 2px;
+  font-size: 13px;
+  margin-bottom: 1px;
 }
 
 .foot-role {
   color: var(--label);
-  font-size: 12px;
+  font-size: 11px;
 }
 
 .foot-actions {
   display: flex;
-  gap: 12px;
-  margin-top: 8px;
+  gap: 10px;
+  margin-top: 6px;
 }
 
 .foot-btn {
