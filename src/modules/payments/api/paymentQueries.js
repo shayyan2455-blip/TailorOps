@@ -23,18 +23,21 @@ export async function fetchCustomersForPayment(tenantId) {
       .select('id, total_amount, current_stage')
       .eq('customer_id', c.id)
 
-    let totalUnpaid = 0
+    let totalOrders = 0
+    let totalPaid = 0
     for (const o of orders || []) {
+      totalOrders += Number(o.total_amount)
       const { data: payData } = await supabase
         .from('payments')
         .select('amount')
         .eq('order_id', o.id)
       const paid = (payData || []).reduce((s, p) => s + Number(p.amount), 0)
-      totalUnpaid += Number(o.total_amount) - paid
+      totalPaid += paid
     }
 
     const credit = Number(c.credit || 0)
-    result.push({ ...c, unpaid: Math.max(0, totalUnpaid), credit })
+    const unpaid = Math.max(0, totalOrders - totalPaid - credit)
+    result.push({ ...c, total_orders: totalOrders, total_paid: totalPaid, unpaid, credit })
   }
   return result.sort((a, b) => b.unpaid - a.unpaid)
 }

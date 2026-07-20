@@ -16,6 +16,8 @@ export async function fetchTailorsForPayment(tenantId) {
     id: l.tailor_id,
     name: l.tailor_name,
     mobile: l.mobile,
+    total_amount: Number(l.total_amount),
+    total_paid: Number(l.total_paid),
     balance: Number(l.balance),
     credit: Number(l.credit_balance),
   })).filter(t => t.balance !== undefined)
