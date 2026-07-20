@@ -36,8 +36,9 @@ export async function fetchCustomersForPayment(tenantId) {
     }
 
     const credit = Number(c.credit || 0)
-    const unpaid = Math.max(0, totalOrders - totalPaid - credit)
-    result.push({ ...c, total_orders: totalOrders, total_paid: totalPaid, unpaid, credit })
+    const balance = totalOrders - totalPaid - credit
+    const unpaid = Math.max(0, balance)
+    result.push({ ...c, total_orders: totalOrders, total_paid: totalPaid, balance, unpaid, credit })
   }
   return result.sort((a, b) => b.unpaid - a.unpaid)
 }
