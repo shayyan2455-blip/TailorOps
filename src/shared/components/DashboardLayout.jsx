@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { NavLink, Outlet, Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { useTheme } from '../../shared/hooks/useTheme'
+import { useTableLabels } from '../../shared/hooks/useTableLabels'
 import './DashboardLayout.css'
 
 const navGroups = [
@@ -54,6 +55,8 @@ export default function DashboardLayout() {
   const location = useLocation()
 
   useEffect(() => { setMenuOpen(false) }, [location.pathname])
+
+  useTableLabels('table, .tp-table, .admin-table', [location.pathname])
 
   if (loading) return null
   if (!user) return <Navigate to="/" replace />

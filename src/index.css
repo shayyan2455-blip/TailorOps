@@ -163,12 +163,56 @@ a {
   }
 }
 
-@media (max-width: 768px) {
+/* ---------- MOBILE TABLE → CARDS ---------- */
+@media (max-width: 600px) {
   table {
     display: block;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    white-space: nowrap;
+    width: 100%;
+  }
+  table thead {
+    display: none;
+  }
+  table tbody,
+  table tr,
+  table td {
+    display: block;
+  }
+  table tr {
+    margin-bottom: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 10px 14px;
+    background: var(--card-bg);
+  }
+  table td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 0;
+    border: none;
+    gap: 8px;
+    min-height: 28px;
+    white-space: normal;
+    word-break: break-word;
+  }
+  table td::before {
+    content: attr(data-label);
+    flex: 0 0 auto;
+    font-weight: 500;
+    font-size: 12px;
+    opacity: 0.5;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+  table td:empty::before,
+  table td:has(:only-child:is(button, .admin-btn, .admin-btn-outline, .admin-btn-danger, .tp-btn)) {
+    justify-content: flex-end;
+  }
+  table td:has(:only-child:is(button, .admin-btn, .admin-btn-outline, .admin-btn-danger, .tp-btn))::before {
+    display: none;
+  }
+  .table-wrap table {
+    min-width: auto;
   }
 }
 

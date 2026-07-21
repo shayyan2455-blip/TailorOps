@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { useTheme } from '../../shared/hooks/useTheme'
+import { useTableLabels } from '../../shared/hooks/useTableLabels'
 import './TailorLayout.css'
 
 const navItems = [
@@ -17,6 +18,8 @@ export default function TailorLayout() {
   const location = useLocation()
 
   useEffect(() => { setMenuOpen(false) }, [location.pathname])
+
+  useTableLabels('.tp-table', [location.pathname])
 
   const handleSignOut = async () => {
     try { await signOut() } catch {}

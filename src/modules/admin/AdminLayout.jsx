@@ -3,6 +3,7 @@ import { NavLink, Outlet, Navigate, useNavigate, useLocation } from 'react-route
 import { supabase } from '../../shared/lib/supabaseClient'
 import { useAuth } from '../../context/AuthContext'
 import { useTheme } from '../../shared/hooks/useTheme'
+import { useTableLabels } from '../../shared/hooks/useTableLabels'
 import './AdminLayout.css'
 
 const navItems = [
@@ -22,6 +23,8 @@ export default function AdminLayout() {
   const location = useLocation()
 
   useEffect(() => { setMenuOpen(false) }, [location.pathname])
+
+  useTableLabels('.admin-table', [location.pathname])
 
   useEffect(() => {
     if (loading) return
