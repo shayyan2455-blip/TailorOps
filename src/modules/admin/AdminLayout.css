@@ -672,7 +672,19 @@
   }
   .admin-main {
     padding: 20px;
-    padding-top: 64px;
     max-height: none;
+  }
+  .menu-toggle {
+    display: flex;
+  }
+  .admin-brand {
+    padding-left: 46px;
+    position: relative;
+  }
+  .admin-brand .menu-toggle {
+    position: absolute;
+    left: 6px;
+    top: 50%;
+    transform: translateY(-50%);
   }
 }

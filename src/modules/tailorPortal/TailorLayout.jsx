@@ -32,6 +32,9 @@ export default function TailorLayout() {
 
       <aside className={`t-sidebar${menuOpen ? ' open' : ''}`}>
         <div className="t-brand">
+          <button className="menu-toggle" onClick={() => setMenuOpen(p => !p)} aria-label="Toggle menu">
+            <span className="menu-bar" /><span className="menu-bar" /><span className="menu-bar" />
+          </button>
           <span className="t-brand-tag" />
           TailorOps
         </div>
@@ -64,9 +67,6 @@ export default function TailorLayout() {
       </aside>
 
       <main className="t-main">
-        <button className="menu-toggle" onClick={() => setMenuOpen(p => !p)} aria-label="Toggle menu">
-          <span className="menu-bar" /><span className="menu-bar" /><span className="menu-bar" />
-        </button>
         <Outlet />
       </main>
     </div>
