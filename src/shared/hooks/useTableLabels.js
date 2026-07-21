@@ -28,7 +28,7 @@ function styleActionCells() {
     td.style.setProperty('border-top', '1px solid var(--border-color)', 'important')
     td.style.setProperty('margin-top', '4px', 'important')
     td.style.setProperty('padding-top', '8px', 'important')
-    td.setAttribute('data-mobile-action', 'true')
+    td.setAttribute('data-ml-action', '1')
   })
 
   document.querySelectorAll('td > div[style*="flex"]').forEach(div => {
@@ -53,20 +53,27 @@ function run(selector) {
   styleActionCells()
 }
 
+const MOBILE_BREAKPOINT = 600
+
 export function useTableLabels(selector = 'table', deps = []) {
   const observerRef = useRef(null)
+  const rafRef = useRef(null)
 
   useEffect(() => {
     run(selector)
 
     if (observerRef.current) observerRef.current.disconnect()
     observerRef.current = new MutationObserver(() => {
-      run(selector)
+      if (rafRef.current) cancelAnimationFrame(rafRef.current)
+      rafRef.current = requestAnimationFrame(() => {
+        run(selector)
+        rafRef.current = null
+      })
     })
     observerRef.current.observe(document.body, { childList: true, subtree: true })
 
     const onResize = () => {
-      if (isMobile()) {
+      if (window.innerWidth <= MOBILE_BREAKPOINT) {
         styleActionCells()
       } else {
         unstyleActionCells()
@@ -77,6 +84,7 @@ export function useTableLabels(selector = 'table', deps = []) {
     return () => {
       observerRef.current?.disconnect()
       window.removeEventListener('resize', onResize)
+      if (rafRef.current) cancelAnimationFrame(rafRef.current)
     }
   }, deps)
 }
