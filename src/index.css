@@ -204,6 +204,20 @@ a {
     line-height: 1.3;
   }
   table td:empty { display: none; }
+  table td:has(button:only-child),
+  table td:has(.admin-btn:only-child),
+  table td:has(.admin-btn-outline:only-child),
+  table td:has(.admin-btn-danger:only-child),
+  table td:has(.tp-btn:only-child) {
+    align-items: flex-end;
+  }
+  table td:has(button:only-child)::before,
+  table td:has(.admin-btn:only-child)::before,
+  table td:has(.admin-btn-outline:only-child)::before,
+  table td:has(.admin-btn-danger:only-child)::before,
+  table td:has(.tp-btn:only-child)::before {
+    display: none;
+  }
   .table-wrap table {
     min-width: auto;
   }
