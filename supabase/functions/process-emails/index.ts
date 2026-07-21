@@ -1,28 +1,15 @@
-// Supabase Edge Function — Process pending email notifications
-//
-// This function reads unsent emails from the `email_notifications` table
-// and sends them via Resend. It can be triggered:
-//   1. Manually:    supabase functions invoke process-emails
-//   2. Via webhook: database webhook on email_notifications INSERT
-//   3. Via cron:    pg_cron or a scheduled Vercel job
-//
-// Environment variables (set via `supabase secrets set`):
-//   RESEND_API_KEY  — Resend API key
-//   APP_URL         — frontend URL (default: https://tailorops.vercel.app)
-
 import { serve } from 'https://deno.land/std@0.177.0/http/server.ts'
-
-interface EmailNotification {
-  id: string
-  to_email: string
-  subject: string
-  body: string
-}
+import { SmtpClient } from 'https://deno.land/x/smtp@v0.7.0/mod.ts'
 
 serve(async (_req) => {
-  const resendApiKey = Deno.env.get('RESEND_API_KEY')
-  if (!resendApiKey) {
-    return new Response(JSON.stringify({ error: 'RESEND_API_KEY not set' }), {
+  const smtpHost = Deno.env.get('SMTP_HOST') || 'smtp.gmail.com'
+  const smtpPort = parseInt(Deno.env.get('SMTP_PORT') || '587')
+  const smtpUser = Deno.env.get('SMTP_USER') || ''
+  const smtpPass = Deno.env.get('SMTP_PASS') || ''
+  const smtpFrom = Deno.env.get('SMTP_FROM') || smtpUser
+
+  if (!smtpUser || !smtpPass) {
+    return new Response(JSON.stringify({ error: 'SMTP_USER and SMTP_PASS not set' }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },
     })
@@ -39,7 +26,6 @@ serve(async (_req) => {
   }
 
   try {
-    // Fetch pending emails from the database
     const response = await fetch(`${supabaseUrl}/rest/v1/rpc/admin_get_pending_emails`, {
       method: 'POST',
       headers: {
@@ -57,32 +43,35 @@ serve(async (_req) => {
       })
     }
 
+    interface EmailNotification {
+      id: string
+      to_email: string
+      subject: string
+      body: string
+    }
+
     const emails: EmailNotification[] = await response.json()
     const results: { id: string; sent: boolean; error?: string }[] = []
 
     for (const email of emails) {
       try {
-        const resendRes = await fetch('https://api.resend.com/emails', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${resendApiKey}`,
-          },
-          body: JSON.stringify({
-            from: 'TailorOps <notifications@tailorops.com>',
-            to: [email.to_email],
-            subject: email.subject,
-            text: email.body,
-          }),
+        const client = new SmtpClient()
+        await client.connectTLS({
+          hostname: smtpHost,
+          port: smtpPort,
+          username: smtpUser,
+          password: smtpPass,
         })
 
-        if (!resendRes.ok) {
-          const errText = await resendRes.text()
-          results.push({ id: email.id, sent: false, error: errText })
-          continue
-        }
+        await client.send({
+          from: smtpFrom,
+          to: email.to_email,
+          subject: email.subject,
+          content: email.body,
+        })
 
-        // Mark as sent
+        await client.close()
+
         await fetch(`${supabaseUrl}/rest/v1/rpc/admin_mark_email_sent`, {
           method: 'POST',
           headers: {
