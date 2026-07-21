@@ -7,6 +7,7 @@ export default function TeamPage() {
   const { tenantId, profile } = useAuth()
   const [members, setMembers] = useState([])
   const [tailors, setTailors] = useState([])
+  const [shopName, setShopName] = useState('')
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [showInvite, setShowInvite] = useState(false)
@@ -32,6 +33,13 @@ export default function TeamPage() {
         .eq('active', true)
         .order('name')
       setTailors(tData || [])
+
+      const { data: tenant } = await supabase
+        .from('tenants')
+        .select('name')
+        .eq('id', tenantId)
+        .single()
+      if (tenant) setShopName(tenant.name)
     } catch (e) {
       setError(e.message)
     } finally {
@@ -55,6 +63,24 @@ export default function TeamPage() {
           : null,
       })
       if (error) throw error
+
+      // Send invitation email via Vercel API
+      const emailRes = await fetch('/api/send-invite-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: invite.email,
+          fullName: invite.full_name,
+          role: invite.role,
+          tempPassword: data.temp_password,
+          shopName,
+        }),
+      })
+      if (!emailRes.ok) {
+        const err = await emailRes.json()
+        console.error('Email send failed:', err.error)
+      }
+
       setShowInvite(false)
       setInvite({ email: '', full_name: '', role: 'admin', tailor_id: '' })
       load()
