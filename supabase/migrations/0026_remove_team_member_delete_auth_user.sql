@@ -34,6 +34,7 @@ BEGIN
   DELETE FROM tenant_audit_log WHERE performed_by = p_user_id;
   UPDATE order_stage_history SET changed_by = NULL WHERE changed_by = p_user_id;
 
+  DELETE FROM auth.identities WHERE user_id = p_user_id;
   DELETE FROM profiles WHERE id = p_user_id AND tenant_id = p_tenant_id;
   DELETE FROM auth.users WHERE id = p_user_id;
 END;

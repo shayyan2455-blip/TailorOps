@@ -73,7 +73,15 @@ export default async function handler(req, res) {
           headers,
         })
         if (!delRes.ok) {
-          return res.status(500).json({ error: 'Failed to remove stale user' })
+          const delErr = await delRes.json().catch(() => ({}))
+          console.error('Auth Admin DELETE failed:', delRes.status, delErr)
+
+          // If user already gone (404), that's fine — RPC may have deleted it already
+          if (delRes.status === 404) {
+            console.log('Stale auth user already removed, proceeding with recreate')
+          } else {
+            return res.status(500).json({ error: `Failed to remove stale user: ${delRes.status} ${JSON.stringify(delErr)}` })
+          }
         }
 
         // Create fresh auth user
