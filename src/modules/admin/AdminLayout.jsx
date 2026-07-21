@@ -64,9 +64,6 @@ export default function AdminLayout() {
 
       <aside className={`admin-sidebar${menuOpen ? ' open' : ''}`}>
         <div className="admin-brand">
-          <button className="menu-toggle" onClick={() => setMenuOpen(p => !p)} aria-label="Toggle menu">
-            <span className="menu-bar" /><span className="menu-bar" /><span className="menu-bar" />
-          </button>
           <span className="admin-brand-tag" />
           TailorOps
           <span style={{ fontSize: 10, opacity: 0.35, fontFamily: "'IBM Plex Mono', monospace", letterSpacing: '0.08em', textTransform: 'uppercase', marginLeft: 'auto' }}>
@@ -103,6 +100,9 @@ export default function AdminLayout() {
       </aside>
 
       <main className="admin-main">
+        <button className="menu-toggle" onClick={() => setMenuOpen(p => !p)} aria-label="Toggle menu">
+          <span className="menu-bar" /><span className="menu-bar" /><span className="menu-bar" />
+        </button>
         <Outlet />
       </main>
     </div>

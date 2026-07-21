@@ -103,16 +103,19 @@ a {
 /* ---------- MOBILE MENU (shared) ---------- */
 .menu-toggle {
   display: none;
-  flex-shrink: 0;
-  background: none;
+  position: fixed;
+  top: 14px;
+  left: 14px;
+  z-index: 200;
+  background: var(--second-bg-color);
   border: 1px solid var(--border-color);
-  border-radius: 8px;
-  width: 34px;
-  height: 34px;
+  border-radius: 10px;
+  width: 40px;
+  height: 40px;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 3.5px;
+  gap: 4px;
   cursor: pointer;
   padding: 0;
 }
@@ -212,6 +215,7 @@ a {
   .main,
   .t-main {
     padding: 12px !important;
+    padding-top: 64px !important;
   }
   .admin-header,
   .c-header,

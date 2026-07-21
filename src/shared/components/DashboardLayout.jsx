@@ -77,9 +77,6 @@ export default function DashboardLayout() {
       <aside className={`sidebar${menuOpen ? ' open' : ''}`}>
         <div className="sidebar-inner">
           <div className="brand">
-            <button className="menu-toggle" onClick={() => setMenuOpen(p => !p)} aria-label="Toggle menu">
-              <span className="menu-bar" /><span className="menu-bar" /><span className="menu-bar" />
-            </button>
             <span className="brand-tag" />
             TailorOps
           </div>
@@ -113,6 +110,9 @@ export default function DashboardLayout() {
       </aside>
 
       <main className="main">
+        <button className="menu-toggle" onClick={() => setMenuOpen(p => !p)} aria-label="Toggle menu">
+          <span className="menu-bar" /><span className="menu-bar" /><span className="menu-bar" />
+        </button>
         <Outlet />
       </main>
     </div>

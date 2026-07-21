@@ -165,18 +165,12 @@
   .menu-toggle {
     display: flex;
   }
-  .brand {
-    padding-left: 46px;
-    position: relative;
-  }
-  .brand .menu-toggle {
-    position: absolute;
-    left: 6px;
-    top: 50%;
-    transform: translateY(-50%);
-  }
   .main {
     padding: 20px;
+    padding-top: 64px;
     max-height: none;
+  }
+  .sidebar.open .brand {
+    padding-left: 54px;
   }
 }

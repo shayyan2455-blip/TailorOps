@@ -670,21 +670,15 @@
   .admin-sidebar.open {
     left: 0;
   }
-  .admin-main {
-    padding: 20px;
-    max-height: none;
-  }
   .menu-toggle {
     display: flex;
   }
-  .admin-brand {
-    padding-left: 46px;
-    position: relative;
+  .admin-main {
+    padding: 20px;
+    padding-top: 64px;
+    max-height: none;
   }
-  .admin-brand .menu-toggle {
-    position: absolute;
-    left: 6px;
-    top: 50%;
-    transform: translateY(-50%);
+  .admin-sidebar.open .admin-brand {
+    padding-left: 54px;
   }
 }
