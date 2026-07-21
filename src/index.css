@@ -221,6 +221,16 @@ a {
   table td:has(> div[style*="flex"])::before {
     display: none;
   }
+  .c-actions {
+    flex-direction: column !important;
+    align-items: flex-end !important;
+    border-top: 1px solid var(--border-color);
+    margin-top: 4px;
+    padding-top: 8px;
+  }
+  .c-actions::before {
+    display: none !important;
+  }
   .table-wrap table {
     min-width: auto;
   }
