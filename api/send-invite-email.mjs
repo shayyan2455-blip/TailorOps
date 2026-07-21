@@ -54,48 +54,26 @@ export default async function handler(req, res) {
     } else {
       const errBody = await createRes.json()
 
-      // If duplicate email — delete and recreate (PUT doesn't reliably fix
-      // corrupt password hashes from the old direct auth.users INSERT)
+      // If duplicate email — use SQL RPC to clean up stale user (reliable,
+      // unlike the Auth Admin list endpoint which may ignore filters).
       if (errBody.code === '23505') {
-        const listRes = await fetch(`${supabaseUrl}/auth/v1/admin/users?filter[email]=eq.${encodeURIComponent(email)}`, { headers })
-        if (!listRes.ok) {
-          return res.status(500).json({ error: 'Failed to look up existing user' })
-        }
-        const list = await listRes.json()
-        const existing = list.users?.[0]
-        if (!existing) {
-          return res.status(500).json({ error: 'Email claimed but user not found' })
-        }
-
-        // Clear FK references so Auth Admin API delete doesn't fail
-        const staleId = existing.id
-        const restHeaders = { ...headers, 'Prefer': 'return=minimal' }
-        await fetch(`${supabaseUrl}/rest/v1/order_stage_history?changed_by=eq.${staleId}`, {
-          method: 'PATCH', headers: restHeaders, body: JSON.stringify({ changed_by: null }),
+        // Delete stale auth user via RPC (handles FK cleanup internally)
+        const rpcRes = await fetch(`${supabaseUrl}/rest/v1/rpc/force_remove_stale_auth_user`, {
+          method: 'POST',
+          headers: { ...headers, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ p_email: email }),
         })
-        await fetch(`${supabaseUrl}/rest/v1/tenant_audit_log?performed_by=eq.${staleId}`, {
-          method: 'DELETE', headers: restHeaders,
-        })
-
-        // Delete the stale auth user
-        const delRes = await fetch(`${supabaseUrl}/auth/v1/admin/users/${staleId}`, {
-          method: 'DELETE',
-          headers,
-        })
-        if (!delRes.ok) {
-          const delErr = await delRes.json().catch(() => ({}))
-          console.error('Auth Admin DELETE failed:', delRes.status, delErr)
-
-          // If user already gone (404), that's fine — RPC may have deleted it already
-          if (delRes.status === 404) {
-            console.log('Stale auth user already removed, proceeding with recreate')
-          } else {
-            return res.status(500).json({ error: `Failed to remove stale user: ${delRes.status} ${JSON.stringify(delErr)}` })
-          }
+        if (!rpcRes.ok) {
+          const rpcErr = await rpcRes.text()
+          console.error('force_remove_stale_auth_user RPC failed:', rpcErr)
+          // Non-fatal — proceed even if RPC fails (e.g. function not deployed yet)
+        } else {
+          const removedId = await rpcRes.json()
+          console.log('force_remove_stale_auth_user removed:', removedId)
         }
 
-        // Create fresh auth user
-        const reCreateRes = await fetch(`${supabaseUrl}/auth/v1/admin/users`, {
+        // Create fresh auth user (with retry for ghost identities)
+        let reCreateRes = await fetch(`${supabaseUrl}/auth/v1/admin/users`, {
           method: 'POST',
           headers,
           body: JSON.stringify({
@@ -105,6 +83,32 @@ export default async function handler(req, res) {
             user_metadata: { full_name: fullName, role },
           }),
         })
+        // If still 23505 after RPC cleanup, try one more time (ghost identity)
+        if (!reCreateRes.ok) {
+          const reErr = await reCreateRes.json().catch(() => ({}))
+          if (reErr.code === '23505') {
+            // Ghost identity — delete via Auth Admin API directly with a list endpoint that works
+            const listRes = await fetch(`${supabaseUrl}/auth/v1/admin/users?filter%5Bemail%5D=eq.${encodeURIComponent(email)}`, { headers })
+            if (listRes.ok) {
+              const listData = await listRes.json()
+              const ghostUser = listData.users?.[0]
+              if (ghostUser?.id) {
+                await fetch(`${supabaseUrl}/auth/v1/admin/users/${ghostUser.id}`, { method: 'DELETE', headers })
+              }
+            }
+            // Retry create
+            reCreateRes = await fetch(`${supabaseUrl}/auth/v1/admin/users`, {
+              method: 'POST',
+              headers,
+              body: JSON.stringify({
+                email,
+                password: tempPassword,
+                email_confirm: true,
+                user_metadata: { full_name: fullName, role },
+              }),
+            })
+          }
+        }
         if (!reCreateRes.ok) {
           const reErr = await reCreateRes.json().catch(() => ({}))
           console.error('Auth Admin RECREATE failed:', reCreateRes.status, reErr)
