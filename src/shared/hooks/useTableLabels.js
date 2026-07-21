@@ -21,39 +21,30 @@ function styleActionCells() {
   if (!isMobile()) return
 
   document.querySelectorAll('td.c-actions').forEach(td => {
-    td.style.display = 'flex'
-    td.style.flexDirection = 'column'
-    td.style.alignItems = 'flex-end'
-    td.style.gap = '6px'
-    td.style.borderTop = '1px solid var(--border-color)'
-    td.style.marginTop = '4px'
-    td.style.paddingTop = '8px'
+    td.style.setProperty('display', 'flex', 'important')
+    td.style.setProperty('flex-direction', 'column', 'important')
+    td.style.setProperty('align-items', 'flex-end', 'important')
+    td.style.setProperty('gap', '6px', 'important')
+    td.style.setProperty('border-top', '1px solid var(--border-color)', 'important')
+    td.style.setProperty('margin-top', '4px', 'important')
+    td.style.setProperty('padding-top', '8px', 'important')
+    td.setAttribute('data-mobile-action', 'true')
   })
 
   document.querySelectorAll('td > div[style*="flex"]').forEach(div => {
-    div.style.flexDirection = 'column'
-    div.style.alignItems = 'flex-end'
-    div.style.gap = '6px'
-    div.style.width = '100%'
+    div.style.setProperty('flex-direction', 'column', 'important')
+    div.style.setProperty('align-items', 'flex-end', 'important')
+    div.style.setProperty('gap', '6px', 'important')
+    div.style.setProperty('width', '100%', 'important')
   })
 }
 
 function unstyleActionCells() {
   document.querySelectorAll('td.c-actions').forEach(td => {
-    td.style.display = ''
-    td.style.flexDirection = ''
-    td.style.alignItems = ''
-    td.style.gap = ''
-    td.style.borderTop = ''
-    td.style.marginTop = ''
-    td.style.paddingTop = ''
+    td.style.cssText = ''
   })
-
   document.querySelectorAll('td > div[style*="flex"]').forEach(div => {
-    div.style.flexDirection = ''
-    div.style.alignItems = ''
-    div.style.gap = ''
-    div.style.width = ''
+    div.style.cssText = ''
   })
 }
 
