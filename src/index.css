@@ -221,23 +221,13 @@ a {
   table td:has(> div[style*="flex"])::before {
     display: none;
   }
-  td.c-actions,
   .c-actions {
-    display: flex !important;
-    flex-direction: column !important;
-    align-items: flex-end !important;
-    gap: 6px !important;
-    width: 100% !important;
     border-top: 1px solid var(--border-color);
     margin-top: 4px;
     padding-top: 8px;
   }
   .c-actions::before {
     display: none !important;
-  }
-  .c-actions .c-action-btn {
-    width: auto;
-    min-width: 60px;
   }
   .table-wrap table {
     min-width: auto;
