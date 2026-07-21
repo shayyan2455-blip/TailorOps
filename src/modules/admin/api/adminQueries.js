@@ -76,3 +76,11 @@ export async function adminMarkEmailSent(emailId) {
   })
   if (error) throw error
 }
+
+export async function adminGetShopGrowth(months = 6) {
+  const { data, error } = await supabase.rpc('admin_get_shop_growth', {
+    p_months: months,
+  })
+  if (error) throw error
+  return data
+}
