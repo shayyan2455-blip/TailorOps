@@ -72,8 +72,8 @@ export default async function handler(req, res) {
           console.log('force_remove_stale_auth_user removed:', removedId)
         }
 
-        // Create fresh auth user (with retry for ghost identities)
-        let reCreateRes = await fetch(`${supabaseUrl}/auth/v1/admin/users`, {
+        // Create fresh auth user (RPC already cleaned auth user + ghost identities)
+        const reCreateRes = await fetch(`${supabaseUrl}/auth/v1/admin/users`, {
           method: 'POST',
           headers,
           body: JSON.stringify({
@@ -83,32 +83,6 @@ export default async function handler(req, res) {
             user_metadata: { full_name: fullName, role },
           }),
         })
-        // If still 23505 after RPC cleanup, try one more time (ghost identity)
-        if (!reCreateRes.ok) {
-          const reErr = await reCreateRes.json().catch(() => ({}))
-          if (reErr.code === '23505') {
-            // Ghost identity — delete via Auth Admin API directly with a list endpoint that works
-            const listRes = await fetch(`${supabaseUrl}/auth/v1/admin/users?filter%5Bemail%5D=eq.${encodeURIComponent(email)}`, { headers })
-            if (listRes.ok) {
-              const listData = await listRes.json()
-              const ghostUser = listData.users?.[0]
-              if (ghostUser?.id) {
-                await fetch(`${supabaseUrl}/auth/v1/admin/users/${ghostUser.id}`, { method: 'DELETE', headers })
-              }
-            }
-            // Retry create
-            reCreateRes = await fetch(`${supabaseUrl}/auth/v1/admin/users`, {
-              method: 'POST',
-              headers,
-              body: JSON.stringify({
-                email,
-                password: tempPassword,
-                email_confirm: true,
-                user_metadata: { full_name: fullName, role },
-              }),
-            })
-          }
-        }
         if (!reCreateRes.ok) {
           const reErr = await reCreateRes.json().catch(() => ({}))
           console.error('Auth Admin RECREATE failed:', reCreateRes.status, reErr)
