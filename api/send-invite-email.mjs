@@ -54,7 +54,8 @@ export default async function handler(req, res) {
     } else {
       const errBody = await createRes.json()
 
-      // If duplicate email — find and reuse existing auth user
+      // If duplicate email — delete and recreate (PUT doesn't reliably fix
+      // corrupt password hashes from the old direct auth.users INSERT)
       if (errBody.code === '23505') {
         const listRes = await fetch(`${supabaseUrl}/auth/v1/admin/users?filter[email]=eq.${encodeURIComponent(email)}`, { headers })
         if (!listRes.ok) {
@@ -66,21 +67,31 @@ export default async function handler(req, res) {
           return res.status(500).json({ error: 'Email claimed but user not found' })
         }
 
-        authUserId = existing.id
+        // Delete the stale auth user
+        const delRes = await fetch(`${supabaseUrl}/auth/v1/admin/users/${existing.id}`, {
+          method: 'DELETE',
+          headers,
+        })
+        if (!delRes.ok) {
+          return res.status(500).json({ error: 'Failed to remove stale user' })
+        }
 
-        // Reset password
-        const updateRes = await fetch(`${supabaseUrl}/auth/v1/admin/users/${authUserId}`, {
-          method: 'PUT',
+        // Create fresh auth user
+        const reCreateRes = await fetch(`${supabaseUrl}/auth/v1/admin/users`, {
+          method: 'POST',
           headers,
           body: JSON.stringify({
+            email,
             password: tempPassword,
             email_confirm: true,
             user_metadata: { full_name: fullName, role },
           }),
         })
-        if (!updateRes.ok) {
-          return res.status(500).json({ error: 'Failed to update existing user password' })
+        if (!reCreateRes.ok) {
+          return res.status(500).json({ error: 'Failed to recreate user' })
         }
+        const reCreated = await reCreateRes.json()
+        authUserId = reCreated.id
       } else {
         // Some other error
         return res.status(400).json({ error: `Auth API error: ${errBody.msg || errBody.error || JSON.stringify(errBody)}` })
@@ -90,7 +101,7 @@ export default async function handler(req, res) {
     // 2. Upsert profile (handles orphaned users where profile was deleted)
     const profileRes = await fetch(`${supabaseUrl}/rest/v1/profiles`, {
       method: 'POST',
-      headers: { ...headers, 'Prefer': 'return=representation' },
+      headers: { ...headers, 'Prefer': 'resolution=merge-duplicates' },
       body: JSON.stringify({
         id: authUserId,
         tenant_id: req.body.tenantId,
