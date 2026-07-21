@@ -15,20 +15,22 @@ DECLARE
 BEGIN
   SELECT id INTO v_user_id FROM auth.users WHERE email = p_email;
 
-  IF NOT FOUND THEN
+  IF FOUND THEN
+    -- User exists in auth.users — clean up FK refs and delete
+    DELETE FROM tenant_audit_log WHERE performed_by = v_user_id;
+    UPDATE order_stage_history SET changed_by = NULL WHERE changed_by = v_user_id;
+    DELETE FROM auth.identities WHERE user_id = v_user_id;
+    DELETE FROM auth.sessions WHERE user_id = v_user_id;
+    DELETE FROM auth.mfa_factors WHERE user_id = v_user_id;
+    DELETE FROM auth.mfa_challenges WHERE user_id = v_user_id;
+    DELETE FROM auth.users WHERE id = v_user_id;
+    RETURN v_user_id;
+  ELSE
+    -- User already gone from auth.users, but ghost identity may remain.
+    -- Delete identities by provider_id = email for the 'email' provider.
+    DELETE FROM auth.identities
+    WHERE provider = 'email' AND provider_id = p_email;
     RETURN NULL;
   END IF;
-
-  -- Clean up all FK references (gracefully skip missing tables)
-  DELETE FROM tenant_audit_log WHERE performed_by = v_user_id;
-  UPDATE order_stage_history SET changed_by = NULL WHERE changed_by = v_user_id;
-  DELETE FROM auth.identities WHERE user_id = v_user_id;
-  DELETE FROM auth.sessions WHERE user_id = v_user_id;
-  DELETE FROM auth.mfa_factors WHERE user_id = v_user_id;
-  DELETE FROM auth.mfa_challenges WHERE user_id = v_user_id;
-
-  DELETE FROM auth.users WHERE id = v_user_id;
-
-  RETURN v_user_id;
 END;
 $$;
