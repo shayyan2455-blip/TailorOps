@@ -65,22 +65,27 @@ export default function TeamPage() {
       if (error) throw error
 
       // Create auth user + send email via Vercel API
+      const payload = {
+        email: data.email,
+        fullName: data.full_name,
+        role: data.role,
+        tailorId: data.tailor_id,
+        tenantId: data.tenant_id,
+        tempPassword: data.temp_password,
+        shopName: data.shop_name,
+      }
+      console.log('Invite payload:', payload)
       const emailRes = await fetch('/api/send-invite-email', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: data.email,
-          fullName: data.full_name,
-          role: data.role,
-          tailerId: data.tailor_id,
-          tenantId: data.tenant_id,
-          tempPassword: data.temp_password,
-          shopName: data.shop_name,
-        }),
+        body: JSON.stringify(payload),
       })
+      const emailBody = await emailRes.text()
+      console.log('API response:', emailRes.status, emailBody)
       if (!emailRes.ok) {
-        const err = await emailRes.json()
-        throw new Error(err.error || 'Failed to send invitation')
+        let msg
+        try { msg = JSON.parse(emailBody).error } catch { msg = emailBody }
+        throw new Error(msg || 'Failed to send invitation')
       }
 
       setShowInvite(false)
