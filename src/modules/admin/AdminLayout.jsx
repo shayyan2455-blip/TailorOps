@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { NavLink, Outlet, Navigate, useNavigate } from 'react-router-dom'
 import { supabase } from '../../shared/lib/supabaseClient'
 import { useAuth } from '../../context/AuthContext'
+import { useTheme } from '../../shared/hooks/useTheme'
 import './AdminLayout.css'
 
 const navItems = [
@@ -13,6 +14,7 @@ const navItems = [
 
 export default function AdminLayout() {
   const { user, loading } = useAuth()
+  const { theme, toggleTheme } = useTheme()
   const [checking, setChecking] = useState(true)
   const [authorized, setAuthorized] = useState(false)
   const navigate = useNavigate()
@@ -72,9 +74,14 @@ export default function AdminLayout() {
           <div style={{ fontSize: 12, opacity: 0.4, marginBottom: 8 }}>
             {user?.email}
           </div>
-          <button className="admin-signout" onClick={handleSignOut}>
-            Sign out
-          </button>
+          <div style={{ display: 'flex', gap: 6 }}>
+            <button className="admin-signout" onClick={toggleTheme}>
+              {theme === 'dark' ? '☀️ Light' : '🌙 Dark'}
+            </button>
+            <button className="admin-signout" onClick={handleSignOut}>
+              Sign out
+            </button>
+          </div>
         </div>
       </aside>
 

@@ -1,5 +1,6 @@
 import { NavLink, Outlet } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
+import { useTheme } from '../../shared/hooks/useTheme'
 import './TailorLayout.css'
 
 const navItems = [
@@ -10,6 +11,7 @@ const navItems = [
 
 export default function TailorLayout() {
   const { user, signOut } = useAuth()
+  const { theme, toggleTheme } = useTheme()
 
   const handleSignOut = async () => {
     try { await signOut() } catch {}
@@ -41,7 +43,12 @@ export default function TailorLayout() {
           <div style={{ fontSize: 12, opacity: 0.4, marginBottom: 8 }}>
             {user?.email}
           </div>
-          <button className="t-signout" onClick={handleSignOut}>Sign out</button>
+          <div style={{ display: 'flex', gap: 6 }}>
+            <button className="t-signout" onClick={toggleTheme}>
+              {theme === 'dark' ? '☀️ Light' : '🌙 Dark'}
+            </button>
+            <button className="t-signout" onClick={handleSignOut}>Sign out</button>
+          </div>
         </div>
       </aside>
 
