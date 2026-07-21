@@ -51,29 +51,33 @@ BEGIN
     -- Orphaned auth user from a previous failed attempt — reuse it
     v_user_id := v_existing.id;
     v_temp_password := replace(gen_random_uuid()::text, '-', '') || 'Aa1!';
-    v_encrypted_pw := crypt(v_temp_password, gen_salt('bf'));
+    v_encrypted_pw := crypt(v_temp_password, gen_salt('bf', 10));
     UPDATE auth.users SET
       encrypted_password = v_encrypted_pw,
       email_confirmed_at = now(),
       raw_user_meta_data = jsonb_build_object('full_name', p_full_name, 'role', p_role),
-      updated_at = now()
+      updated_at = now(),
+      is_sso_user = false,
+      is_anonymous = false
     WHERE id = v_user_id;
   ELSE
     -- New user — generate ID and password
     v_user_id := gen_random_uuid();
     v_temp_password := replace(gen_random_uuid()::text, '-', '') || 'Aa1!';
-    v_encrypted_pw := crypt(v_temp_password, gen_salt('bf'));
+    v_encrypted_pw := crypt(v_temp_password, gen_salt('bf', 10));
 
     INSERT INTO auth.users (
       id, email, encrypted_password,
       email_confirmed_at, confirmation_sent_at,
       raw_app_meta_data, raw_user_meta_data,
-      created_at, updated_at, aud, role
+      created_at, updated_at, aud, role,
+      is_sso_user, is_anonymous
     ) VALUES (
       v_user_id, p_email, v_encrypted_pw, now(), now(),
       jsonb_build_object('provider', 'email', 'providers', ARRAY['email']),
       jsonb_build_object('full_name', p_full_name, 'role', p_role),
-      now(), now(), 'authenticated', 'authenticated'
+      now(), now(), 'authenticated', 'authenticated',
+      false, false
     );
   END IF;
 
@@ -87,6 +91,11 @@ BEGIN
       VALUES (v_caller_tenant_id, p_full_name, true, true)
       RETURNING id INTO v_tailor_id;
     END IF;
+  END IF;
+
+  -- Verify password hash works
+  IF crypt(v_temp_password, v_encrypted_pw) != v_encrypted_pw THEN
+    RAISE EXCEPTION 'Password hash verification failed — bcrypt mismatch';
   END IF;
 
   -- Upsert profile (handles orphaned auth users from previous failures)
