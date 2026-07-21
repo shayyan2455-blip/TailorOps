@@ -10,7 +10,8 @@ export default function LandingPage() {
   const hideSplash = useCallback(() => setShowSplash(false), [])
   const [authOpen, setAuthOpen] = useState(false)
   const [authMode, setAuthMode] = useState('signin')
-  const openAuth = (mode) => { setAuthMode(mode); setAuthOpen(true) }
+  const [menuOpen, setMenuOpen] = useState(false)
+  const openAuth = (mode) => { setAuthMode(mode); setAuthOpen(true); setMenuOpen(false) }
   const closeAuth = () => setAuthOpen(false)
 
   return (
@@ -31,21 +32,26 @@ export default function LandingPage() {
             </svg>
             TailorOps
           </div>
-        <div className="nav-right">
-          <div className="nav-links">
-            <a href="#features">Modules</a>
-            <a href="#tenancy">Multi-shop</a>
-          </div>
-          <button className="theme-toggle" onClick={toggleTheme} aria-label="Toggle theme">
-            {theme === 'dark' ? (
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
-            ) : (
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
-            )}
+
+          <button className={`nav-hamburger${menuOpen ? ' open' : ''}`} onClick={() => setMenuOpen(p => !p)} aria-label="Menu">
+            <span /><span /><span />
           </button>
-          <button className="btn-ghost" onClick={() => openAuth('signin')}>Sign in</button>
-          <button className="btn-primary" onClick={() => openAuth('create')}>Create shop account →</button>
-        </div>
+
+          <div className={`nav-right${menuOpen ? ' open' : ''}`}>
+            <div className="nav-links">
+              <a href="#features" onClick={() => setMenuOpen(false)}>Modules</a>
+              <a href="#tenancy" onClick={() => setMenuOpen(false)}>Multi-shop</a>
+            </div>
+            <button className="theme-toggle" onClick={toggleTheme} aria-label="Toggle theme">
+              {theme === 'dark' ? (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+              ) : (
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+              )}
+            </button>
+            <button className="btn-ghost" onClick={() => openAuth('signin')}>Sign in</button>
+            <button className="btn-primary" onClick={() => openAuth('create')}>Create shop account →</button>
+          </div>
       </nav>
 
       <section className="hero">
