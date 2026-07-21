@@ -67,8 +67,18 @@ export default async function handler(req, res) {
           return res.status(500).json({ error: 'Email claimed but user not found' })
         }
 
+        // Clear FK references so Auth Admin API delete doesn't fail
+        const staleId = existing.id
+        const restHeaders = { ...headers, 'Prefer': 'return=minimal' }
+        await fetch(`${supabaseUrl}/rest/v1/order_stage_history?changed_by=eq.${staleId}`, {
+          method: 'PATCH', headers: restHeaders, body: JSON.stringify({ changed_by: null }),
+        })
+        await fetch(`${supabaseUrl}/rest/v1/tenant_audit_log?performed_by=eq.${staleId}`, {
+          method: 'DELETE', headers: restHeaders,
+        })
+
         // Delete the stale auth user
-        const delRes = await fetch(`${supabaseUrl}/auth/v1/admin/users/${existing.id}`, {
+        const delRes = await fetch(`${supabaseUrl}/auth/v1/admin/users/${staleId}`, {
           method: 'DELETE',
           headers,
         })
