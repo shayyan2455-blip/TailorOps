@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import { useNavigate } from 'react-router-dom'
-import { fetchKpiData, fetchTailorWorkload } from '../reports/api/reportQueries'
+import { fetchDashboardMetrics, fetchDashboardTailorWorkload } from './api/dashboardQueries'
 import { fetchProductionOrders } from '../production/api/productionQueries'
 import './DashboardHome.css'
 
@@ -15,7 +15,7 @@ const STAGE_COLORS = {
 }
 
 export default function DashboardHome() {
-  const { profile } = useAuth()
+  const { profile, tenantId } = useAuth()
   const navigate = useNavigate()
   const [kpi, setKpi] = useState(null)
   const [boardOrders, setBoardOrders] = useState([])
@@ -26,9 +26,9 @@ export default function DashboardHome() {
     try {
       setLoading(true)
       const [kpiData, prodOrders, tData] = await Promise.all([
-        fetchKpiData(),
+        fetchDashboardMetrics(tenantId),
         fetchProductionOrders(),
-        fetchTailorWorkload(),
+        fetchDashboardTailorWorkload(tenantId),
       ])
       setKpi(kpiData)
       setBoardOrders(prodOrders)
@@ -36,7 +36,7 @@ export default function DashboardHome() {
     } catch {} finally {
       setLoading(false)
     }
-  }, [])
+  }, [tenantId])
 
   useEffect(() => { load() }, [load])
 
