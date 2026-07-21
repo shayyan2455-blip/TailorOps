@@ -89,6 +89,27 @@ BEGIN
     VALUES (v_user_id, v_caller_tenant_id, p_full_name, p_role::user_role);
   END IF;
 
+  -- Queue invitation email
+  INSERT INTO email_notifications (to_email, subject, body)
+  VALUES (
+    p_email,
+    'You''ve been invited to TailorOps',
+    'Hi ' || p_full_name || ',
+
+You have been invited to join ' || (SELECT name FROM tenants WHERE id = v_caller_tenant_id) || ' on TailorOps.
+
+Role: ' || p_role || '
+Email: ' || p_email || '
+Temporary password: ' || v_temp_password || '
+
+Sign in at: https://tailorops.vercel.app
+
+Please change your password after first login.
+
+—
+TailorOps'
+  );
+
   -- Build result
   SELECT jsonb_build_object(
     'user_id', v_user_id,
