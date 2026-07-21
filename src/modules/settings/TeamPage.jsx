@@ -46,15 +46,15 @@ export default function TeamPage() {
     setInviting(true)
     setError('')
     try {
-      const { data, error } = await supabase.functions.invoke('invite-user', {
-        body: {
-          email: invite.email,
-          full_name: invite.full_name,
-          role: invite.role,
-          tailor_id: invite.role === 'tailor' && invite.tailor_id ? invite.tailor_id : null,
-        },
+      const { data, error } = await supabase.rpc('invite_team_member', {
+        p_email: invite.email,
+        p_full_name: invite.full_name,
+        p_role: invite.role,
+        p_tailor_id: invite.role === 'tailor' && invite.tailor_id
+          ? invite.tailor_id === '__new' ? null : invite.tailor_id
+          : null,
       })
-      if (error) throw new Error(error.message || 'Invitation failed')
+      if (error) throw error
       setShowInvite(false)
       setInvite({ email: '', full_name: '', role: 'admin', tailor_id: '' })
       load()
