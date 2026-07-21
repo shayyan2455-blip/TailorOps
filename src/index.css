@@ -222,8 +222,10 @@ a {
     display: none;
   }
   .c-actions {
+    display: flex !important;
     flex-direction: column !important;
     align-items: flex-end !important;
+    gap: 6px !important;
     border-top: 1px solid var(--border-color);
     margin-top: 4px;
     padding-top: 8px;
