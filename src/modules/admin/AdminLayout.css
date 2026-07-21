@@ -293,6 +293,31 @@
   flex-shrink: 0;
 }
 
+.admin-detail-card {
+  background: var(--second-bg-color);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.admin-detail-card-title {
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 16px;
+  opacity: 0.6;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+@media (max-width: 600px) {
+  .admin-detail-card {
+    padding: 14px;
+  }
+  .admin-detail-card-title {
+    margin-bottom: 12px;
+  }
+}
+
 /* Metrics page */
 .admin-loading {
   opacity: 0.4;

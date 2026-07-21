@@ -84,16 +84,9 @@ export default function ShopDetailPage() {
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, marginBottom: 32 }}>
-        <div style={{
-          background: 'var(--second-bg-color)',
-          border: '1px solid var(--border-color)',
-          borderRadius: 12,
-          padding: 20,
-        }}>
-          <div style={{ fontSize: 13, fontWeight: 500, marginBottom: 16, opacity: 0.6, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-            Shop Info
-          </div>
+      <div className="admin-two-col" style={{ gap: 24, marginBottom: 32 }}>
+        <div className="admin-detail-card">
+          <div className="admin-detail-card-title">Shop Info</div>
           <div className="admin-detail-row">
             <span className="admin-detail-label">Name</span>
             <span>{tenant.tenant_name}</span>
@@ -134,15 +127,8 @@ export default function ShopDetailPage() {
           )}
         </div>
 
-        <div style={{
-          background: 'var(--second-bg-color)',
-          border: '1px solid var(--border-color)',
-          borderRadius: 12,
-          padding: 20,
-        }}>
-          <div style={{ fontSize: 13, fontWeight: 500, marginBottom: 16, opacity: 0.6, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-            Owner Info
-          </div>
+        <div className="admin-detail-card">
+          <div className="admin-detail-card-title">Owner Info</div>
           <div className="admin-detail-row">
             <span className="admin-detail-label">Name</span>
             <span>{tenant.owner_name || '—'}</span>
