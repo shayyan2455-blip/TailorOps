@@ -15,7 +15,7 @@ CREATE OR REPLACE FUNCTION invite_team_member(
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
-SET search_path = public
+SET search_path = public, extensions
 AS $$
 DECLARE
   v_caller_tenant_id UUID;
@@ -64,7 +64,7 @@ BEGIN
 
   -- Generate user ID and temp password
   v_user_id := gen_random_uuid();
-  v_temp_password := encode(gen_random_bytes(9), 'hex') || 'Aa1!';
+  v_temp_password := replace(gen_random_uuid()::text, '-', '') || 'Aa1!';
   v_encrypted_pw := crypt(v_temp_password, gen_salt('bf'));
 
   -- Create auth user
