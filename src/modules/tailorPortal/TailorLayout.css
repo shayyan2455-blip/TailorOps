@@ -211,14 +211,26 @@
   color: var(--main-color);
 }
 
-@media (max-width: 900px) {
+@media (max-width: 1024px) {
   .t-shell {
     grid-template-columns: 1fr;
   }
   .t-sidebar {
-    display: none;
+    position: fixed;
+    top: 0;
+    left: -220px;
+    bottom: 0;
+    width: 200px;
+    z-index: 100;
+    transition: left 0.25s ease;
+    overflow-y: auto;
+  }
+  .t-sidebar.open {
+    left: 0;
   }
   .t-main {
     padding: 20px;
+    padding-top: 64px;
+    max-height: none;
   }
 }

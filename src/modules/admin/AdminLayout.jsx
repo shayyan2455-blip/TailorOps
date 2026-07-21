@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { NavLink, Outlet, Navigate, useNavigate } from 'react-router-dom'
+import { NavLink, Outlet, Navigate, useNavigate, useLocation } from 'react-router-dom'
 import { supabase } from '../../shared/lib/supabaseClient'
 import { useAuth } from '../../context/AuthContext'
 import { useTheme } from '../../shared/hooks/useTheme'
@@ -17,7 +17,11 @@ export default function AdminLayout() {
   const { theme, toggleTheme } = useTheme()
   const [checking, setChecking] = useState(true)
   const [authorized, setAuthorized] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
   const navigate = useNavigate()
+  const location = useLocation()
+
+  useEffect(() => { setMenuOpen(false) }, [location.pathname])
 
   useEffect(() => {
     if (loading) return
@@ -46,9 +50,16 @@ export default function AdminLayout() {
     navigate('/admin/login', { replace: true })
   }
 
+  const handleSignOutInner = async () => {
+    await handleSignOut()
+    setMenuOpen(false)
+  }
+
   return (
     <div className="admin-shell">
-      <aside className="admin-sidebar">
+      <div className={`mobile-overlay${menuOpen ? ' open' : ''}`} onClick={() => setMenuOpen(false)} />
+
+      <aside className={`admin-sidebar${menuOpen ? ' open' : ''}`}>
         <div className="admin-brand">
           <span className="admin-brand-tag" />
           TailorOps
@@ -78,7 +89,7 @@ export default function AdminLayout() {
             <button className="admin-signout" onClick={toggleTheme}>
               {theme === 'dark' ? '☀️ Light' : '🌙 Dark'}
             </button>
-            <button className="admin-signout" onClick={handleSignOut}>
+            <button className="admin-signout" onClick={handleSignOutInner}>
               Sign out
             </button>
           </div>
@@ -86,6 +97,9 @@ export default function AdminLayout() {
       </aside>
 
       <main className="admin-main">
+        <button className="menu-toggle" onClick={() => setMenuOpen(p => !p)} aria-label="Toggle menu">
+          <span className="menu-bar" /><span className="menu-bar" /><span className="menu-bar" />
+        </button>
         <Outlet />
       </main>
     </div>

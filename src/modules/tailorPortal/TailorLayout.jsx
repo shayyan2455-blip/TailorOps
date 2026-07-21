@@ -1,4 +1,5 @@
-import { NavLink, Outlet } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { useTheme } from '../../shared/hooks/useTheme'
 import './TailorLayout.css'
@@ -12,14 +13,21 @@ const navItems = [
 export default function TailorLayout() {
   const { user, signOut } = useAuth()
   const { theme, toggleTheme } = useTheme()
+  const [menuOpen, setMenuOpen] = useState(false)
+  const location = useLocation()
+
+  useEffect(() => { setMenuOpen(false) }, [location.pathname])
 
   const handleSignOut = async () => {
     try { await signOut() } catch {}
+    setMenuOpen(false)
   }
 
   return (
     <div className="t-shell">
-      <aside className="t-sidebar">
+      <div className={`mobile-overlay${menuOpen ? ' open' : ''}`} onClick={() => setMenuOpen(false)} />
+
+      <aside className={`t-sidebar${menuOpen ? ' open' : ''}`}>
         <div className="t-brand">
           <span className="t-brand-tag" />
           TailorOps
@@ -53,6 +61,9 @@ export default function TailorLayout() {
       </aside>
 
       <main className="t-main">
+        <button className="menu-toggle" onClick={() => setMenuOpen(p => !p)} aria-label="Toggle menu">
+          <span className="menu-bar" /><span className="menu-bar" /><span className="menu-bar" />
+        </button>
         <Outlet />
       </main>
     </div>

@@ -628,14 +628,26 @@
   line-height: 1.5;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 1024px) {
   .admin-shell {
     grid-template-columns: 1fr;
   }
   .admin-sidebar {
-    display: none;
+    position: fixed;
+    top: 0;
+    left: -240px;
+    bottom: 0;
+    width: 220px;
+    z-index: 100;
+    transition: left 0.25s ease;
+    overflow-y: auto;
+  }
+  .admin-sidebar.open {
+    left: 0;
   }
   .admin-main {
     padding: 20px;
+    padding-top: 64px;
+    max-height: none;
   }
 }

@@ -1,4 +1,5 @@
-import { NavLink, Outlet, Navigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { NavLink, Outlet, Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { useTheme } from '../../shared/hooks/useTheme'
 import './DashboardLayout.css'
@@ -49,6 +50,10 @@ const navGroups = [
 export default function DashboardLayout() {
   const { user, profile, loading, signOut } = useAuth()
   const { theme, toggleTheme } = useTheme()
+  const [menuOpen, setMenuOpen] = useState(false)
+  const location = useLocation()
+
+  useEffect(() => { setMenuOpen(false) }, [location.pathname])
 
   if (loading) return null
   if (!user) return <Navigate to="/" replace />
@@ -59,11 +64,14 @@ export default function DashboardLayout() {
 
   const handleSignOut = async () => {
     try { await signOut() } catch {}
+    setMenuOpen(false)
   }
 
   return (
     <div className="shell">
-      <aside className="sidebar">
+      <div className={`mobile-overlay${menuOpen ? ' open' : ''}`} onClick={() => setMenuOpen(false)} />
+
+      <aside className={`sidebar${menuOpen ? ' open' : ''}`}>
         <div className="sidebar-inner">
           <div className="brand">
             <span className="brand-tag" />
@@ -99,6 +107,9 @@ export default function DashboardLayout() {
       </aside>
 
       <main className="main">
+        <button className="menu-toggle" onClick={() => setMenuOpen(p => !p)} aria-label="Toggle menu">
+          <span className="menu-bar" /><span className="menu-bar" /><span className="menu-bar" />
+        </button>
         <Outlet />
       </main>
     </div>
