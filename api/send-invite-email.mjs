@@ -27,15 +27,19 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'SMTP not configured' })
   }
 
+  const headers = {
+    'Content-Type': 'application/json',
+    'apikey': serviceRoleKey,
+    'Authorization': `Bearer ${serviceRoleKey}`,
+  }
+
   try {
-    // 1. Create auth user via Supabase Admin API
+    let authUserId
+
+    // 1. Try to create auth user — may fail if email already exists
     const createRes = await fetch(`${supabaseUrl}/auth/v1/admin/users`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'apikey': serviceRoleKey,
-        'Authorization': `Bearer ${serviceRoleKey}`,
-      },
+      headers,
       body: JSON.stringify({
         email,
         password: tempPassword,
@@ -44,24 +48,51 @@ export default async function handler(req, res) {
       }),
     })
 
-    if (!createRes.ok) {
-      const errBody = await createRes.text()
-      return res.status(400).json({ error: `Auth API error: ${errBody}` })
+    if (createRes.ok) {
+      const created = await createRes.json()
+      authUserId = created.id
+    } else {
+      const errBody = await createRes.json()
+
+      // If duplicate email — find and reuse existing auth user
+      if (errBody.code === '23505') {
+        const listRes = await fetch(`${supabaseUrl}/auth/v1/admin/users?filter[email]=eq.${encodeURIComponent(email)}`, { headers })
+        if (!listRes.ok) {
+          return res.status(500).json({ error: 'Failed to look up existing user' })
+        }
+        const list = await listRes.json()
+        const existing = list.users?.[0]
+        if (!existing) {
+          return res.status(500).json({ error: 'Email claimed but user not found' })
+        }
+
+        authUserId = existing.id
+
+        // Reset password
+        const updateRes = await fetch(`${supabaseUrl}/auth/v1/admin/users/${authUserId}`, {
+          method: 'PUT',
+          headers,
+          body: JSON.stringify({
+            password: tempPassword,
+            email_confirm: true,
+            user_metadata: { full_name: fullName, role },
+          }),
+        })
+        if (!updateRes.ok) {
+          return res.status(500).json({ error: 'Failed to update existing user password' })
+        }
+      } else {
+        // Some other error
+        return res.status(400).json({ error: `Auth API error: ${errBody.msg || errBody.error || JSON.stringify(errBody)}` })
+      }
     }
 
-    const authUser = await createRes.json()
-
-    // 2. Create profile in public.profiles via the API
+    // 2. Upsert profile (handles orphaned users where profile was deleted)
     const profileRes = await fetch(`${supabaseUrl}/rest/v1/profiles`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'apikey': serviceRoleKey,
-        'Authorization': `Bearer ${serviceRoleKey}`,
-        'Prefer': 'return=representation',
-      },
+      headers: { ...headers, 'Prefer': 'return=representation' },
       body: JSON.stringify({
-        id: authUser.id,
+        id: authUserId,
         tenant_id: req.body.tenantId,
         full_name: fullName,
         role,
@@ -70,14 +101,6 @@ export default async function handler(req, res) {
     })
 
     if (!profileRes.ok) {
-      // Rollback: delete the auth user we just created
-      await fetch(`${supabaseUrl}/auth/v1/admin/users/${authUser.id}`, {
-        method: 'DELETE',
-        headers: {
-          'apikey': serviceRoleKey,
-          'Authorization': `Bearer ${serviceRoleKey}`,
-        },
-      })
       const errBody = await profileRes.text()
       return res.status(400).json({ error: `Profile API error: ${errBody}` })
     }
@@ -114,7 +137,7 @@ export default async function handler(req, res) {
       text: body,
     })
 
-    return res.status(200).json({ sent: true, user_id: authUser.id })
+    return res.status(200).json({ sent: true, user_id: authUserId })
   } catch (err) {
     console.error('Invite failed:', err)
     return res.status(500).json({ error: err.message })
