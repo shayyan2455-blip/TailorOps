@@ -3,9 +3,10 @@ import { useAuth } from '../../context/AuthContext'
 import { useToast } from '../../context/ToastContext'
 import { fetchTenant, updateTenant } from './api/settingsQueries'
 import TeamPage from './TeamPage'
+import ChangePasswordPage from './ChangePasswordPage'
 import './SettingsPage.css'
 
-const TABS = ['Shop Settings', 'Team']
+const TABS = ['Shop Settings', 'Team', 'Change Password']
 
 export default function SettingsPage() {
   const { tenantId, profile, role } = useAuth()
@@ -99,6 +100,8 @@ export default function SettingsPage() {
       )}
 
       {tab === 'Team' && <TeamPage />}
+
+      {tab === 'Change Password' && <ChangePasswordPage />}
     </div>
   )
 }
