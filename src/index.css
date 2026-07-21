@@ -186,31 +186,24 @@ a {
   }
   table td {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 5px 0;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 4px 0;
     border: none;
-    gap: 8px;
-    min-height: 28px;
+    gap: 1px;
     white-space: normal;
     word-break: break-word;
   }
   table td::before {
     content: attr(data-label);
-    flex: 0 0 auto;
     font-weight: 500;
-    font-size: 12px;
-    opacity: 0.5;
+    font-size: 11px;
+    opacity: 0.45;
     text-transform: uppercase;
-    letter-spacing: 0.03em;
+    letter-spacing: 0.04em;
+    line-height: 1.3;
   }
-  table td:empty::before,
-  table td:has(:only-child:is(button, .admin-btn, .admin-btn-outline, .admin-btn-danger, .tp-btn)) {
-    justify-content: flex-end;
-  }
-  table td:has(:only-child:is(button, .admin-btn, .admin-btn-outline, .admin-btn-danger, .tp-btn))::before {
-    display: none;
-  }
+  table td:empty { display: none; }
   .table-wrap table {
     min-width: auto;
   }
