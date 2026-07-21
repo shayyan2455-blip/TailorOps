@@ -39,10 +39,11 @@ BEGIN
     RAISE EXCEPTION 'Only owners and admins can invite members';
   END IF;
 
-  -- Check for existing user in this tenant
-  SELECT id INTO v_existing
-  FROM profiles
-  WHERE tenant_id = v_caller_tenant_id AND email = p_email
+  -- Check for existing user with this email (in any tenant)
+  SELECT u.id INTO v_existing
+  FROM auth.users u
+  JOIN profiles p ON p.id = u.id
+  WHERE u.email = p_email AND p.tenant_id = v_caller_tenant_id
   LIMIT 1;
 
   IF FOUND THEN
@@ -68,13 +69,12 @@ BEGIN
 
   -- Create auth user
   INSERT INTO auth.users (
-    id, instance_id, email, encrypted_password,
+    id, email, encrypted_password,
     email_confirmed_at, confirmation_sent_at,
     raw_app_meta_data, raw_user_meta_data,
     created_at, updated_at, aud, role
   ) VALUES (
-    v_user_id, '00000000-0000-0000-0000-000000000000',
-    p_email, v_encrypted_pw, now(), now(),
+    v_user_id, p_email, v_encrypted_pw, now(), now(),
     jsonb_build_object('provider', 'email', 'providers', ARRAY['email']),
     jsonb_build_object('full_name', p_full_name, 'role', p_role),
     now(), now(), 'authenticated', 'authenticated'
@@ -82,11 +82,11 @@ BEGIN
 
   -- Create profile
   IF v_tailor_id IS NOT NULL THEN
-    INSERT INTO profiles (id, tenant_id, full_name, email, role, tailor_id)
-    VALUES (v_user_id, v_caller_tenant_id, p_full_name, p_email, p_role::user_role, v_tailor_id);
+    INSERT INTO profiles (id, tenant_id, full_name, role, tailor_id)
+    VALUES (v_user_id, v_caller_tenant_id, p_full_name, p_role::user_role, v_tailor_id);
   ELSE
-    INSERT INTO profiles (id, tenant_id, full_name, email, role)
-    VALUES (v_user_id, v_caller_tenant_id, p_full_name, p_email, p_role::user_role);
+    INSERT INTO profiles (id, tenant_id, full_name, role)
+    VALUES (v_user_id, v_caller_tenant_id, p_full_name, p_role::user_role);
   END IF;
 
   -- Build result
