@@ -106,7 +106,9 @@ export default async function handler(req, res) {
           }),
         })
         if (!reCreateRes.ok) {
-          return res.status(500).json({ error: 'Failed to recreate user' })
+          const reErr = await reCreateRes.json().catch(() => ({}))
+          console.error('Auth Admin RECREATE failed:', reCreateRes.status, reErr)
+          return res.status(500).json({ error: `Failed to recreate user: ${reCreateRes.status} ${JSON.stringify(reErr)}` })
         }
         const reCreated = await reCreateRes.json()
         authUserId = reCreated.id
