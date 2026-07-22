@@ -4,6 +4,7 @@ export default function ExpenseForm({ initial, onSave, onCancel }) {
   const [description, setDescription] = useState(initial?.description || '')
   const [payeeName, setPayeeName] = useState(initial?.payee_name || '')
   const [totalAmount, setTotalAmount] = useState(initial?.total_amount?.toString() || '')
+  const [advancePayment, setAdvancePayment] = useState('')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const ref = useRef(null)
@@ -18,12 +19,14 @@ export default function ExpenseForm({ initial, onSave, onCancel }) {
     setSaving(true)
     setError('')
     try {
+      const pmt = Number(advancePayment) || 0
       await onSave({
         description: description.trim(),
         payee_name: payeeName.trim(),
         total_amount: Number(totalAmount),
         amount_paid: initial?.amount_paid || 0,
         credit: initial?.credit || 0,
+        advance_payment: pmt > 0 ? pmt : 0,
       })
     } catch (err) {
       setError(err.message || 'Failed to save expense.')
@@ -50,6 +53,15 @@ export default function ExpenseForm({ initial, onSave, onCancel }) {
         <span className="c-form-label">Total Amount *</span>
         <input className="c-form-input" type="number" min="0" step="0.01" value={totalAmount} onChange={e => setTotalAmount(e.target.value)} placeholder="0.00" />
       </label>
+
+      {!initial && (
+        <details className="c-form-field" style={{ cursor: 'pointer' }}>
+          <summary className="c-form-label" style={{ cursor: 'pointer', userSelect: 'none' }}>Advance Payment</summary>
+          <div style={{ marginTop: 8 }}>
+            <input className="c-form-input" type="number" min="0" step="0.01" value={advancePayment} onChange={e => setAdvancePayment(e.target.value)} placeholder="0 — no advance payment" />
+          </div>
+        </details>
+      )}
 
       {initial && (
         <div style={{ fontSize: 12, opacity: 0.6 }}>

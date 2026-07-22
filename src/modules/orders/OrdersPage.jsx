@@ -5,6 +5,8 @@ import { useTopbar } from '../../shared/context/TopbarContext'
 import { supabase } from '../../shared/lib/supabaseClient'
 import { fetchOrders, createOrder, updateOrder, deleteOrder } from './api/orderQueries'
 import { saveMeasurement } from '../measurements/api/measurementQueries'
+import { distributePayment } from '../payments/api/paymentQueries'
+import ReceiptView from '../payments/components/ReceiptView'
 import OrderForm from './components/OrderForm'
 import ConfirmModal from '../../shared/components/ConfirmModal'
 import './OrdersPage.css'
@@ -25,6 +27,7 @@ export default function OrdersPage() {
   const [editing, setEditing] = useState(null)
   const [detail, setDetail] = useState(null)
   const [confirmDelete, setConfirmDelete] = useState(null)
+  const [receiptData, setReceiptData] = useState(null)
 
   const load = useCallback(async () => {
     try {
@@ -52,7 +55,7 @@ export default function OrdersPage() {
 
   const handleSave = async (payload) => {
     try {
-      const { items, measurements, ...orderData } = payload
+      const { items, measurements, advance_payment, ...orderData } = payload
 
       if (editing) {
         await updateOrder(editing.id, orderData)
@@ -96,10 +99,28 @@ export default function OrdersPage() {
           p_order_id: orderId,
           p_tenant_id: tenantId,
         })
-        if (creditApplied && Number(creditApplied) > 0) {
-          showToast(`Order created. Rs. ${Number(creditApplied).toFixed(0)} credit auto-applied from overpayment.`)
-        } else {
-          showToast('Order created.')
+
+        let paymentId = null
+        if (advance_payment > 0) {
+          const pmtResult = await distributePayment(tenantId, {
+            customer_id: orderData.customer_id,
+            amount: advance_payment,
+            payment_date: new Date().toISOString().slice(0, 10),
+            payment_mode: 'Cash',
+            notes: `Advance payment for order`,
+          })
+          if (pmtResult && pmtResult.length > 0 && pmtResult[0].payment_id) {
+            paymentId = pmtResult[0].payment_id
+          }
+        }
+
+        const msgs = []
+        if (creditApplied && Number(creditApplied) > 0) msgs.push(`Rs. ${Number(creditApplied).toFixed(0)} credit auto-applied`)
+        if (paymentId) msgs.push('Advance payment recorded.')
+        showToast(msgs.length ? `Order created. ${msgs.join(', ')}.` : 'Order created.')
+
+        if (paymentId) {
+          setReceiptData({ paymentId })
         }
       }
 
@@ -226,6 +247,13 @@ export default function OrdersPage() {
 
       {confirmDelete !== null && (
         <ConfirmModal message="Delete this order?" onConfirm={() => handleDelete(confirmDelete)} onCancel={() => setConfirmDelete(null)} />
+      )}
+
+      {receiptData && (
+        <ReceiptView
+          paymentId={receiptData.paymentId}
+          onClose={() => setReceiptData(null)}
+        />
       )}
     </div>
   )
