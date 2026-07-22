@@ -74,14 +74,12 @@ export default function TeamPage() {
         tempPassword: data.temp_password,
         shopName: data.shop_name,
       }
-      console.log('Invite payload:', payload)
       const emailRes = await fetch('/api/send-invite-email', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       })
       const emailBody = await emailRes.text()
-      console.log('API response:', emailRes.status, emailBody)
       if (!emailRes.ok) {
         let msg
         try { msg = JSON.parse(emailBody).error } catch { msg = emailBody }
