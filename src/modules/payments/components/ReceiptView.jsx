@@ -123,6 +123,7 @@ export default function ReceiptView({ paymentId, onClose }) {
     <div class="row"><span class="row-label">Balance remaining</span><span class="row-value balance">${currency} ${bal}</span></div>
   </div>
 
+  ${tenant?.receipt_footer ? `<div class="footer">${tenant.receipt_footer}</div>` : ''}
   <div class="footer">Generated on ${todayStr()} &middot; TailorOps</div>
 </body>
 </html>`
@@ -220,6 +221,7 @@ export default function ReceiptView({ paymentId, onClose }) {
                 </div>
               </div>
 
+              {data?.tenant?.receipt_footer && <div className="r-footer">{data.tenant.receipt_footer}</div>}
               <div className="r-footer">Generated on {todayStr()} · TailorOps</div>
             </div>
 

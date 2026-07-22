@@ -104,6 +104,7 @@ export default function ExpenseReceiptView({ paymentId, onClose }) {
     <div class="row"><span class="row-label">Method</span><span class="row-value">${payment.payment_mode || '—'}</span></div>
     <div class="row"><span class="row-label">Date</span><span class="row-value">${formatDate(payment.payment_date)}</span></div>
   </div>
+  ${tenant?.receipt_footer ? `<div class="footer">${tenant.receipt_footer}</div>` : ''}
   <div class="footer">Generated on ${todayStr()} &middot; TailorOps</div>
 </body>
 </html>`
@@ -170,6 +171,7 @@ export default function ExpenseReceiptView({ paymentId, onClose }) {
                 <div className="r-row"><span className="r-row-label">Method</span><span className="r-row-value">{data?.payment?.payment_mode || '—'}</span></div>
                 <div className="r-row"><span className="r-row-label">Date</span><span className="r-row-value">{formatDate(data?.payment?.payment_date)}</span></div>
               </div>
+              {data?.tenant?.receipt_footer && <div className="r-footer">{data.tenant.receipt_footer}</div>}
               <div className="r-footer">Generated on {todayStr()} · TailorOps</div>
             </div>
             <div className="r-close-bottom">
