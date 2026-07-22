@@ -54,7 +54,7 @@ function LayoutInner() {
   const { theme, toggleTheme } = useTheme()
   const [menuOpen, setMenuOpen] = useState(false)
   const location = useLocation()
-  const { topbar } = useTopbar()
+  const { title, action } = useTopbar()
 
   useEffect(() => { setMenuOpen(false) }, [location.pathname])
 
@@ -112,8 +112,8 @@ function LayoutInner() {
           <button className="menu-toggle" onClick={() => setMenuOpen(p => !p)} aria-label="Toggle menu">
             <span className="menu-bar" /><span className="menu-bar" /><span className="menu-bar" />
           </button>
-          <span className="mobile-topbar-title">{topbar.title}</span>
-          {topbar.action && <span className="mobile-topbar-action">{topbar.action}</span>}
+          <span className="mobile-topbar-title">{title}</span>
+          {action && <span className="mobile-topbar-action">{action}</span>}
         </div>
         <Outlet />
       </main>
