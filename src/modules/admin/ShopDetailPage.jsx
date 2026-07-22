@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react'
+import { useTopbar } from '../../shared/context/TopbarContext'
 import { useParams, Link } from 'react-router-dom'
 import { adminGetTenant, adminGetAuditLog } from './api/adminQueries'
 
 export default function ShopDetailPage() {
   const { tenantId } = useParams()
+  const { setTopbar } = useTopbar()
   const [tenant, setTenant] = useState(null)
   const [auditLog, setAuditLog] = useState([])
   const [loading, setLoading] = useState(true)
@@ -23,6 +25,11 @@ export default function ShopDetailPage() {
       .catch(e => setError(e.message))
       .finally(() => setLoading(false))
   }, [tenantId])
+
+  useEffect(() => {
+    setTopbar(tenant?.tenant_name || 'Shop Detail', null)
+    return () => setTopbar('', null)
+  }, [tenant])
 
   if (loading) {
     return <div style={{ opacity: 0.4, fontSize: 14 }}>Loading...</div>

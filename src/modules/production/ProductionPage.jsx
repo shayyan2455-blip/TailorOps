@@ -3,6 +3,7 @@ import { useAuth } from '../../context/AuthContext'
 import { useToast } from '../../context/ToastContext'
 import { supabase } from '../../shared/lib/supabaseClient'
 import { fetchTailors } from '../tailors/api/tailorQueries'
+import { useTopbar } from '../../shared/context/TopbarContext'
 import { fetchProductionOrders, transitionOrder, assignTailorToOrder, unassignTailor, setWorkAssignmentAmount } from './api/productionQueries'
 import './ProductionPage.css'
 
@@ -18,6 +19,7 @@ const STAGE_COLORS = {
 export default function ProductionPage() {
   const { tenantId } = useAuth()
   const { showToast } = useToast()
+  const { setTopbar } = useTopbar()
   const [orders, setOrders] = useState([])
   const [tailors, setTailors] = useState([])
   const [loading, setLoading] = useState(true)
@@ -40,6 +42,11 @@ export default function ProductionPage() {
   }, [showToast])
 
   useEffect(() => { load() }, [load])
+
+  useEffect(() => {
+    setTopbar('Production Floor', null)
+    return () => setTopbar('', null)
+  }, [setTopbar])
 
   const handleTransition = async (orderId, newStage) => {
     setMoving(orderId)

@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import { useNavigate } from 'react-router-dom'
+import { useTopbar } from '../../shared/context/TopbarContext'
 import { fetchDashboardMetrics, fetchDashboardTailorWorkload } from './api/dashboardQueries'
 import { fetchProductionOrders } from '../production/api/productionQueries'
 import './DashboardHome.css'
@@ -17,6 +18,7 @@ const STAGE_COLORS = {
 export default function DashboardHome() {
   const { profile, tenantId } = useAuth()
   const navigate = useNavigate()
+  const { setTopbar } = useTopbar()
   const [kpi, setKpi] = useState(null)
   const [boardOrders, setBoardOrders] = useState([])
   const [tailorData, setTailorData] = useState([])
@@ -39,6 +41,11 @@ export default function DashboardHome() {
   }, [tenantId])
 
   useEffect(() => { load() }, [load])
+
+  useEffect(() => {
+    setTopbar('Dashboard', <button className="btn-primary" onClick={() => navigate('/dashboard/orders')} style={{ fontSize: 12, padding: '7px 16px', gap: 0 }}>+ New order</button>)
+    return () => setTopbar('', null)
+  }, [setTopbar, navigate])
 
   const hour = new Date().getHours()
   const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening'

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useTopbar } from '../../shared/context/TopbarContext'
 import { useNavigate } from 'react-router-dom'
 import { adminGetMetrics, adminGetPendingEmails, adminMarkEmailSent, adminGetShopGrowth } from './api/adminQueries'
 import { adminGetAuditLog } from './api/adminQueries'
@@ -17,6 +18,7 @@ function timeAgo(dateStr) {
 
 export default function MetricsPage() {
   const navigate = useNavigate()
+  const { setTopbar } = useTopbar()
   const [metrics, setMetrics] = useState(null)
   const [growth, setGrowth] = useState([])
   const [activity, setActivity] = useState([])
@@ -28,6 +30,11 @@ export default function MetricsPage() {
     adminGetShopGrowth().then(setGrowth).catch(() => {})
     adminGetAuditLog(null).then(d => setActivity(d?.slice(0, 6) || [])).catch(() => {})
     adminGetPendingEmails().then(setEmails).catch(() => {})
+  }, [])
+
+  useEffect(() => {
+    setTopbar('Metrics', null)
+    return () => setTopbar('', null)
   }, [])
 
   const handleMarkSent = async (id) => {

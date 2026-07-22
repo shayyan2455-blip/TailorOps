@@ -1,10 +1,12 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useToast } from '../../context/ToastContext'
+import { useTopbar } from '../../shared/context/TopbarContext'
 import { fetchReadyOrders, fetchTodayDeliveries, markDelivered } from './api/deliveryQueries'
 import './DeliveryPage.css'
 
 export default function DeliveryPage() {
   const { showToast } = useToast()
+  const { setTopbar } = useTopbar()
   const [tab, setTab] = useState('ready')
   const [readyOrders, setReadyOrders] = useState([])
   const [todayDeliveries, setTodayDeliveries] = useState([])
@@ -28,6 +30,11 @@ export default function DeliveryPage() {
   }, [showToast])
 
   useEffect(() => { load() }, [load])
+
+  useEffect(() => {
+    setTopbar('Delivery', null)
+    return () => setTopbar('', null)
+  }, [setTopbar])
 
   const handleDeliver = async (orderId) => {
     setDelivering(orderId)

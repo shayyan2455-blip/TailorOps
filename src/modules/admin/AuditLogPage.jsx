@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useTopbar } from '../../shared/context/TopbarContext'
 import { adminGetAuditLog } from './api/adminQueries'
 import { useNavigate } from 'react-router-dom'
 
@@ -7,6 +8,7 @@ export default function AuditLogPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const navigate = useNavigate()
+  const { setTopbar } = useTopbar()
 
   useEffect(() => {
     setLoading(true)
@@ -14,6 +16,11 @@ export default function AuditLogPage() {
       .then(data => setLog(data || []))
       .catch(e => setError(e.message))
       .finally(() => setLoading(false))
+  }, [])
+
+  useEffect(() => {
+    setTopbar('Audit Log', null)
+    return () => setTopbar('', null)
   }, [])
 
   return (

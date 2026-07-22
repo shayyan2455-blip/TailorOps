@@ -1,12 +1,14 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import { useToast } from '../../context/ToastContext'
+import { useTopbar } from '../../shared/context/TopbarContext'
 import { fetchCustomerLedgers, fetchCustomerLedger } from './api/ledgerQueries'
 import './LedgerPage.css'
 
 export default function LedgerPage() {
   const { tenantId } = useAuth()
   const { showToast } = useToast()
+  const { setTopbar } = useTopbar()
   const [ledgers, setLedgers] = useState([])
   const [loading, setLoading] = useState(true)
   const [expanded, setExpanded] = useState(null)
@@ -26,6 +28,11 @@ export default function LedgerPage() {
   }, [tenantId, showToast])
 
   useEffect(() => { load() }, [load])
+
+  useEffect(() => {
+    setTopbar('Customer Ledger', null)
+    return () => setTopbar('', null)
+  }, [setTopbar])
 
   const toggleExpand = async (customerId) => {
     if (expanded === customerId) {

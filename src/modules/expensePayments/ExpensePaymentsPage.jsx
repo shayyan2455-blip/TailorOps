@@ -4,11 +4,13 @@ import { useToast } from '../../context/ToastContext'
 import { fetchExpensePayments, recordExpensePayment, deleteExpensePayment } from './api/expensePaymentQueries'
 import ExpensePaymentForm from './components/ExpensePaymentForm'
 import ExpenseReceiptView from './components/ExpenseReceiptView'
+import { useTopbar } from '../../shared/context/TopbarContext'
 import ConfirmModal from '../../shared/components/ConfirmModal'
 
 export default function ExpensePaymentsPage() {
   const { tenantId } = useAuth()
   const { showToast } = useToast()
+  const { setTopbar } = useTopbar()
   const [payments, setPayments] = useState([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
@@ -28,6 +30,11 @@ export default function ExpensePaymentsPage() {
   }, [showToast])
 
   useEffect(() => { load() }, [load])
+
+  useEffect(() => {
+    setTopbar('Expense Payments', <button className="c-add-btn" onClick={() => setShowForm(true)}>+ Record Payment</button>)
+    return () => setTopbar('', null)
+  }, [setTopbar])
 
   const handleSave = async (payload) => {
     try {

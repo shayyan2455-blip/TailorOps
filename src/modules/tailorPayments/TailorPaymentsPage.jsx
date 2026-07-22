@@ -4,11 +4,13 @@ import { useToast } from '../../context/ToastContext'
 import { fetchTailorPayments, recordTailorPayment, deleteTailorPayment } from './api/tailorPaymentQueries'
 import TailorPaymentForm from './components/TailorPaymentForm'
 import TailorReceiptView from './components/TailorReceiptView'
+import { useTopbar } from '../../shared/context/TopbarContext'
 import ConfirmModal from '../../shared/components/ConfirmModal'
 
 export default function TailorPaymentsPage() {
   const { tenantId } = useAuth()
   const { showToast } = useToast()
+  const { setTopbar } = useTopbar()
   const [payments, setPayments] = useState([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
@@ -28,6 +30,11 @@ export default function TailorPaymentsPage() {
   }, [showToast])
 
   useEffect(() => { load() }, [load])
+
+  useEffect(() => {
+    setTopbar('Tailor Payments', <button className="c-add-btn" onClick={() => setShowForm(true)}>+ Record Payment</button>)
+    return () => setTopbar('', null)
+  }, [setTopbar])
 
   const handleSave = async (payload) => {
     try {

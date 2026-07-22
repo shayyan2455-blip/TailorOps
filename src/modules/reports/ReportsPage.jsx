@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useAuth } from '../../context/AuthContext'
+import { useTopbar } from '../../shared/context/TopbarContext'
 import {
-  fetchProfitSummary,
   fetchRevenueMetrics,
   fetchOrdersByStage,
   fetchExpensesBreakdown,
@@ -48,6 +48,7 @@ export default function ReportsPage() {
   const [customStart, setCustomStart] = useState('')
   const [customEnd, setCustomEnd] = useState('')
 
+  const { setTopbar } = useTopbar()
   const [summary, setSummary] = useState(null)
   const [metrics, setMetrics] = useState(null)
   const [stages, setStages] = useState({})
@@ -91,6 +92,11 @@ export default function ReportsPage() {
   }, [tenantId, preset, customStart, customEnd])
 
   useEffect(() => { load() }, [load])
+
+  useEffect(() => {
+    setTopbar('Reports', null)
+    return () => setTopbar('', null)
+  }, [setTopbar])
 
   const profitMargin = metrics && metrics.totalRevenue > 0
     ? ((summary?.net_profit || 0) / metrics.totalRevenue * 100).toFixed(1)

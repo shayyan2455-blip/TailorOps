@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import { useToast } from '../../context/ToastContext'
+import { useTopbar } from '../../shared/context/TopbarContext'
 import { supabase } from '../../shared/lib/supabaseClient'
 import { fetchOrders, createOrder, updateOrder, deleteOrder } from './api/orderQueries'
 import { saveMeasurement } from '../measurements/api/measurementQueries'
@@ -13,6 +14,7 @@ const STAGES = ['', 'Booked', 'Cutting', 'Stitching', 'Ready', 'Delivered']
 export default function OrdersPage() {
   const { tenantId } = useAuth()
   const { showToast } = useToast()
+  const { setTopbar } = useTopbar()
   const [orders, setOrders] = useState([])
   const [stageFilter, setStageFilter] = useState('')
   const [dateFrom, setDateFrom] = useState('')
@@ -42,6 +44,11 @@ export default function OrdersPage() {
   }, [stageFilter, dateFrom, dateTo, search, showToast])
 
   useEffect(() => { load() }, [load])
+
+  useEffect(() => {
+    setTopbar('Orders', <button className="c-add-btn" onClick={() => { setEditing(null); setShowForm(true) }}>+ New Order</button>)
+    return () => setTopbar('', null)
+  }, [setTopbar])
 
   const handleSave = async (payload) => {
     try {

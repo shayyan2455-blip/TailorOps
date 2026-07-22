@@ -5,12 +5,14 @@ import { fetchPayments, distributePayment, deletePayment, fetchPaymentForReceipt
 import { fetchTenant } from '../settings/api/settingsQueries'
 import PaymentForm from './components/PaymentForm'
 import ReceiptView from './components/ReceiptView'
+import { useTopbar } from '../../shared/context/TopbarContext'
 import ConfirmModal from '../../shared/components/ConfirmModal'
 import './PaymentsPage.css'
 
 export default function PaymentsPage() {
   const { tenantId } = useAuth()
   const { showToast } = useToast()
+  const { setTopbar } = useTopbar()
   const [payments, setPayments] = useState([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
@@ -30,6 +32,11 @@ export default function PaymentsPage() {
   }, [showToast])
 
   useEffect(() => { load() }, [load])
+
+  useEffect(() => {
+    setTopbar('Customer Payments', <button className="c-add-btn" onClick={() => setShowForm(true)}>+ Record Payment</button>)
+    return () => setTopbar('', null)
+  }, [setTopbar])
 
   const handleSave = async (payload) => {
     try {

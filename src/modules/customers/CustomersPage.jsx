@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import { useToast } from '../../context/ToastContext'
+import { useTopbar } from '../../shared/context/TopbarContext'
 import { fetchCustomers, createCustomer, updateCustomer, deleteCustomer } from './api/customerQueries'
 import CustomerForm from './components/CustomerForm'
 import ConfirmModal from '../../shared/components/ConfirmModal'
@@ -9,6 +10,7 @@ import './CustomersPage.css'
 export default function CustomersPage() {
   const { tenantId } = useAuth()
   const { showToast } = useToast()
+  const { setTopbar } = useTopbar()
   const [customers, setCustomers] = useState([])
   const [search, setSearch] = useState('')
   const [loading, setLoading] = useState(true)
@@ -30,6 +32,11 @@ export default function CustomersPage() {
   }, [search, showToast])
 
   useEffect(() => { load() }, [load])
+
+  useEffect(() => {
+    setTopbar('Customers', <button className="c-add-btn" onClick={() => { setEditing(null); setShowForm(true) }}>+ Add Customer</button>)
+    return () => setTopbar('', null)
+  }, [setTopbar])
 
   const handleSave = async (payload) => {
     try {

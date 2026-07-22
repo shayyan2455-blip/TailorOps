@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useTopbar } from '../../shared/context/TopbarContext'
 import { useNavigate } from 'react-router-dom'
 import { adminListTenants, adminApproveTenant, adminRejectTenant } from './api/adminQueries'
 
@@ -10,6 +11,7 @@ export default function PendingApprovalsPage() {
   const [rejectReason, setRejectReason] = useState('')
   const [showReject, setShowReject] = useState(null)
   const navigate = useNavigate()
+  const { setTopbar } = useTopbar()
 
   const load = async () => {
     setLoading(true)
@@ -24,6 +26,11 @@ export default function PendingApprovalsPage() {
   }
 
   useEffect(() => { load() }, [])
+
+  useEffect(() => {
+    setTopbar('Pending Approvals', <button className="admin-btn" onClick={load}>Refresh</button>)
+    return () => setTopbar('', null)
+  }, [load])
 
   const handleApprove = async (id) => {
     setActionId(id)

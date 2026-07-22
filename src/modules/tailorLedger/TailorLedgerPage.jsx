@@ -1,12 +1,14 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import { useToast } from '../../context/ToastContext'
+import { useTopbar } from '../../shared/context/TopbarContext'
 import { fetchTailorLedgers, fetchTailorLedgerDetail } from './api/tailorLedgerQueries'
 import '../ledger/LedgerPage.css'
 
 export default function TailorLedgerPage() {
   const { tenantId } = useAuth()
   const { showToast } = useToast()
+  const { setTopbar } = useTopbar()
   const [ledgers, setLedgers] = useState([])
   const [loading, setLoading] = useState(true)
   const [expanded, setExpanded] = useState(null)
@@ -26,6 +28,11 @@ export default function TailorLedgerPage() {
   }, [tenantId, showToast])
 
   useEffect(() => { load() }, [load])
+
+  useEffect(() => {
+    setTopbar('Tailor Ledger', null)
+    return () => setTopbar('', null)
+  }, [setTopbar])
 
   const toggleExpand = async (tailorId) => {
     if (expanded === tailorId) {

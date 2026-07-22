@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react'
+import { useTopbar } from '../../shared/context/TopbarContext'
 import { fetchMyLedger } from './api/tailorPortalQueries'
 
 export default function MyEarningsPage() {
+  const { setTopbar } = useTopbar()
   const [entries, setEntries] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -12,6 +14,11 @@ export default function MyEarningsPage() {
       .catch(e => setError(e.message))
       .finally(() => setLoading(false))
   }, [])
+
+  useEffect(() => {
+    setTopbar('My Earnings', null)
+    return () => setTopbar('', null)
+  }, [setTopbar])
 
   const balance = entries.length > 0 ? entries[entries.length - 1].running_balance : 0
 

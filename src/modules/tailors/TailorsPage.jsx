@@ -3,12 +3,14 @@ import { useAuth } from '../../context/AuthContext'
 import { useToast } from '../../context/ToastContext'
 import { fetchTailors, createTailor, updateTailor, deleteTailor, fetchWorkAssignments, removeAssignment } from './api/tailorQueries'
 import TailorForm from './components/TailorForm'
+import { useTopbar } from '../../shared/context/TopbarContext'
 import ConfirmModal from '../../shared/components/ConfirmModal'
 import './TailorsPage.css'
 
 export default function TailorsPage() {
   const { tenantId } = useAuth()
   const { showToast } = useToast()
+  const { setTopbar } = useTopbar()
   const [tailors, setTailors] = useState([])
   const [search, setSearch] = useState('')
   const [loading, setLoading] = useState(true)
@@ -45,6 +47,11 @@ export default function TailorsPage() {
     if (selected) loadAssignments(selected.id)
     else setAssignments([])
   }, [selected, loadAssignments])
+
+  useEffect(() => {
+    setTopbar('Tailors', <button className="c-add-btn" onClick={() => { setEditing(null); setShowForm(true) }}>+ Add Tailor</button>)
+    return () => setTopbar('', null)
+  }, [setTopbar])
 
   const handleSave = async (payload) => {
     try {

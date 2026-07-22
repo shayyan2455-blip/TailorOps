@@ -3,6 +3,7 @@ import { NavLink, Outlet, Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { useTheme } from '../../shared/hooks/useTheme'
 import { useTableLabels } from '../../shared/hooks/useTableLabels'
+import { TopbarProvider, useTopbar } from '../../shared/context/TopbarContext'
 import './DashboardLayout.css'
 
 const navGroups = [
@@ -48,11 +49,12 @@ const navGroups = [
   },
 ]
 
-export default function DashboardLayout() {
+function LayoutInner() {
   const { user, profile, loading, signOut } = useAuth()
   const { theme, toggleTheme } = useTheme()
   const [menuOpen, setMenuOpen] = useState(false)
   const location = useLocation()
+  const { topbar } = useTopbar()
 
   useEffect(() => { setMenuOpen(false) }, [location.pathname])
 
@@ -60,10 +62,6 @@ export default function DashboardLayout() {
 
   if (loading) return null
   if (!user) return <Navigate to="/" replace />
-
-  const initials = profile?.full_name
-    ? profile.full_name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
-    : 'SO'
 
   const handleSignOut = async () => {
     try { await signOut() } catch {}
@@ -114,9 +112,19 @@ export default function DashboardLayout() {
           <button className="menu-toggle" onClick={() => setMenuOpen(p => !p)} aria-label="Toggle menu">
             <span className="menu-bar" /><span className="menu-bar" /><span className="menu-bar" />
           </button>
+          <span className="mobile-topbar-title">{topbar.title}</span>
+          {topbar.action && <span className="mobile-topbar-action">{topbar.action}</span>}
         </div>
         <Outlet />
       </main>
     </div>
+  )
+}
+
+export default function DashboardLayout() {
+  return (
+    <TopbarProvider>
+      <LayoutInner />
+    </TopbarProvider>
   )
 }

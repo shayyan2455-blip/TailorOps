@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react'
+import { useTopbar } from '../../shared/context/TopbarContext'
 import { fetchMyHistory } from './api/tailorPortalQueries'
 
 export default function MyHistoryPage() {
+  const { setTopbar } = useTopbar()
   const [assignments, setAssignments] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -12,6 +14,11 @@ export default function MyHistoryPage() {
       .catch(e => setError(e.message))
       .finally(() => setLoading(false))
   }, [])
+
+  useEffect(() => {
+    setTopbar('My History', null)
+    return () => setTopbar('', null)
+  }, [setTopbar])
 
   return (
     <div className="tp-module">

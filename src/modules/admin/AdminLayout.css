@@ -653,6 +653,41 @@
   line-height: 1.5;
 }
 
+/* ---------- MOBILE TOPBAR ---------- */
+.mobile-topbar {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 52px;
+  z-index: 150;
+  background: var(--second-bg-color);
+  border-bottom: 1px solid var(--border-color);
+  align-items: center;
+  gap: 10px;
+  padding: 0 14px;
+}
+
+.mobile-topbar-title {
+  flex: 1;
+  font-family: 'Fraunces', serif;
+  font-size: 16px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mobile-topbar-action {
+  flex-shrink: 0;
+}
+
+.mobile-topbar-action .admin-btn {
+  font-size: 12px;
+  padding: 5px 14px;
+}
+
 @media (max-width: 1024px) {
   .admin-shell {
     grid-template-columns: 1fr;

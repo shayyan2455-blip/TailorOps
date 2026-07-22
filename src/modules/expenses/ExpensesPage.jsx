@@ -3,11 +3,13 @@ import { useAuth } from '../../context/AuthContext'
 import { useToast } from '../../context/ToastContext'
 import { fetchExpenses, createExpense, updateExpense, deleteExpense } from './api/expenseQueries'
 import ExpenseForm from './ExpenseForm'
+import { useTopbar } from '../../shared/context/TopbarContext'
 import ConfirmModal from '../../shared/components/ConfirmModal'
 
 export default function ExpensesPage() {
   const { tenantId } = useAuth()
   const { showToast } = useToast()
+  const { setTopbar } = useTopbar()
   const [expenses, setExpenses] = useState([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
@@ -28,6 +30,11 @@ export default function ExpensesPage() {
   }, [showToast, search])
 
   useEffect(() => { load() }, [load])
+
+  useEffect(() => {
+    setTopbar('Expenses', <button className="c-add-btn" onClick={() => { setEditing(null); setShowForm(true) }}>+ New Expense</button>)
+    return () => setTopbar('', null)
+  }, [setTopbar])
 
   const handleSave = async (payload) => {
     try {

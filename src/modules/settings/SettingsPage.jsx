@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import { useToast } from '../../context/ToastContext'
+import { useTopbar } from '../../shared/context/TopbarContext'
 import { fetchTenant, updateTenant } from './api/settingsQueries'
 import TeamPage from './TeamPage'
 import ChangePasswordPage from './ChangePasswordPage'
@@ -11,6 +12,7 @@ const TABS = ['Shop Settings', 'Team', 'Change Password']
 export default function SettingsPage() {
   const { tenantId, profile, role } = useAuth()
   const { showToast } = useToast()
+  const { setTopbar } = useTopbar()
   const [tab, setTab] = useState('Shop Settings')
   const [form, setForm] = useState({ name: '', address: '', phone: '', currency: 'Rs.', receipt_footer: '' })
   const [loading, setLoading] = useState(true)
@@ -30,6 +32,11 @@ export default function SettingsPage() {
       .catch(err => showToast(err.message, 'error'))
       .finally(() => setLoading(false))
   }, [tenantId, showToast])
+
+  useEffect(() => {
+    setTopbar('Settings', null)
+    return () => setTopbar('', null)
+  }, [setTopbar])
 
   const handleChange = (key) => (e) => setForm(p => ({ ...p, [key]: e.target.value }))
 

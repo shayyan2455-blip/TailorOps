@@ -4,6 +4,7 @@ import { supabase } from '../../shared/lib/supabaseClient'
 import { useAuth } from '../../context/AuthContext'
 import { useTheme } from '../../shared/hooks/useTheme'
 import { useTableLabels } from '../../shared/hooks/useTableLabels'
+import { TopbarProvider, useTopbar } from '../../shared/context/TopbarContext'
 import './AdminLayout.css'
 
 const navItems = [
@@ -13,7 +14,7 @@ const navItems = [
   { label: 'Audit Log', path: '/admin/audit' },
 ]
 
-export default function AdminLayout() {
+function AdminLayoutInner() {
   const { user, loading } = useAuth()
   const { theme, toggleTheme } = useTheme()
   const [checking, setChecking] = useState(true)
@@ -21,6 +22,7 @@ export default function AdminLayout() {
   const [menuOpen, setMenuOpen] = useState(false)
   const navigate = useNavigate()
   const location = useLocation()
+  const { title, action } = useTopbar()
 
   useEffect(() => { setMenuOpen(false) }, [location.pathname])
 
@@ -104,9 +106,19 @@ export default function AdminLayout() {
           <button className="menu-toggle" onClick={() => setMenuOpen(p => !p)} aria-label="Toggle menu">
             <span className="menu-bar" /><span className="menu-bar" /><span className="menu-bar" />
           </button>
+          <span className="mobile-topbar-title">{title}</span>
+          {action && <span className="mobile-topbar-action">{action}</span>}
         </div>
         <Outlet />
       </main>
     </div>
+  )
+}
+
+export default function AdminLayout() {
+  return (
+    <TopbarProvider>
+      <AdminLayoutInner />
+    </TopbarProvider>
   )
 }

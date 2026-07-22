@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react'
+import { useTopbar } from '../../shared/context/TopbarContext'
 import { fetchMyWork, markStageComplete } from './api/tailorPortalQueries'
 
 export default function MyWorkPage() {
+  const { setTopbar } = useTopbar()
   const [assignments, setAssignments] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -20,6 +22,11 @@ export default function MyWorkPage() {
   }
 
   useEffect(() => { load() }, [])
+
+  useEffect(() => {
+    setTopbar('My Work', null)
+    return () => setTopbar('', null)
+  }, [setTopbar])
 
   const handleComplete = async (id) => {
     setMarking(id)

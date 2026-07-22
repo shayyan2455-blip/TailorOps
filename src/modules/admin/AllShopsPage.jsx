@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useTopbar } from '../../shared/context/TopbarContext'
 import { useNavigate } from 'react-router-dom'
 import { adminListTenants, adminSuspendTenant, adminReactivateTenant } from './api/adminQueries'
 
@@ -13,6 +14,7 @@ export default function AllShopsPage() {
   const [suspendReason, setSuspendReason] = useState('')
   const [showSuspend, setShowSuspend] = useState(null)
   const navigate = useNavigate()
+  const { setTopbar } = useTopbar()
 
   const load = async (status) => {
     setLoading(true)
@@ -27,6 +29,11 @@ export default function AllShopsPage() {
   }
 
   useEffect(() => { load(filter) }, [filter])
+
+  useEffect(() => {
+    setTopbar('All Shops', <button className="admin-btn" onClick={() => load(filter)}>Refresh</button>)
+    return () => setTopbar('', null)
+  }, [load, filter])
 
   const handleSuspend = async (id) => {
     if (!suspendReason.trim()) return

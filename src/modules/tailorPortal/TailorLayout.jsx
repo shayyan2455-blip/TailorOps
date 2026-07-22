@@ -3,6 +3,7 @@ import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { useTheme } from '../../shared/hooks/useTheme'
 import { useTableLabels } from '../../shared/hooks/useTableLabels'
+import { TopbarProvider, useTopbar } from '../../shared/context/TopbarContext'
 import './TailorLayout.css'
 
 const navItems = [
@@ -11,11 +12,12 @@ const navItems = [
   { label: 'My Earnings', path: '/tailor/earnings' },
 ]
 
-export default function TailorLayout() {
+function TailorLayoutInner() {
   const { user, signOut } = useAuth()
   const { theme, toggleTheme } = useTheme()
   const [menuOpen, setMenuOpen] = useState(false)
   const location = useLocation()
+  const { title, action } = useTopbar()
 
   useEffect(() => { setMenuOpen(false) }, [location.pathname])
 
@@ -68,9 +70,19 @@ export default function TailorLayout() {
           <button className="menu-toggle" onClick={() => setMenuOpen(p => !p)} aria-label="Toggle menu">
             <span className="menu-bar" /><span className="menu-bar" /><span className="menu-bar" />
           </button>
+          <span className="mobile-topbar-title">{title}</span>
+          {action && <span className="mobile-topbar-action">{action}</span>}
         </div>
         <Outlet />
       </main>
     </div>
+  )
+}
+
+export default function TailorLayout() {
+  return (
+    <TopbarProvider>
+      <TailorLayoutInner />
+    </TopbarProvider>
   )
 }

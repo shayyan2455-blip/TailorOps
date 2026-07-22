@@ -252,6 +252,17 @@ a {
   }
 }
 
+@media (max-width: 1024px) {
+  .c-header-row,
+  .c-title {
+    display: none;
+  }
+  .admin-header h2,
+  .admin-header .admin-btn {
+    display: none;
+  }
+}
+
 @media (max-width: 480px) {
   body { font-size: 14px; }
   .admin-main,
