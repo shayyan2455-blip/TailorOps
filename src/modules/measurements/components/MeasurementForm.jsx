@@ -1,16 +1,16 @@
 import { useState, useEffect } from 'react'
 
 const DEFAULT_FIELDS = [
+  { key: 'neck', label: 'Neck' },
   { key: 'chest', label: 'Chest' },
   { key: 'waist', label: 'Waist' },
+  { key: 'hip', label: 'Hip' },
   { key: 'shoulder', label: 'Shoulder' },
   { key: 'sleeve', label: 'Sleeve' },
   { key: 'length', label: 'Length' },
   { key: 'collar', label: 'Collar' },
-  { key: 'inseam', label: 'Inseam' },
-  { key: 'hip', label: 'Hip' },
-  { key: 'bust', label: 'Bust' },
-  { key: 'outseam', label: 'Outseam' },
+  { key: 'shalwar_length', label: 'Shalwar Length' },
+  { key: 'pancha', label: 'Pancha' },
 ]
 
 export default function MeasurementForm({ data, onChange }) {
