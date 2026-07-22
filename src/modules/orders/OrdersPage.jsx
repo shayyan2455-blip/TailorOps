@@ -136,7 +136,7 @@ export default function OrdersPage() {
           <button className="c-add-btn" onClick={() => { setEditing(null); setShowForm(true) }}>+ New Order</button>
         </div>
         <div className="o-filters">
-          <input className="c-search o-filter-item" placeholder="Search by order number…" value={search} onChange={e => setSearch(e.target.value)} />
+          <input className="c-search o-filter-item" placeholder="Search by order# or customer name…" value={search} onChange={e => setSearch(e.target.value)} />
           <select className="c-form-input o-filter-item" value={stageFilter} onChange={e => setStageFilter(e.target.value)}>
             <option value="">All stages</option>
             {STAGES.filter(Boolean).map(s => <option key={s} value={s}>{s}</option>)}
