@@ -34,7 +34,13 @@ function TailorLayoutInner() {
 
       <aside className={`t-sidebar${menuOpen ? ' open' : ''}`}>
         <div className="t-brand">
-          <span className="t-brand-tag" />
+          <svg className="scissor-logo" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="10" cy="10" r="3.5" stroke="currentColor" strokeWidth="1.6" />
+            <circle cx="30" cy="10" r="3.5" stroke="currentColor" strokeWidth="1.6" />
+            <path d="M12.5 12.5L30 30" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+            <path d="M27.5 12.5L10 30" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+            <circle cx="20" cy="20" r="2" fill="currentColor" stroke="currentColor" strokeWidth="1" />
+          </svg>
           TailorOps
         </div>
 
