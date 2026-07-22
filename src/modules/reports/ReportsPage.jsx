@@ -3,6 +3,7 @@ import { useAuth } from '../../context/AuthContext'
 import { useTopbar } from '../../shared/context/TopbarContext'
 import {
   fetchRevenueMetrics,
+  fetchProfitSummary,
   fetchOrdersByStage,
   fetchExpensesBreakdown,
   fetchTailorPerformance,
