@@ -1,9 +1,5 @@
 import { useEffect, useRef } from 'react'
 
-function isMobile() {
-  return window.innerWidth <= 600
-}
-
 function labelTable(table) {
   const ths = table.querySelectorAll('thead th')
   if (!ths.length) return
@@ -17,43 +13,9 @@ function labelTable(table) {
   })
 }
 
-function styleActionCells() {
-  if (!isMobile()) return
-
-  document.querySelectorAll('td.c-actions').forEach(td => {
-    td.style.setProperty('display', 'flex', 'important')
-    td.style.setProperty('flex-direction', 'column', 'important')
-    td.style.setProperty('align-items', 'flex-end', 'important')
-    td.style.setProperty('gap', '6px', 'important')
-    td.style.setProperty('border-top', '1px solid var(--border-color)', 'important')
-    td.style.setProperty('margin-top', '4px', 'important')
-    td.style.setProperty('padding-top', '8px', 'important')
-    td.setAttribute('data-ml-action', '1')
-  })
-
-  document.querySelectorAll('td > div[style*="flex"]').forEach(div => {
-    div.style.setProperty('flex-direction', 'column', 'important')
-    div.style.setProperty('align-items', 'flex-end', 'important')
-    div.style.setProperty('gap', '6px', 'important')
-    div.style.setProperty('width', '100%', 'important')
-  })
-}
-
-function unstyleActionCells() {
-  document.querySelectorAll('td.c-actions').forEach(td => {
-    td.style.cssText = ''
-  })
-  document.querySelectorAll('td > div[style*="flex"]').forEach(div => {
-    div.style.cssText = ''
-  })
-}
-
 function run(selector) {
   document.querySelectorAll(selector).forEach(labelTable)
-  styleActionCells()
 }
-
-const MOBILE_BREAKPOINT = 600
 
 export function useTableLabels(selector = 'table', deps = []) {
   const observerRef = useRef(null)
@@ -72,18 +34,8 @@ export function useTableLabels(selector = 'table', deps = []) {
     })
     observerRef.current.observe(document.body, { childList: true, subtree: true })
 
-    const onResize = () => {
-      if (window.innerWidth <= MOBILE_BREAKPOINT) {
-        styleActionCells()
-      } else {
-        unstyleActionCells()
-      }
-    }
-    window.addEventListener('resize', onResize)
-
     return () => {
       observerRef.current?.disconnect()
-      window.removeEventListener('resize', onResize)
       if (rafRef.current) cancelAnimationFrame(rafRef.current)
     }
   }, deps)
