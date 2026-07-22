@@ -114,7 +114,7 @@
 
 /* Shared module styles for tailor portal */
 .tp-module {
-  max-width: 1000px;
+  width: 100%;
 }
 
 .tp-header {
