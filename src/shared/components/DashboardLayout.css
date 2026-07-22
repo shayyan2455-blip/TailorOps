@@ -162,7 +162,7 @@
   .sidebar.open {
     left: 0;
   }
-  .menu-toggle {
+  .mobile-topbar {
     display: flex;
   }
   .main {

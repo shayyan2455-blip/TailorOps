@@ -101,12 +101,23 @@ a {
 }
 
 /* ---------- MOBILE MENU (shared) ---------- */
-.menu-toggle {
+/* ---------- MOBILE MENU (shared) ---------- */
+.mobile-topbar {
   display: none;
   position: fixed;
-  top: 14px;
-  left: 14px;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 64px;
+  align-items: center;
+  padding: 0 14px;
+  background: var(--bg-color);
+  border-bottom: 1px solid var(--border-color);
   z-index: 200;
+}
+
+.menu-toggle {
+  display: flex;
   background: var(--second-bg-color);
   border: 1px solid var(--border-color);
   border-radius: 10px;
