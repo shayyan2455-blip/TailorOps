@@ -3,6 +3,7 @@ import { useAuth } from '../../../context/AuthContext'
 import { fetchTailorPaymentForReceipt } from '../api/tailorPaymentQueries'
 import { fetchTenant } from '../../settings/api/settingsQueries'
 import { useToast } from '../../../context/ToastContext'
+import { formatDate } from '../../../shared/lib/formatDate'
 import '../../payments/components/ReceiptView.css'
 
 const CloseX = () => (
@@ -17,14 +18,8 @@ const PrinterIcon = () => (
   </svg>
 )
 
-function formatDate(dateStr) {
-  if (!dateStr) return '—'
-  const d = new Date(dateStr + 'T00:00:00')
-  return d.toLocaleDateString('en-PK', { year: 'numeric', month: 'short', day: 'numeric' })
-}
-
 function todayStr() {
-  return new Date().toLocaleDateString('en-PK', { year: 'numeric', month: 'short', day: 'numeric' })
+  return formatDate(new Date().toISOString().slice(0, 10))
 }
 
 export default function TailorReceiptView({ paymentId, onClose }) {

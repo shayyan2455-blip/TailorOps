@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useTopbar } from '../../shared/context/TopbarContext'
+import { formatDate } from '../../shared/lib/formatDate'
 import { fetchMyLedger } from './api/tailorPortalQueries'
 
 export default function MyEarningsPage() {
@@ -82,7 +83,7 @@ export default function MyEarningsPage() {
             <tbody>
               {entries.map((e, i) => (
                 <tr key={i}>
-                  <td style={{ fontSize: 12, opacity: 0.6 }}>{new Date(e.date).toLocaleDateString()}</td>
+                  <td style={{ fontSize: 12, opacity: 0.6 }}>{formatDate(e.date)}</td>
                   <td>{e.description}</td>
                   <td className="tp-mono">{e.ref}</td>
                   <td style={{ color: 'var(--main-color)' }}>Rs. {Number(e.debit).toFixed(0)}</td>

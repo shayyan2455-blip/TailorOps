@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useTopbar } from '../../shared/context/TopbarContext'
 import { useNavigate } from 'react-router-dom'
+import { formatDate } from '../../shared/lib/formatDate'
 import { adminListTenants, adminSuspendTenant, adminReactivateTenant } from './api/adminQueries'
 
 const STATUSES = ['all', 'active', 'pending', 'rejected', 'suspended']
@@ -128,7 +129,7 @@ export default function AllShopsPage() {
                   <span className={`admin-status ${t.status}`}>{t.status}</span>
                 </td>
                 <td style={{ opacity: 0.6, fontSize: 12 }}>
-                  {new Date(t.created_at).toLocaleDateString()}
+                  {formatDate(t.created_at)}
                 </td>
                 <td>
                   <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>

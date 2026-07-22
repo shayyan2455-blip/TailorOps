@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useTopbar } from '../../shared/context/TopbarContext'
+import { formatDate } from '../../shared/lib/formatDate'
 import { fetchMyHistory } from './api/tailorPortalQueries'
 
 export default function MyHistoryPage() {
@@ -52,10 +53,10 @@ export default function MyHistoryPage() {
                 <td>{a.quantity}</td>
                 <td><span className="tp-badge">{a.stage}</span></td>
                 <td style={{ fontSize: 12, opacity: 0.6 }}>
-                  {new Date(a.assigned_at).toLocaleDateString()}
+                  {formatDate(a.assigned_at)}
                 </td>
                 <td style={{ fontSize: 12, opacity: 0.6 }}>
-                  {a.completed_at ? new Date(a.completed_at).toLocaleDateString() : '—'}
+                  {formatDate(a.completed_at)}
                 </td>
               </tr>
             ))}

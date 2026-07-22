@@ -4,6 +4,7 @@ import { useToast } from '../../context/ToastContext'
 import { supabase } from '../../shared/lib/supabaseClient'
 import { fetchTailors } from '../tailors/api/tailorQueries'
 import { useTopbar } from '../../shared/context/TopbarContext'
+import { formatDate } from '../../shared/lib/formatDate'
 import { fetchProductionOrders, transitionOrder, assignTailorToOrder, unassignTailor, setWorkAssignmentAmount } from './api/productionQueries'
 import './ProductionPage.css'
 
@@ -172,7 +173,7 @@ export default function ProductionPage() {
                       <span className="p-card-total">Rs.{Number(order.total_amount).toFixed(0)}</span>
                     </div>
                     <div className="p-card-customer">{order.customers?.name || '—'}</div>
-                    {order.delivery_date && <div className="p-card-delivery">Due {order.delivery_date}</div>}
+                    {order.delivery_date && <div className="p-card-delivery">Due {formatDate(order.delivery_date)}</div>}
                     <div className="p-card-actions">
                       <span className="p-card-stage-label">{stage}</span>
                       {stage !== 'Delivered' && (
@@ -194,7 +195,7 @@ export default function ProductionPage() {
             <div><span className="c-detail-label">Customer</span><span>{detail.customers?.name}</span></div>
             <div><span className="c-detail-label">Stage</span><span className={`o-stage o-stage--${detail.current_stage?.toLowerCase()}`}>{detail.current_stage}</span></div>
             <div><span className="c-detail-label">Total</span><span>Rs. {Number(detail.total_amount).toFixed(0)}</span></div>
-            <div><span className="c-detail-label">Delivery</span><span>{detail.delivery_date || '—'}</span></div>
+            <div><span className="c-detail-label">Delivery</span><span>{formatDate(detail.delivery_date)}</span></div>
           </div>
           {detail.order_items?.length > 0 && (
             <div style={{ marginTop: 12 }}>

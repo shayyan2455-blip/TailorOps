@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useTopbar } from '../../shared/context/TopbarContext'
+import { formatDate } from '../../shared/lib/formatDate'
 import { fetchMyWork, markStageComplete } from './api/tailorPortalQueries'
 
 export default function MyWorkPage() {
@@ -77,7 +78,7 @@ export default function MyWorkPage() {
                 <td>{a.quantity}</td>
                 <td><span className="tp-badge">{a.stage}</span></td>
                 <td style={{ fontSize: 12, opacity: 0.6 }}>
-                  {a.delivery_date ? new Date(a.delivery_date).toLocaleDateString() : '—'}
+                  {formatDate(a.delivery_date)}
                 </td>
                 <td style={{ fontSize: 12, opacity: 0.6, maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis' }}>
                   {a.notes || '—'}

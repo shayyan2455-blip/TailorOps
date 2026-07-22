@@ -5,6 +5,7 @@ import { fetchTailorPayments, recordTailorPayment, deleteTailorPayment } from '.
 import TailorPaymentForm from './components/TailorPaymentForm'
 import TailorReceiptView from './components/TailorReceiptView'
 import { useTopbar } from '../../shared/context/TopbarContext'
+import { formatDate } from '../../shared/lib/formatDate'
 import ConfirmModal from '../../shared/components/ConfirmModal'
 
 export default function TailorPaymentsPage() {
@@ -131,7 +132,7 @@ export default function TailorPaymentsPage() {
                     <td>{p.tailors?.name || '—'}</td>
                     <td className="mono">{p.invoice_number || '—'}</td>
                     <td className="pmt-amount">Rs. {Number(p.amount).toFixed(0)}</td>
-                    <td>{p.payment_date}</td>
+                    <td>{formatDate(p.payment_date)}</td>
                     <td><span className="pmt-mode">{p.payment_mode}</span></td>
                     <td style={{ fontSize: 13, opacity: 0.6 }}>{p.notes || '—'}</td>
                     <td className="c-actions">

@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useToast } from '../../context/ToastContext'
 import { useTopbar } from '../../shared/context/TopbarContext'
+import { formatDate } from '../../shared/lib/formatDate'
 import { fetchReadyOrders, fetchTodayDeliveries, markDelivered } from './api/deliveryQueries'
 import './DeliveryPage.css'
 
@@ -102,7 +103,7 @@ export default function DeliveryPage() {
                     </div>
                   </td>
                   <td className="d-total">Rs. {Number(o.total_amount).toFixed(0)}</td>
-                  <td className="d-date">{isReady ? (o.ready_at ? new Date(o.ready_at).toLocaleDateString() : '—') : (o.delivered_at ? new Date(o.delivered_at).toLocaleString() : '—')}</td>
+                  <td className="d-date">{isReady ? formatDate(o.ready_at) : formatDate(o.delivered_at)}</td>
                   <td>
                     {isReady ? (
                       <button

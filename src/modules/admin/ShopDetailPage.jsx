@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useTopbar } from '../../shared/context/TopbarContext'
 import { useParams, Link } from 'react-router-dom'
+import { formatDate } from '../../shared/lib/formatDate'
 import { adminGetTenant, adminGetAuditLog } from './api/adminQueries'
 
 export default function ShopDetailPage() {
@@ -120,11 +121,11 @@ export default function ShopDetailPage() {
           </div>
           <div className="admin-detail-row">
             <span className="admin-detail-label">Created</span>
-            <span>{new Date(tenant.created_at).toLocaleString()}</span>
+            <span>{formatDate(tenant.created_at)}</span>
           </div>
           <div className="admin-detail-row">
             <span className="admin-detail-label">Last Status Change</span>
-            <span>{tenant.status_updated_at ? new Date(tenant.status_updated_at).toLocaleString() : '—'}</span>
+            <span>{tenant.status_updated_at ? formatDate(tenant.status_updated_at) : '—'}</span>
           </div>
           {tenant.rejection_reason && (
             <div className="admin-detail-row">
@@ -176,7 +177,7 @@ export default function ShopDetailPage() {
               {auditLog.map(entry => (
                 <tr key={entry.log_id}>
                   <td style={{ fontSize: 12, opacity: 0.6 }}>
-                    {new Date(entry.created_at).toLocaleString()}
+                    {formatDate(entry.created_at)}
                   </td>
                   <td>
                     <span className={`admin-status ${entry.action === 'approved' || entry.action === 'reactivated' ? 'active' : entry.action === 'rejected' ? 'rejected' : 'suspended'}`}>

@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import { useToast } from '../../context/ToastContext'
 import { useTopbar } from '../../shared/context/TopbarContext'
+import { formatDate } from '../../shared/lib/formatDate'
 import { supabase } from '../../shared/lib/supabaseClient'
 import { fetchOrders, createOrder, updateOrder, deleteOrder } from './api/orderQueries'
 import { saveMeasurement } from '../measurements/api/measurementQueries'
@@ -174,7 +175,7 @@ export default function OrdersPage() {
                   <td>{o.customers?.name || '—'}</td>
                   <td><span className={`o-stage o-stage--${o.current_stage?.toLowerCase()}`}>{stageLabel(o.current_stage)}</span></td>
                   <td>Rs. {Number(o.total_amount).toFixed(0)}</td>
-                  <td>{o.delivery_date || '—'}</td>
+                  <td>{formatDate(o.delivery_date)}</td>
                   <td className="c-actions">
                     <button className="c-action-btn" onClick={() => { setEditing(o); setShowForm(true) }}>Edit</button>
                     <button className="c-action-btn c-action-destructive" onClick={() => setConfirmDelete(o.id)}>Delete</button>
@@ -193,7 +194,7 @@ export default function OrdersPage() {
             <div><span className="c-detail-label">Customer</span><span>{detail.customers?.name}</span></div>
             <div><span className="c-detail-label">Stage</span><span>{detail.current_stage}</span></div>
             <div><span className="c-detail-label">Total</span><span>Rs. {Number(detail.total_amount).toFixed(0)}</span></div>
-            <div><span className="c-detail-label">Delivery</span><span>{detail.delivery_date || '—'}</span></div>
+            <div><span className="c-detail-label">Delivery</span><span>{formatDate(detail.delivery_date)}</span></div>
           </div>
           {detail.order_items?.length > 0 && (
             <div style={{ marginTop: 12 }}>

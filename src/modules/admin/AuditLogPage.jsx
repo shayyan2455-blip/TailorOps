@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useTopbar } from '../../shared/context/TopbarContext'
 import { adminGetAuditLog } from './api/adminQueries'
+import { formatDate } from '../../shared/lib/formatDate'
 import { useNavigate } from 'react-router-dom'
 
 export default function AuditLogPage() {
@@ -71,7 +72,7 @@ export default function AuditLogPage() {
             {log.map(entry => (
               <tr key={entry.log_id}>
                 <td style={{ fontSize: 12, opacity: 0.6, whiteSpace: 'nowrap' }}>
-                  {new Date(entry.created_at).toLocaleString()}
+                  {formatDate(entry.created_at)}
                 </td>
                 <td>
                   <span

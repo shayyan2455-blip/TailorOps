@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useTopbar } from '../../shared/context/TopbarContext'
 import { useNavigate } from 'react-router-dom'
+import { formatDate } from '../../shared/lib/formatDate'
 import { adminListTenants, adminApproveTenant, adminRejectTenant } from './api/adminQueries'
 
 export default function PendingApprovalsPage() {
@@ -118,7 +119,7 @@ export default function PendingApprovalsPage() {
                 <td style={{ opacity: 0.6, fontSize: 12 }}>{t.owner_email || '—'}</td>
                 <td style={{ opacity: 0.6 }}>{t.owner_mobile || '—'}</td>
                 <td style={{ opacity: 0.6, fontSize: 12 }}>
-                  {new Date(t.created_at).toLocaleDateString()}
+                  {formatDate(t.created_at)}
                 </td>
                 <td>
                   <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>

@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import { useNavigate } from 'react-router-dom'
 import { useTopbar } from '../../shared/context/TopbarContext'
+import { formatDate } from '../../shared/lib/formatDate'
 import { fetchDashboardMetrics, fetchDashboardTailorWorkload } from './api/dashboardQueries'
 import { fetchProductionOrders } from '../production/api/productionQueries'
 import './DashboardHome.css'
@@ -123,7 +124,7 @@ export default function DashboardHome() {
                         <span className="ocard-id">{order.order_number}</span>
                         <div className="ocard-name">{order.customers?.name || '—'} — {order.order_items?.[0]?.garment_name || ''}</div>
                         <div className="ocard-meta">
-                          {order.delivery_date ? `Due ${order.delivery_date}` : ''}
+                          {order.delivery_date ? `Due ${formatDate(order.delivery_date)}` : ''}
                           {order.work_assignments?.[0]?.tailors?.name ? ` · ${order.work_assignments[0].tailors.name}` : ''}
                         </div>
                       </div>

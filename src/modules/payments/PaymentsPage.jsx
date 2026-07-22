@@ -6,6 +6,7 @@ import { fetchTenant } from '../settings/api/settingsQueries'
 import PaymentForm from './components/PaymentForm'
 import ReceiptView from './components/ReceiptView'
 import { useTopbar } from '../../shared/context/TopbarContext'
+import { formatDate } from '../../shared/lib/formatDate'
 import ConfirmModal from '../../shared/components/ConfirmModal'
 import './PaymentsPage.css'
 
@@ -145,7 +146,7 @@ export default function PaymentsPage() {
                     <td className="mono">{p.invoice_number || '—'}</td>
                     <td className="mono">{orderNum}{isCredit ? ' (credit)' : ''}</td>
                     <td className="pmt-amount">Rs. {Number(p.amount).toFixed(0)}</td>
-                    <td>{p.payment_date}</td>
+                    <td>{formatDate(p.payment_date)}</td>
                     <td><span className="pmt-mode">{p.payment_mode}</span></td>
                     <td className="c-actions">
                       <button className="c-action-btn" onClick={() => handleReceipt(p)}>Receipt</button>

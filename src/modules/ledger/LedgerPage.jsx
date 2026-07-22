@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import { useToast } from '../../context/ToastContext'
 import { useTopbar } from '../../shared/context/TopbarContext'
+import { formatDate } from '../../shared/lib/formatDate'
 import { fetchCustomerLedgers, fetchCustomerLedger } from './api/ledgerQueries'
 import './LedgerPage.css'
 
@@ -134,7 +135,7 @@ export default function LedgerPage() {
                                   const entryBal = Number(entry.running_balance)
                                   return (
                                     <tr key={i} className={`l-entry l-entry--${entry.entry_type}`}>
-                                      <td>{entry.date}</td>
+                                      <td>{formatDate(entry.date)}</td>
                                       <td>
                                         <span className="l-entry-desc">{entry.description}</span>
                                         <span className="l-entry-ref">{entry.invoice_or_order}</span>

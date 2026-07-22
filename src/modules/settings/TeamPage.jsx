@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import { supabase } from '../../shared/lib/supabaseClient'
 import { fetchTenant, updateTenant } from './api/settingsQueries'
+import { formatDate } from '../../shared/lib/formatDate'
 
 export default function TeamPage() {
   const { tenantId, profile } = useAuth()
@@ -159,7 +160,7 @@ export default function TeamPage() {
                 </td>
                 <td style={{ fontSize: 12 }}>{m.tailor_name || '—'}</td>
                 <td style={{ fontSize: 12, opacity: 0.6 }}>
-                  {new Date(m.created_at).toLocaleDateString()}
+                  {formatDate(m.created_at)}
                 </td>
                 {isOwner && m.role !== 'owner' && (
                   <td>

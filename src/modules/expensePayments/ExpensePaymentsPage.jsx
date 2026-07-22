@@ -5,6 +5,7 @@ import { fetchExpensePayments, recordExpensePayment, deleteExpensePayment } from
 import ExpensePaymentForm from './components/ExpensePaymentForm'
 import ExpenseReceiptView from './components/ExpenseReceiptView'
 import { useTopbar } from '../../shared/context/TopbarContext'
+import { formatDate } from '../../shared/lib/formatDate'
 import ConfirmModal from '../../shared/components/ConfirmModal'
 
 export default function ExpensePaymentsPage() {
@@ -130,7 +131,7 @@ export default function ExpensePaymentsPage() {
                   <td>{p.expenses?.description || '—'}</td>
                   <td>{p.expenses?.payee_name || '—'}</td>
                   <td className="l-num mono">Rs. {Number(p.amount).toFixed(0)}</td>
-                  <td>{p.payment_date}</td>
+                    <td>{formatDate(p.payment_date)}</td>
                   <td><span className="pmt-mode">{p.payment_mode}</span></td>
                   <td className="c-actions">
                     <button className="c-action-btn" onClick={() => handleReceipt(p)}>Receipt</button>
