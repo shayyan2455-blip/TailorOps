@@ -1,12 +1,15 @@
 import { supabase } from '../../../shared/lib/supabaseClient'
 
 export async function fetchProductionOrders() {
+  const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
   const { data, error } = await supabase
     .from('orders')
     .select('*, customers(name, mobile), order_items(*), work_assignments(*, tailors(name))')
     .order('created_at', { ascending: false })
   if (error) throw error
-  return data
+  return (data || []).filter(o =>
+    o.current_stage !== 'Delivered' || (o.delivered_at && o.delivered_at >= cutoff)
+  )
 }
 
 export async function transitionOrder(orderId, newStage) {
