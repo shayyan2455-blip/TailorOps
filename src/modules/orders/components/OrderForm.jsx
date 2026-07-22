@@ -14,7 +14,6 @@ export default function OrderForm({ order, onSave, onCancel }) {
   const [deliveryDate, setDeliveryDate] = useState('')
   const [notes, setNotes] = useState('')
   const [measData, setMeasData] = useState({})
-  const [advancePayment, setAdvancePayment] = useState('')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const firstRef = useRef(null)
@@ -72,7 +71,6 @@ export default function OrderForm({ order, onSave, onCancel }) {
     setSaving(true)
     setError('')
     try {
-      const pmt = Number(advancePayment) || 0
       await onSave({
         customer_id: customerId,
         total_amount: totalAmount,
@@ -80,7 +78,6 @@ export default function OrderForm({ order, onSave, onCancel }) {
         notes,
         items: items.filter(i => i.garment_name),
         measurements: Object.keys(measData).length > 0 ? measData : null,
-        advance_payment: pmt > 0 ? pmt : 0,
       })
     } catch (err) {
       setError(err.message || 'Failed to save order.')
@@ -129,15 +126,6 @@ export default function OrderForm({ order, onSave, onCancel }) {
         <span className="c-form-label">Notes</span>
         <textarea className="c-form-input c-form-textarea" value={notes} onChange={e => setNotes(e.target.value)} rows={2} />
       </label>
-
-      {!order && (
-        <details className="c-form-field" style={{ cursor: 'pointer' }}>
-          <summary className="c-form-label" style={{ cursor: 'pointer', userSelect: 'none' }}>Advance Payment</summary>
-          <div style={{ marginTop: 8 }}>
-            <input className="c-form-input" type="number" min="0" step="0.01" value={advancePayment} onChange={e => setAdvancePayment(e.target.value)} placeholder="0 — no payment" />
-          </div>
-        </details>
-      )}
 
       <MeasurementForm data={measData} onChange={setMeasData} />
 

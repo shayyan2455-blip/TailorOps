@@ -2,8 +2,6 @@ import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import { useToast } from '../../context/ToastContext'
 import { fetchExpenses, createExpense, updateExpense, deleteExpense } from './api/expenseQueries'
-import { recordExpensePayment } from '../expensePayments/api/expensePaymentQueries'
-import ExpenseReceiptView from '../expensePayments/components/ExpenseReceiptView'
 import ExpenseForm from './ExpenseForm'
 import { useTopbar } from '../../shared/context/TopbarContext'
 import ConfirmModal from '../../shared/components/ConfirmModal'
@@ -18,7 +16,6 @@ export default function ExpensesPage() {
   const [editing, setEditing] = useState(null)
   const [confirmDelete, setConfirmDelete] = useState(null)
   const [search, setSearch] = useState('')
-  const [receiptData, setReceiptData] = useState(null)
 
   const load = useCallback(async () => {
     try {
@@ -41,39 +38,15 @@ export default function ExpensesPage() {
 
   const handleSave = async (payload) => {
     try {
-      const { advance_payment, ...expenseData } = payload
-
       if (editing) {
-        await updateExpense(editing.id, expenseData)
+        await updateExpense(editing.id, payload)
         showToast('Expense updated.')
       } else {
-        const result = await createExpense(tenantId, expenseData)
-        const msgs = []
-        let paymentId = null
-
-        if (advance_payment > 0) {
-          const pmtResult = await recordExpensePayment(tenantId, {
-            expense_id: result.expense.id,
-            amount: advance_payment,
-            payment_date: new Date().toISOString().slice(0, 10),
-            payment_mode: 'Cash',
-            notes: `Advance payment for expense`,
-          })
-          const r = pmtResult?.[0]
-          if (r?.payment_id) {
-            paymentId = r.payment_id
-            if (Number(r.applied_amount) > 0) msgs.push(`Rs. ${Number(r.applied_amount).toFixed(0)} applied`)
-            if (Number(r.credit_stored) > 0) msgs.push(`Rs. ${Number(r.credit_stored).toFixed(0)} stored as credit`)
-          }
-        }
-
+        const result = await createExpense(tenantId, payload)
         if (result.creditApplied > 0) {
-          msgs.push(`Rs. ${result.creditApplied.toFixed(0)} credit auto-applied`)
-        }
-        showToast(msgs.length ? `Expense created. ${msgs.join(', ')}.` : 'Expense created.')
-
-        if (paymentId) {
-          setReceiptData({ paymentId })
+          showToast(`Expense created. Rs. ${result.creditApplied.toFixed(0)} credit auto-applied.`)
+        } else {
+          showToast('Expense created.')
         }
       }
       setShowForm(false)
@@ -166,13 +139,6 @@ export default function ExpensesPage() {
 
       {confirmDelete !== null && (
         <ConfirmModal message="Delete this expense?" onConfirm={() => handleDelete(confirmDelete)} onCancel={() => setConfirmDelete(null)} />
-      )}
-
-      {receiptData && (
-        <ExpenseReceiptView
-          paymentId={receiptData.paymentId}
-          onClose={() => setReceiptData(null)}
-        />
       )}
     </div>
   )
