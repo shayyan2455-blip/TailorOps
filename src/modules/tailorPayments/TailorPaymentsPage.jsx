@@ -16,6 +16,9 @@ export default function TailorPaymentsPage() {
   const [showForm, setShowForm] = useState(false)
   const [receiptData, setReceiptData] = useState(null)
   const [confirmDelete, setConfirmDelete] = useState(null)
+  const [search, setSearch] = useState('')
+  const [dateFrom, setDateFrom] = useState('')
+  const [dateTo, setDateTo] = useState('')
 
   const load = useCallback(async () => {
     try {
@@ -77,6 +80,17 @@ export default function TailorPaymentsPage() {
     setReceiptData({ paymentId: payment.id })
   }
 
+  const filtered = payments.filter(p => {
+    if (search) {
+      const q = search.toLowerCase()
+      const name = (p.tailors?.name || '').toLowerCase()
+      if (!name.includes(q)) return false
+    }
+    if (dateFrom && p.payment_date < dateFrom) return false
+    if (dateTo && p.payment_date > dateTo) return false
+    return true
+  })
+
   return (
     <div className="c-module">
       <header className="c-header">
@@ -84,12 +98,19 @@ export default function TailorPaymentsPage() {
           <h3 className="c-title">Tailor Payments</h3>
           <button className="c-add-btn" onClick={() => setShowForm(true)}>+ Record Payment</button>
         </div>
+        <div className="c-header-row" style={{ marginTop: 8, gap: 8 }}>
+          <input className="c-search" placeholder="Search by tailor name…" value={search} onChange={e => setSearch(e.target.value)} />
+          <input className="c-search" type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)} title="From date" />
+          <input className="c-search" type="date" value={dateTo} onChange={e => setDateTo(e.target.value)} title="To date" />
+        </div>
       </header>
 
       {loading ? (
         <p className="c-empty">Loading...</p>
       ) : payments.length === 0 ? (
         <p className="c-empty">No tailor payments recorded yet.</p>
+      ) : filtered.length === 0 ? (
+        <p className="c-empty">No tailor payments match your filters.</p>
       ) : (
         <div className="c-table-wrap">
           <table className="c-table">
@@ -105,7 +126,7 @@ export default function TailorPaymentsPage() {
               </tr>
             </thead>
             <tbody>
-              {payments.map(p => (
+              {filtered.map(p => (
                   <tr key={p.id}>
                     <td>{p.tailors?.name || '—'}</td>
                     <td className="mono">{p.invoice_number || '—'}</td>

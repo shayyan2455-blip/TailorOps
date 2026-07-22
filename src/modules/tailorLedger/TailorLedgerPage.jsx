@@ -14,6 +14,7 @@ export default function TailorLedgerPage() {
   const [expanded, setExpanded] = useState(null)
   const [detail, setDetail] = useState(null)
   const [detailLoading, setDetailLoading] = useState(false)
+  const [search, setSearch] = useState('')
 
   const load = useCallback(async () => {
     try {
@@ -52,16 +53,27 @@ export default function TailorLedgerPage() {
     }
   }
 
+  const filtered = ledgers.filter(row => {
+    if (!search) return true
+    const q = search.toLowerCase()
+    return (row.tailor_name || '').toLowerCase().includes(q)
+  })
+
   return (
     <div className="c-module">
       <header className="c-header">
         <h3 className="c-title">Tailor Ledger</h3>
+        <div style={{ marginTop: 8 }}>
+          <input className="c-search" placeholder="Search by tailor name…" value={search} onChange={e => setSearch(e.target.value)} />
+        </div>
       </header>
 
       {loading ? (
         <p className="c-empty">Loading...</p>
       ) : ledgers.length === 0 ? (
         <p className="c-empty">No tailor payments yet.</p>
+      ) : filtered.length === 0 ? (
+        <p className="c-empty">No tailors match your search.</p>
       ) : (
         <div className="c-table-wrap">
           <table className="c-table l-table">
@@ -74,7 +86,7 @@ export default function TailorLedgerPage() {
               </tr>
             </thead>
             <tbody>
-              {ledgers.map(row => {
+              {filtered.map(row => {
                 const bal = Number(row.balance)
                 return (
                   <>

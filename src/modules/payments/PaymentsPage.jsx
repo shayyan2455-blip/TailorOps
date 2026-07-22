@@ -18,6 +18,9 @@ export default function PaymentsPage() {
   const [showForm, setShowForm] = useState(false)
   const [receiptData, setReceiptData] = useState(null)
   const [confirmDelete, setConfirmDelete] = useState(null)
+  const [search, setSearch] = useState('')
+  const [dateFrom, setDateFrom] = useState('')
+  const [dateTo, setDateTo] = useState('')
 
   const load = useCallback(async () => {
     try {
@@ -71,6 +74,17 @@ export default function PaymentsPage() {
     setReceiptData({ paymentId: payment.id })
   }
 
+  const filtered = payments.filter(p => {
+    if (search) {
+      const q = search.toLowerCase()
+      const name = (p.customers?.name || p.orders?.customers?.name || '').toLowerCase()
+      if (!name.includes(q)) return false
+    }
+    if (dateFrom && p.payment_date < dateFrom) return false
+    if (dateTo && p.payment_date > dateTo) return false
+    return true
+  })
+
   const grouped = {}
   payments.forEach(p => {
     const cid = p.orders?.customer_id || 'unknown'
@@ -93,12 +107,19 @@ export default function PaymentsPage() {
           <h3 className="c-title">Customer Payments</h3>
           <button className="c-add-btn" onClick={() => setShowForm(true)}>+ Record Payment</button>
         </div>
+        <div className="c-header-row" style={{ marginTop: 8, gap: 8 }}>
+          <input className="c-search" placeholder="Search by customer name…" value={search} onChange={e => setSearch(e.target.value)} />
+          <input className="c-search" type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)} title="From date" />
+          <input className="c-search" type="date" value={dateTo} onChange={e => setDateTo(e.target.value)} title="To date" />
+        </div>
       </header>
 
       {loading ? (
         <p className="c-empty">Loading...</p>
       ) : payments.length === 0 ? (
         <p className="c-empty">No payments recorded yet.</p>
+      ) : filtered.length === 0 ? (
+        <p className="c-empty">No payments match your filters.</p>
       ) : (
         <div className="c-table-wrap">
           <table className="c-table">
@@ -114,7 +135,7 @@ export default function PaymentsPage() {
               </tr>
             </thead>
             <tbody>
-              {payments.map(p => {
+              {filtered.map(p => {
                 const customerName = p.customers?.name || p.orders?.customers?.name || '—'
                 const orderNum = p.orders?.order_number || (p.order_id === null ? '—' : '—')
                 const isCredit = p.order_id === null && p.payment_mode === 'Credit'
