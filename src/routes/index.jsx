@@ -31,6 +31,7 @@ import TailorLayout from '../modules/tailorPortal/TailorLayout'
 import MyWorkPage from '../modules/tailorPortal/MyWorkPage'
 import MyHistoryPage from '../modules/tailorPortal/MyHistoryPage'
 import MyEarningsPage from '../modules/tailorPortal/MyEarningsPage'
+import ForcedPasswordChangePage from '../modules/settings/ForcedPasswordChangePage'
 
 function TenantStatusGuard({ children }) {
   const { user, tenantStatus, loading, isAdmin } = useAuth()
@@ -66,6 +67,13 @@ function RoleGuard({ children }) {
   return children
 }
 
+function ForcePasswordChangeGuard({ children }) {
+  const { mustChangePassword, loading } = useAuth()
+  if (loading) return null
+  if (mustChangePassword) return <Navigate to="/change-password-required" replace />
+  return children
+}
+
 export default function AppRoutes() {
   return (
     <Routes>
@@ -74,13 +82,16 @@ export default function AppRoutes() {
       <Route path="/pending-approval" element={<PendingApprovalPage />} />
       <Route path="/rejected" element={<RejectedPage />} />
       <Route path="/suspended" element={<SuspendedPage />} />
+      <Route path="/change-password-required" element={<ForcedPasswordChangePage />} />
 
       <Route path="/dashboard" element={
+        <ForcePasswordChangeGuard>
         <TenantStatusGuard>
           <RoleGuard>
             <DashboardLayout />
           </RoleGuard>
         </TenantStatusGuard>
+        </ForcePasswordChangeGuard>
       }>
         <Route index element={<DashboardHome />} />
         <Route path="customers" element={<CustomersPage />} />
@@ -109,9 +120,11 @@ export default function AppRoutes() {
       </Route>
 
       <Route path="/tailor" element={
+        <ForcePasswordChangeGuard>
         <TenantStatusGuard>
           <TailorLayout />
         </TenantStatusGuard>
+        </ForcePasswordChangeGuard>
       }>
         <Route index element={<MyWorkPage />} />
         <Route path="history" element={<MyHistoryPage />} />

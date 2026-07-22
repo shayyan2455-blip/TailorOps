@@ -105,14 +105,15 @@ export function AuthProvider({ children }) {
     if (error) throw error
   }, [])
 
-  const tenantId = profile?.tenant_id || null
-  const role = profile?.role || null
+const tenantId = profile?.tenant_id || null
+const role = profile?.role || null
+const mustChangePassword = profile?.must_change_password || false
 
-  const value = {
-    user, session, profile, tenantId, tenantStatus, role,
-    loading, isAdmin,
-    signIn, signUp, signOut,
-  }
+const value = {
+  user, session, profile, tenantId, tenantStatus, role,
+  loading, isAdmin, mustChangePassword,
+  signIn, signUp, signOut,
+}
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

@@ -106,6 +106,7 @@ export default async function handler(req, res) {
         full_name: fullName,
         role,
         tailor_id: req.body.tailorId || null,
+        must_change_password: true,
       }),
     })
 

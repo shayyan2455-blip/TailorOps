@@ -229,6 +229,13 @@ a {
   .c-actions::before {
     display: none !important;
   }
+  table td.c-actions {
+    flex-direction: row !important;
+    align-items: center !important;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: flex-start;
+  }
   .table-wrap table {
     min-width: auto;
   }
