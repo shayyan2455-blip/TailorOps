@@ -5,9 +5,9 @@ export async function fetchTenant(tenantId) {
     .from('tenants')
     .select('*')
     .eq('id', tenantId)
-    .single()
   if (error) throw error
-  return data
+  if (!data || data.length === 0) throw new Error('Tenant not found')
+  return data[0]
 }
 
 export async function updateTenant(tenantId, payload) {
@@ -16,7 +16,6 @@ export async function updateTenant(tenantId, payload) {
     .update(payload)
     .eq('id', tenantId)
     .select()
-    .single()
   if (error) throw error
-  return data
+  return data?.[0] || null
 }
