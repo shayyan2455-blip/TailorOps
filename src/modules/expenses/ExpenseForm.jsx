@@ -9,7 +9,7 @@ export default function ExpenseForm({ initial, onSave, onCancel }) {
   const { tenantId } = useAuth()
   const [description, setDescription] = useState(initial?.description || '')
   const [payeeName, setPayeeName] = useState(initial?.payee_name || '')
-  const [totalAmount, setTotalAmount] = useState(initial?.total_amount?.toString() || '')
+  const [totalAmount, setTotalAmount] = useState(initial?.amount?.toString() || '')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const ref = useRef(null)
@@ -35,10 +35,10 @@ export default function ExpenseForm({ initial, onSave, onCancel }) {
     setSaving(true)
     setError('')
     try {
-      const result = await onSave({
+      const result =       await onSave({
         description: description.trim(),
         payee_name: payeeName.trim(),
-        total_amount: Number(totalAmount),
+        amount: Number(totalAmount),
         amount_paid: initial?.amount_paid || 0,
         credit: initial?.credit || 0,
       })
