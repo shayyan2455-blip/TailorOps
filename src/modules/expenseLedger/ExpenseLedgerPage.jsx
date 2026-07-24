@@ -120,6 +120,20 @@ export default function ExpenseLedgerPage() {
                             ? `Rs. ${Math.abs(bal).toFixed(0)} excess`
                             : 'Rs. 0'
                         }
+                        <span style={{ cursor: 'pointer', marginLeft: 8, display: 'inline-flex', verticalAlign: 'middle' }}
+                          onClick={async (e) => {
+                            e.stopPropagation()
+                            try {
+                              const entries = await fetchExpenseLedgerDetail(row.expense_id, tenantId)
+                              printLedgerStatement({
+                                tenant, partyLabel: 'Expense', partyName: row.description,
+                                partyMeta: row.payee_name, entries, closingBalance: row.balance,
+                              })
+                            } catch (err) { showToast(err.message, 'error') }
+                          }}
+                          title="Print statement">
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                        </span>
                       </td>
                     </tr>
                     {expanded === row.expense_id && (
@@ -130,18 +144,7 @@ export default function ExpenseLedgerPage() {
                           ) : !detail || detail.length === 0 ? (
                             <p className="l-detail-loading">No entries.</p>
                           ) : (
-                            <>
-                              <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>
-                                <button className="c-action-btn" onClick={() => printLedgerStatement({
-                                  tenant,
-                                  partyLabel: 'Expense',
-                                  partyName: row.description,
-                                  partyMeta: row.payee_name,
-                                  entries: detail,
-                                  closingBalance: row.balance,
-                                })}>Print</button>
-                              </div>
-                              <table className="l-subtable">
+                            <table className="l-subtable">
                                 <thead>
                                   <tr>
                                     <th>Date</th>
@@ -176,7 +179,6 @@ export default function ExpenseLedgerPage() {
                                   })}
                                 </tbody>
                               </table>
-                            </>
                           )}
                         </td>
                       </tr>
