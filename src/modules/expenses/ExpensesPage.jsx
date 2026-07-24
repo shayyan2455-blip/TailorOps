@@ -3,6 +3,7 @@ import { useAuth } from '../../context/AuthContext'
 import { useToast } from '../../context/ToastContext'
 import { fetchExpenses, createExpense, updateExpense, deleteExpense } from './api/expenseQueries'
 import ExpenseForm from './ExpenseForm'
+import ExpenseInvoiceView from './components/ExpenseInvoiceView'
 import { useTopbar } from '../../shared/context/TopbarContext'
 import ConfirmModal from '../../shared/components/ConfirmModal'
 
@@ -15,6 +16,7 @@ export default function ExpensesPage() {
   const [showForm, setShowForm] = useState(false)
   const [editing, setEditing] = useState(null)
   const [confirmDelete, setConfirmDelete] = useState(null)
+  const [invoiceExpenseId, setInvoiceExpenseId] = useState(null)
   const [search, setSearch] = useState('')
 
   const load = useCallback(async () => {
@@ -122,6 +124,7 @@ export default function ExpensesPage() {
                       }
                     </td>
                     <td className="c-actions">
+                      <button className="c-action-btn" onClick={() => setInvoiceExpenseId(e.id)}>Invoice</button>
                       <button className="c-action-btn" onClick={() => handleEdit(e)}>Edit</button>
                       <button className="c-action-btn c-action-destructive" onClick={() => setConfirmDelete(e.id)}>Delete</button>
                     </td>
@@ -143,6 +146,10 @@ export default function ExpensesPage() {
 
       {confirmDelete !== null && (
         <ConfirmModal message="Delete this expense?" onConfirm={() => handleDelete(confirmDelete)} onCancel={() => setConfirmDelete(null)} />
+      )}
+
+      {invoiceExpenseId && (
+        <ExpenseInvoiceView expenseId={invoiceExpenseId} onClose={() => setInvoiceExpenseId(null)} />
       )}
     </div>
   )

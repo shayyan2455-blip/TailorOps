@@ -14,6 +14,27 @@ export async function fetchExpense(id) {
   return data
 }
 
+export async function fetchExpenseForInvoice(expenseId) {
+  const { data: expense, error } = await supabase
+    .from('expenses')
+    .select('*')
+    .eq('id', expenseId)
+    .single()
+  if (error) throw error
+
+  const { data: payments } = await supabase
+    .from('expense_payments')
+    .select('amount, payment_date, payment_mode, invoice_number')
+    .eq('expense_id', expenseId)
+    .order('payment_date', { ascending: true })
+
+  return {
+    expense,
+    payments: payments || [],
+    balance: Number(expense.amount) - Number(expense.amount_paid),
+  }
+}
+
 export async function createExpense(tenantId, payload) {
   const { data, error } = await supabase.from('expenses').insert({ ...payload, tenant_id: tenantId }).select().single()
   if (error) throw error
