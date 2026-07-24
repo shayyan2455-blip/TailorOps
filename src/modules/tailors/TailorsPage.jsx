@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import { useToast } from '../../context/ToastContext'
+import { formatDate } from '../../shared/lib/formatDate'
+import { fetchTenant } from '../settings/api/settingsQueries'
 import { fetchTailors, createTailor, updateTailor, deleteTailor, fetchWorkAssignments, removeAssignment } from './api/tailorQueries'
 import TailorForm from './components/TailorForm'
 import { useTopbar } from '../../shared/context/TopbarContext'
@@ -19,6 +21,57 @@ export default function TailorsPage() {
   const [selected, setSelected] = useState(null)
   const [assignments, setAssignments] = useState([])
   const [confirmDelete, setConfirmDelete] = useState(null)
+  const [tenant, setTenant] = useState(null)
+
+  useEffect(() => {
+    if (tenantId) fetchTenant(tenantId).then(setTenant).catch(() => {})
+  }, [tenantId])
+
+  const printTailors = () => {
+    const rows = tailors.map(t => `
+      <tr>
+        <td>${t.name || '—'}</td>
+        <td>${t.mobile || '—'}</td>
+        <td>${t.active ? 'Active' : 'Inactive'}</td>
+      </tr>`).join('')
+
+    const html = `<!DOCTYPE html>
+<html><head><title>Tailors</title>
+<style>
+  @page { size: A4; margin: 12mm; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Georgia, 'Times New Roman', serif; font-size: 12px; color: #111; }
+  .identity { text-align: center; margin-bottom: 14px; }
+  .shop-name { font-size: 20px; font-weight: 700; }
+  .meta { font-size: 11px; color: #555; margin-top: 4px; }
+  table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+  th, td { text-align: left; padding: 5px 8px; border-bottom: 1px solid #ddd; font-size: 11px; }
+  th { font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; color: #666; font-family: 'Courier New', monospace; }
+  .footer { text-align: center; font-size: 10px; color: #666; margin-top: 16px; border-top: 1px solid #ccc; padding-top: 8px; }
+</style></head>
+<body>
+  <div class="identity">
+    <div class="shop-name">${tenant?.name || 'Tailor Shop'}</div>
+    <div class="meta">Tailors — ${tailors.length} total</div>
+  </div>
+  <table>
+    <thead><tr><th>Name</th><th>Mobile</th><th>Status</th></tr></thead>
+    <tbody>${rows}</tbody>
+  </table>
+  <div class="footer">Generated on ${formatDate(new Date().toISOString().slice(0, 10))} · TailorOps</div>
+</body></html>`
+
+    const iframe = document.createElement('iframe')
+    iframe.style.cssText = 'position:fixed;width:0;height:0;border:none;opacity:0;pointer-events:none;'
+    document.body.appendChild(iframe)
+    const doc = iframe.contentDocument || iframe.contentWindow.document
+    doc.open(); doc.write(html); doc.close()
+    iframe.contentWindow.focus()
+    setTimeout(() => {
+      try { iframe.contentWindow.print() } catch {}
+      setTimeout(() => { if (iframe.parentNode) iframe.parentNode.removeChild(iframe) }, 1000)
+    }, 300)
+  }
 
   const load = useCallback(async () => {
     try {
@@ -97,7 +150,10 @@ export default function TailorsPage() {
       <header className="c-header">
         <div className="c-header-row">
           <h3 className="c-title">Tailors</h3>
-          <button className="c-add-btn" onClick={() => { setEditing(null); setShowForm(true) }}>+ Add Tailor</button>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button className="c-add-btn" onClick={printTailors}>Print PDF</button>
+            <button className="c-add-btn" onClick={() => { setEditing(null); setShowForm(true) }}>+ Add Tailor</button>
+          </div>
         </div>
         <div className="c-search-wrap">
           <input className="c-search" placeholder="Search by name or mobile..." value={search} onChange={e => setSearch(e.target.value)} />

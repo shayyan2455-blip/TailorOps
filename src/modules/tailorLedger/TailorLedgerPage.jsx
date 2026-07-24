@@ -43,6 +43,58 @@ export default function TailorLedgerPage() {
     return () => setTopbar('', null)
   }, [setTopbar])
 
+  const printLedger = () => {
+    const currency = tenant?.currency || 'Rs.'
+    const rows = filtered.map(row => {
+      const bal = Number(row.balance)
+      return `
+      <tr>
+        <td>${row.tailor_name || '—'}</td>
+        <td class="num">${currency} ${Number(row.total_amount).toFixed(0)}</td>
+        <td class="num">${currency} ${Number(row.total_paid).toFixed(0)}</td>
+        <td class="num">${currency} ${Math.abs(bal).toFixed(0)}${bal > 0 ? ' due' : bal < 0 ? ' excess' : ''}</td>
+      </tr>`
+    }).join('')
+
+    const html = `<!DOCTYPE html>
+<html><head><title>Tailor Ledger</title>
+<style>
+  @page { size: A4 landscape; margin: 12mm; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Georgia, 'Times New Roman', serif; font-size: 12px; color: #111; }
+  .identity { text-align: center; margin-bottom: 14px; }
+  .shop-name { font-size: 20px; font-weight: 700; }
+  .meta { font-size: 11px; color: #555; margin-top: 4px; }
+  table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+  th, td { text-align: left; padding: 5px 8px; border-bottom: 1px solid #ddd; font-size: 11px; }
+  th { font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; color: #666; font-family: 'Courier New', monospace; }
+  .num { text-align: right; font-family: 'Courier New', monospace; }
+  .footer { text-align: center; font-size: 10px; color: #666; margin-top: 16px; border-top: 1px solid #ccc; padding-top: 8px; }
+</style></head>
+<body>
+  <div class="identity">
+    <div class="shop-name">${tenant?.name || 'Tailor Shop'}</div>
+    <div class="meta">Tailor Ledger — ${filtered.length} tailor${filtered.length !== 1 ? 's' : ''}</div>
+  </div>
+  <table>
+    <thead><tr><th>Tailor</th><th class="num">Total Amount</th><th class="num">Total Paid</th><th class="num">Balance</th></tr></thead>
+    <tbody>${rows}</tbody>
+  </table>
+  <div class="footer">Generated on ${formatDate(new Date().toISOString().slice(0, 10))} · TailorOps</div>
+</body></html>`
+
+    const iframe = document.createElement('iframe')
+    iframe.style.cssText = 'position:fixed;width:0;height:0;border:none;opacity:0;pointer-events:none;'
+    document.body.appendChild(iframe)
+    const doc = iframe.contentDocument || iframe.contentWindow.document
+    doc.open(); doc.write(html); doc.close()
+    iframe.contentWindow.focus()
+    setTimeout(() => {
+      try { iframe.contentWindow.print() } catch {}
+      setTimeout(() => { if (iframe.parentNode) iframe.parentNode.removeChild(iframe) }, 1000)
+    }, 300)
+  }
+
   const toggleExpand = async (tailorId) => {
     if (expanded === tailorId) {
       setExpanded(null)
@@ -70,7 +122,10 @@ export default function TailorLedgerPage() {
   return (
     <div className="c-module">
       <header className="c-header">
-        <h3 className="c-title">Tailor Ledger</h3>
+        <div className="c-header-row">
+          <h3 className="c-title">Tailor Ledger</h3>
+          <button className="c-add-btn" onClick={printLedger}>Print PDF</button>
+        </div>
         <div style={{ marginTop: 8 }}>
           <input className="c-search" placeholder="Search by tailor name…" value={search} onChange={e => setSearch(e.target.value)} />
         </div>
