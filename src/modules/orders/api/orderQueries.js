@@ -59,3 +59,16 @@ export async function deleteOrder(id) {
   const { error } = await supabase.from('orders').delete().eq('id', id)
   if (error) throw error
 }
+
+export async function recordOrderPayment(tenantId, payload) {
+  const { data, error } = await supabase.rpc('record_order_payment', {
+    p_tenant_id: tenantId,
+    p_order_id: payload.order_id,
+    p_amount: payload.amount,
+    p_payment_date: payload.payment_date,
+    p_payment_mode: payload.payment_mode,
+    p_notes: payload.notes || null,
+  })
+  if (error) throw error
+  return data
+}

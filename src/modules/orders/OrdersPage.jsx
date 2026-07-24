@@ -72,6 +72,10 @@ export default function OrdersPage() {
         }
 
         showToast('Order updated.')
+        setShowForm(false)
+        setEditing(null)
+        load()
+        return null
       } else {
         const { data: orderNum, error: numErr } = await supabase.rpc('generate_order_number', { p_tenant_id: tenantId })
         if (numErr) throw new Error(numErr.message)
@@ -102,13 +106,13 @@ export default function OrdersPage() {
         } else {
           showToast('Order created.')
         }
-      }
 
-      setShowForm(false)
-      setEditing(null)
-      load()
+        load()
+        return { id: orderId, customer_id: orderData.customer_id, total_amount: orderData.total_amount, order_number: orderNum }
+      }
     } catch (err) {
       showToast(err.message, 'error')
+      throw err
     }
   }
 

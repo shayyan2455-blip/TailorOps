@@ -2,9 +2,12 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { useAuth } from '../../../context/AuthContext'
 import { fetchCustomers } from '../../customers/api/customerQueries'
 import { fetchMeasurementsByCustomer } from '../../measurements/api/measurementQueries'
+import { recordOrderPayment } from '../../orders/api/orderQueries'
+import ReceiptView from '../../../modules/payments/components/ReceiptView'
 import MeasurementForm from '../../measurements/components/MeasurementForm'
 
 const EMPTY_ITEM = { garment_name: '', quantity: 1, rate: 0, amount: 0 }
+const MODES = ['Cash', 'JazzCash', 'Card', 'Bank Transfer', 'Other']
 
 export default function OrderForm({ order, onSave, onCancel }) {
   const { tenantId } = useAuth()
@@ -18,20 +21,32 @@ export default function OrderForm({ order, onSave, onCancel }) {
   const [error, setError] = useState('')
   const firstRef = useRef(null)
 
+  const [savedOrder, setSavedOrder] = useState(order)
+
+  const [showPayment, setShowPayment] = useState(false)
+  const [pmtAmount, setPmtAmount] = useState('')
+  const [pmtDate, setPmtDate] = useState(new Date().toISOString().slice(0, 10))
+  const [pmtMode, setPmtMode] = useState('Cash')
+  const [pmtNotes, setPmtNotes] = useState('')
+  const [pmtSaving, setPmtSaving] = useState(false)
+  const [pmtError, setPmtError] = useState('')
+  const [pmtReceiptId, setPmtReceiptId] = useState(null)
+
   useEffect(() => {
     fetchCustomers().then(setCustomers).catch(() => {})
   }, [])
 
   useEffect(() => {
-    if (order) {
-      setCustomerId(order.customer_id)
-      setItems(order.order_items?.map(i => ({ garment_name: i.garment_name, quantity: i.quantity, rate: Number(i.rate), amount: Number(i.amount) })) || [{ ...EMPTY_ITEM }])
-      setDeliveryDate(order.delivery_date || '')
-      setNotes(order.notes || '')
-      if (order.measurements?.length) setMeasData(order.measurements[0].data || {})
+    const target = savedOrder || order
+    if (target) {
+      setCustomerId(target.customer_id)
+      setItems(target.order_items?.map(i => ({ garment_name: i.garment_name, quantity: i.quantity, rate: Number(i.rate), amount: Number(i.amount) })) || [{ ...EMPTY_ITEM }])
+      setDeliveryDate(target.delivery_date || '')
+      setNotes(target.notes || '')
+      if (target.measurements?.length) setMeasData(target.measurements[0].data || {})
     }
     setTimeout(() => firstRef.current?.focus(), 100)
-  }, [order])
+  }, [order, savedOrder])
 
   const loadMeasurements = useCallback(async (cId) => {
     if (!cId) { setMeasData({}); return }
@@ -44,7 +59,7 @@ export default function OrderForm({ order, onSave, onCancel }) {
   const handleCustomerChange = (e) => {
     const val = e.target.value
     setCustomerId(val)
-    if (val && !order) loadMeasurements(val)
+    if (val && !order && !savedOrder) loadMeasurements(val)
   }
 
   const totalAmount = items.reduce((sum, i) => sum + (Number(i.amount) || 0), 0)
@@ -71,7 +86,7 @@ export default function OrderForm({ order, onSave, onCancel }) {
     setSaving(true)
     setError('')
     try {
-      await onSave({
+      const result = await onSave({
         customer_id: customerId,
         total_amount: totalAmount,
         delivery_date: deliveryDate || null,
@@ -79,6 +94,9 @@ export default function OrderForm({ order, onSave, onCancel }) {
         items: items.filter(i => i.garment_name),
         measurements: Object.keys(measData).length > 0 ? measData : null,
       })
+      if (result && result.id) {
+        setSavedOrder(result)
+      }
     } catch (err) {
       setError(err.message || 'Failed to save order.')
     } finally {
@@ -86,9 +104,38 @@ export default function OrderForm({ order, onSave, onCancel }) {
     }
   }
 
+  const handlePayment = async (e) => {
+    e.preventDefault()
+    const orderId = savedOrder?.id || order?.id
+    if (!orderId) return
+    const amt = Number(pmtAmount)
+    if (!amt || amt <= 0) { setPmtError('Enter a valid amount.'); return }
+    setPmtSaving(true)
+    setPmtError('')
+    try {
+      const paymentId = await recordOrderPayment(tenantId, {
+        order_id: orderId,
+        amount: amt,
+        payment_date: pmtDate,
+        payment_mode: pmtMode,
+        notes: pmtNotes,
+      })
+      setPmtReceiptId(paymentId)
+      setPmtAmount('')
+      setPmtNotes('')
+      setShowPayment(false)
+    } catch (err) {
+      setPmtError(err.message || 'Failed to record payment.')
+    } finally {
+      setPmtSaving(false)
+    }
+  }
+
+  const activeOrder = savedOrder || order
+
   return (
     <form className="c-form" onSubmit={handleSubmit}>
-      <h3 className="c-form-title">{order ? 'Edit Order' : 'New Order'}</h3>
+      <h3 className="c-form-title">{activeOrder ? 'Edit Order' : 'New Order'}</h3>
 
       <label className="c-form-field">
         <span className="c-form-label">Customer *</span>
@@ -134,9 +181,53 @@ export default function OrderForm({ order, onSave, onCancel }) {
       <div className="c-form-actions">
         <button type="button" className="c-form-cancel" onClick={onCancel}>Cancel</button>
         <button type="submit" className="c-form-save" disabled={saving}>
-          {saving ? 'Saving...' : order ? 'Update Order' : 'Create Order'}
+          {saving ? 'Saving...' : activeOrder ? 'Update Order' : 'Create Order'}
         </button>
       </div>
+
+      {activeOrder && (
+        <div className="c-form-field" style={{ marginTop: 12 }}>
+          {!showPayment ? (
+            <button type="button" className="c-form-save" style={{ width: '100%' }} onClick={() => setShowPayment(true)}>+ Add a Payment</button>
+          ) : (
+            <div style={{ background: 'var(--card-bg)', padding: 12, borderRadius: 8, border: '1px solid var(--border-color)' }}>
+              <span className="c-form-label">Record Payment</span>
+              <label className="c-form-field" style={{ marginTop: 8 }}>
+                <span className="c-form-label">Amount</span>
+                <input className="c-form-input" type="number" min="0" step="0.01" value={pmtAmount} onChange={e => setPmtAmount(e.target.value)} placeholder="0.00" />
+              </label>
+              <label className="c-form-field">
+                <span className="c-form-label">Date</span>
+                <input className="c-form-input" type="date" value={pmtDate} onChange={e => setPmtDate(e.target.value)} />
+              </label>
+              <label className="c-form-field">
+                <span className="c-form-label">Mode</span>
+                <select className="c-form-input" value={pmtMode} onChange={e => setPmtMode(e.target.value)}>
+                  {MODES.map(m => <option key={m} value={m}>{m}</option>)}
+                </select>
+              </label>
+              <label className="c-form-field">
+                <span className="c-form-label">Notes (optional)</span>
+                <input className="c-form-input" value={pmtNotes} onChange={e => setPmtNotes(e.target.value)} placeholder="optional" />
+              </label>
+              {pmtError && <div className="c-form-error">{pmtError}</div>}
+              <div className="c-form-actions" style={{ marginTop: 8 }}>
+                <button type="button" className="c-form-cancel" onClick={() => { setShowPayment(false); setPmtError('') }}>Cancel</button>
+                <button type="button" className="c-form-save" onClick={handlePayment} disabled={pmtSaving}>
+                  {pmtSaving ? 'Saving...' : 'Record Payment'}
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {pmtReceiptId && (
+        <ReceiptView
+          paymentId={pmtReceiptId}
+          onClose={() => setPmtReceiptId(null)}
+        />
+      )}
     </form>
   )
 }

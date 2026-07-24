@@ -41,6 +41,10 @@ export default function ExpensesPage() {
       if (editing) {
         await updateExpense(editing.id, payload)
         showToast('Expense updated.')
+        setShowForm(false)
+        setEditing(null)
+        load()
+        return null
       } else {
         const result = await createExpense(tenantId, payload)
         if (result.creditApplied > 0) {
@@ -48,12 +52,12 @@ export default function ExpensesPage() {
         } else {
           showToast('Expense created.')
         }
+        load()
+        return result.expense
       }
-      setShowForm(false)
-      setEditing(null)
-      load()
     } catch (err) {
       showToast(err.message, 'error')
+      throw err
     }
   }
 
