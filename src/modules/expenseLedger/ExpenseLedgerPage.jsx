@@ -104,7 +104,7 @@ export default function ExpenseLedgerPage() {
                         {row.description}
                       </td>
                       <td>{row.payee_name}</td>
-                      <td className="l-num mono">Rs. {Number(row.total_amount).toFixed(0)}</td>
+                      <td className="l-num mono">Rs. {Number(row.amount).toFixed(0)}</td>
                       <td className="l-num mono">Rs. {Number(row.amount_paid).toFixed(0)}</td>
                       <td className={`l-num mono l-bal ${bal > 0 ? 'l-due' : bal < 0 ? 'l-excess' : ''}`}>
                         {bal > 0

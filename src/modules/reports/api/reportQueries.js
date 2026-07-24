@@ -63,7 +63,7 @@ export async function fetchExpensesBreakdown(tenantId, start, end) {
     .from('expenses')
     .select(`
       payee_name,
-      total_amount,
+      amount,
       expense_payments!inner(amount, payment_date)
     `)
     .eq('tenant_id', tenantId)
@@ -76,7 +76,7 @@ export async function fetchExpensesBreakdown(tenantId, start, end) {
   data?.forEach(exp => {
     const payee = exp.payee_name || 'Unknown'
     if (!payeeMap[payee]) payeeMap[payee] = { payee, total: 0, paid: 0 }
-    payeeMap[payee].total += Number(exp.total_amount)
+    payeeMap[payee].total += Number(exp.amount)
     exp.expense_payments?.forEach(ep => {
       payeeMap[payee].paid += Number(ep.amount)
     })

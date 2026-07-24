@@ -106,12 +106,12 @@ export default function ExpensesPage() {
             </thead>
             <tbody>
               {expenses.map(e => {
-                const bal = Number(e.total_amount) - Number(e.amount_paid)
+                const bal = Number(e.amount) - Number(e.amount_paid)
                 return (
                   <tr key={e.id}>
                     <td>{e.description}</td>
                     <td>{e.payee_name}</td>
-                    <td className="l-num mono">Rs. {Number(e.total_amount).toFixed(0)}</td>
+                    <td className="l-num mono">Rs. {Number(e.amount).toFixed(0)}</td>
                     <td className="l-num mono">Rs. {Number(e.amount_paid).toFixed(0)}</td>
                     <td className={`l-num mono ${bal > 0 ? 'l-due' : bal < 0 ? 'l-excess' : ''}`}>
                       {bal > 0

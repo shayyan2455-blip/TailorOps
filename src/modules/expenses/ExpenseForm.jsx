@@ -35,7 +35,7 @@ export default function ExpenseForm({ initial, onSave, onCancel }) {
     setSaving(true)
     setError('')
     try {
-      const result =       await onSave({
+      const result = await onSave({
         description: description.trim(),
         payee_name: payeeName.trim(),
         amount: Number(totalAmount),
