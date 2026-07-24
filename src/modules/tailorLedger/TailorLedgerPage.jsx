@@ -91,6 +91,7 @@ export default function TailorLedgerPage() {
                 <th className="l-num mono">Total Amount</th>
                 <th className="l-num mono">Total Paid</th>
                 <th className="l-num mono">Balance</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -116,7 +117,9 @@ export default function TailorLedgerPage() {
                             ? `Rs. ${Math.abs(bal).toFixed(0)} excess`
                             : 'Rs. 0'
                         }
-                        <span style={{ cursor: 'pointer', marginLeft: 8, display: 'inline-flex', verticalAlign: 'middle' }}
+                      </td>
+                      <td className="c-actions">
+                        <span style={{ cursor: 'pointer', display: 'inline-flex', verticalAlign: 'middle' }}
                           onClick={async (e) => {
                             e.stopPropagation()
                             try {
@@ -134,7 +137,7 @@ export default function TailorLedgerPage() {
                     </tr>
                     {expanded === row.tailor_id && (
                       <tr key={`${row.tailor_id}-detail`}>
-                        <td colSpan={4} className="l-detail-cell">
+                        <td colSpan={5} className="l-detail-cell">
                           {detailLoading ? (
                             <p className="l-detail-loading">Loading...</p>
                           ) : !detail || detail.length === 0 ? (

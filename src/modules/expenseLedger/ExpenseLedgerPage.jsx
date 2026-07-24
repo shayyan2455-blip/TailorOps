@@ -94,6 +94,7 @@ export default function ExpenseLedgerPage() {
                 <th className="l-num mono">Total Amount</th>
                 <th className="l-num mono">Paid</th>
                 <th className="l-num mono">Balance</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -120,7 +121,9 @@ export default function ExpenseLedgerPage() {
                             ? `Rs. ${Math.abs(bal).toFixed(0)} excess`
                             : 'Rs. 0'
                         }
-                        <span style={{ cursor: 'pointer', marginLeft: 8, display: 'inline-flex', verticalAlign: 'middle' }}
+                      </td>
+                      <td className="c-actions">
+                        <span style={{ cursor: 'pointer', display: 'inline-flex', verticalAlign: 'middle' }}
                           onClick={async (e) => {
                             e.stopPropagation()
                             try {
@@ -138,7 +141,7 @@ export default function ExpenseLedgerPage() {
                     </tr>
                     {expanded === row.expense_id && (
                       <tr key={`${row.expense_id}-detail`}>
-                        <td colSpan={5} className="l-detail-cell">
+                        <td colSpan={6} className="l-detail-cell">
                           {detailLoading ? (
                             <p className="l-detail-loading">Loading...</p>
                           ) : !detail || detail.length === 0 ? (

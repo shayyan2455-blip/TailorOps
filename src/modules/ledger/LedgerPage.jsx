@@ -91,6 +91,7 @@ export default function LedgerPage() {
                 <th className="l-num mono">Total Amount</th>
                 <th className="l-num mono">Total Paid</th>
                 <th className="l-num mono">Balance</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -117,7 +118,9 @@ export default function LedgerPage() {
                             ? `Rs. ${bal.toFixed(0)} due`
                             : 'Rs. 0'
                         }
-                        <span style={{ cursor: 'pointer', marginLeft: 8, display: 'inline-flex', verticalAlign: 'middle' }}
+                      </td>
+                      <td className="c-actions">
+                        <span style={{ cursor: 'pointer', display: 'inline-flex', verticalAlign: 'middle' }}
                           onClick={async (e) => {
                             e.stopPropagation()
                             try {
@@ -136,7 +139,7 @@ export default function LedgerPage() {
                     </tr>
                     {expanded === row.customer_id && (
                       <tr key={`${row.customer_id}-detail`}>
-                        <td colSpan={4} className="l-detail-cell">
+                        <td colSpan={5} className="l-detail-cell">
                           {detailLoading ? (
                             <p className="l-detail-loading">Loading...</p>
                           ) : !detail || detail.length === 0 ? (
