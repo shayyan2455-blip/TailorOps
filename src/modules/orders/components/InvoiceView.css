@@ -4,9 +4,10 @@
   z-index: 8000;
   background: color-mix(in srgb, #000 50%, transparent);
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: center;
-  padding: 24px;
+  padding: 16px 24px;
+  overflow-y: auto;
 }
 
 .inv-modal {
@@ -14,10 +15,9 @@
   border: 1px solid color-mix(in srgb, var(--text-color) 12%, transparent);
   border-radius: 14px;
   width: 100%;
-  max-width: 720px;
-  max-height: 98vh;
-  overflow-y: auto;
+  max-width: 760px;
   position: relative;
+  margin-top: 12px;
 }
 
 .inv-close-btn {
