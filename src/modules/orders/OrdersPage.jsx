@@ -109,7 +109,7 @@ export default function OrdersPage() {
   useEffect(() => { load() }, [load])
 
   useEffect(() => {
-    setTopbar('Orders', <><button className="c-add-btn" onClick={() => { setEditing(null); setShowForm(true) }}>+ New Order</button><button className="c-add-btn" style={{ marginLeft: 8 }} onClick={printOrders}>Print PDF</button></>)
+    setTopbar('Orders', <div style={{ display: 'flex', gap: 8 }}><button className="c-add-btn" onClick={() => { setEditing(null); setShowForm(true) }}>+ New Order</button><button className="c-add-btn" onClick={printOrders}>Print PDF</button></div>)
     return () => setTopbar('', null)
   }, [setTopbar])
 
