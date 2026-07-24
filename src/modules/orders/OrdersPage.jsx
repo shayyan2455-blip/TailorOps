@@ -200,7 +200,10 @@ export default function OrdersPage() {
       <header className="c-header">
         <div className="c-header-row">
           <h3 className="c-title">Orders</h3>
-          <button className="c-add-btn" onClick={() => { setEditing(null); setShowForm(true) }}>+ New Order</button>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button className="c-add-btn" onClick={printOrders}>Print PDF</button>
+            <button className="c-add-btn" onClick={() => { setEditing(null); setShowForm(true) }}>+ New Order</button>
+          </div>
         </div>
         <div className="o-filters">
           <input className="c-search o-filter-item" placeholder="Search by order# or customer name…" value={search} onChange={e => setSearch(e.target.value)} />
