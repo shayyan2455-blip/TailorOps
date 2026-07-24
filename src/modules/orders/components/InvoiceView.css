@@ -14,8 +14,8 @@
   border: 1px solid color-mix(in srgb, var(--text-color) 12%, transparent);
   border-radius: 14px;
   width: 100%;
-  max-width: 640px;
-  max-height: 90vh;
+  max-width: 720px;
+  max-height: 98vh;
   overflow-y: auto;
   position: relative;
 }
