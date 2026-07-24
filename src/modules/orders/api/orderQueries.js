@@ -60,6 +60,25 @@ export async function deleteOrder(id) {
   if (error) throw error
 }
 
+export async function fetchOrderForInvoice(orderId) {
+  const { data: order, error } = await supabase
+    .from('orders')
+    .select('*, customers(*), order_items(*), measurements(*)')
+    .eq('id', orderId)
+    .single()
+  if (error) throw error
+
+  const { data: payments } = await supabase
+    .from('payments')
+    .select('amount, payment_date, payment_mode')
+    .eq('order_id', orderId)
+    .order('payment_date', { ascending: true })
+
+  const paid = (payments || []).reduce((s, p) => s + Number(p.amount), 0)
+
+  return { order, payments: payments || [], paid, balance: Number(order.total_amount) - paid }
+}
+
 export async function recordOrderPayment(tenantId, payload) {
   const { data, error } = await supabase.rpc('record_order_payment', {
     p_tenant_id: tenantId,

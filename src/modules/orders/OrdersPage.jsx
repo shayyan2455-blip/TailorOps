@@ -7,6 +7,7 @@ import { supabase } from '../../shared/lib/supabaseClient'
 import { fetchOrders, createOrder, updateOrder, deleteOrder } from './api/orderQueries'
 import { saveMeasurement } from '../measurements/api/measurementQueries'
 import OrderForm from './components/OrderForm'
+import InvoiceView from './components/InvoiceView'
 import ConfirmModal from '../../shared/components/ConfirmModal'
 import './OrdersPage.css'
 
@@ -26,6 +27,7 @@ export default function OrdersPage() {
   const [editing, setEditing] = useState(null)
   const [detail, setDetail] = useState(null)
   const [confirmDelete, setConfirmDelete] = useState(null)
+  const [invoiceOrderId, setInvoiceOrderId] = useState(null)
 
   const load = useCallback(async () => {
     try {
@@ -181,6 +183,7 @@ export default function OrdersPage() {
                   <td>Rs. {Number(o.total_amount).toFixed(0)}</td>
                   <td>{formatDate(o.delivery_date)}</td>
                   <td className="c-actions">
+                    <button className="c-action-btn" onClick={() => setInvoiceOrderId(o.id)}>Invoice</button>
                     <button className="c-action-btn" onClick={() => { setEditing(o); setShowForm(true) }}>Edit</button>
                     <button className="c-action-btn c-action-destructive" onClick={() => setConfirmDelete(o.id)}>Delete</button>
                   </td>
@@ -231,6 +234,10 @@ export default function OrdersPage() {
 
       {confirmDelete !== null && (
         <ConfirmModal message="Delete this order?" onConfirm={() => handleDelete(confirmDelete)} onCancel={() => setConfirmDelete(null)} />
+      )}
+
+      {invoiceOrderId && (
+        <InvoiceView orderId={invoiceOrderId} onClose={() => setInvoiceOrderId(null)} />
       )}
     </div>
   )
