@@ -3,6 +3,8 @@ import { useAuth } from '../../context/AuthContext'
 import { useToast } from '../../context/ToastContext'
 import { useTopbar } from '../../shared/context/TopbarContext'
 import { formatDate } from '../../shared/lib/formatDate'
+import { fetchTenant } from '../settings/api/settingsQueries'
+import { printLedgerStatement } from '../../shared/lib/printLedger'
 import { fetchCustomerLedgers, fetchCustomerLedger } from './api/ledgerQueries'
 import './LedgerPage.css'
 
@@ -16,6 +18,7 @@ export default function LedgerPage() {
   const [detail, setDetail] = useState(null)
   const [detailLoading, setDetailLoading] = useState(false)
   const [search, setSearch] = useState('')
+  const [tenant, setTenant] = useState(null)
 
   const load = useCallback(async () => {
     try {
@@ -30,6 +33,10 @@ export default function LedgerPage() {
   }, [tenantId, showToast])
 
   useEffect(() => { load() }, [load])
+
+  useEffect(() => {
+    if (tenantId) fetchTenant(tenantId).then(setTenant).catch(() => {})
+  }, [tenantId])
 
   useEffect(() => {
     setTopbar('Customer Ledger', null)
@@ -120,8 +127,18 @@ export default function LedgerPage() {
                           ) : !detail || detail.length === 0 ? (
                             <p className="l-detail-loading">No transactions.</p>
                           ) : (
-                            <table className="l-subtable">
-                              <thead>
+                            <>
+                              <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>
+                                <button className="c-action-btn" onClick={() => printLedgerStatement({
+                                  tenant,
+                                  partyLabel: 'Customer',
+                                  partyName: row.customer_name,
+                                  entries: detail.map(e => ({ ...e, ref: e.invoice_or_order })),
+                                  closingBalance: row.balance,
+                                })}>Print</button>
+                              </div>
+                              <table className="l-subtable">
+                                <thead>
                                 <tr>
                                   <th>Date</th>
                                   <th>Description</th>
@@ -153,6 +170,7 @@ export default function LedgerPage() {
                                 })}
                               </tbody>
                             </table>
+                            </>
                           )}
                         </td>
                       </tr>

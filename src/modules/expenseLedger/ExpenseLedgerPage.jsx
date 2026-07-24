@@ -3,6 +3,8 @@ import { useAuth } from '../../context/AuthContext'
 import { useToast } from '../../context/ToastContext'
 import { useTopbar } from '../../shared/context/TopbarContext'
 import { formatDate } from '../../shared/lib/formatDate'
+import { fetchTenant } from '../settings/api/settingsQueries'
+import { printLedgerStatement } from '../../shared/lib/printLedger'
 import { fetchExpenseLedgers, fetchExpenseLedgerDetail } from './api/expenseLedgerQueries'
 import '../ledger/LedgerPage.css'
 
@@ -16,6 +18,7 @@ export default function ExpenseLedgerPage() {
   const [detail, setDetail] = useState(null)
   const [detailLoading, setDetailLoading] = useState(false)
   const [search, setSearch] = useState('')
+  const [tenant, setTenant] = useState(null)
 
   const load = useCallback(async () => {
     try {
@@ -30,6 +33,10 @@ export default function ExpenseLedgerPage() {
   }, [tenantId, showToast])
 
   useEffect(() => { load() }, [load])
+
+  useEffect(() => {
+    if (tenantId) fetchTenant(tenantId).then(setTenant).catch(() => {})
+  }, [tenantId])
 
   useEffect(() => {
     setTopbar('Expense Ledger', null)
@@ -123,41 +130,53 @@ export default function ExpenseLedgerPage() {
                           ) : !detail || detail.length === 0 ? (
                             <p className="l-detail-loading">No entries.</p>
                           ) : (
-                            <table className="l-subtable">
-                              <thead>
-                                <tr>
-                                  <th>Date</th>
-                                  <th>Description</th>
-                                  <th className="l-num">Debit (Rs.)</th>
-                                  <th className="l-num">Credit (Rs.)</th>
-                                  <th className="l-num">Balance (Rs.)</th>
-                                </tr>
-                              </thead>
-                              <tbody>
-                                {detail.map((entry, i) => {
-                                  const entryBal = Number(entry.running_balance)
-                                  return (
-                                    <tr key={i} className={`l-entry l-entry--${entry.entry_type}`}>
-                                      <td>{formatDate(entry.date)}</td>
-                                      <td>
-                                        <span className="l-entry-desc">{entry.description}</span>
-                                        <span className="l-entry-ref">{entry.ref}</span>
-                                      </td>
-                                      <td className="l-num">{entry.debit > 0 ? `Rs. ${Number(entry.debit).toFixed(0)}` : '—'}</td>
-                                      <td className="l-num">{entry.credit > 0 ? `Rs. ${Number(entry.credit).toFixed(0)}` : '—'}</td>
-                                      <td className={`l-num ${entryBal > 0 ? 'l-due' : entryBal < 0 ? 'l-excess' : ''}`}>
-                                        {entryBal > 0
-                                          ? `Rs. ${entryBal.toFixed(0)}`
-                                          : entryBal < 0
-                                            ? `Rs. ${Math.abs(entryBal).toFixed(0)}`
-                                            : 'Rs. 0'
-                                        }
-                                      </td>
-                                    </tr>
-                                  )
-                                })}
-                              </tbody>
-                            </table>
+                            <>
+                              <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>
+                                <button className="c-action-btn" onClick={() => printLedgerStatement({
+                                  tenant,
+                                  partyLabel: 'Expense',
+                                  partyName: row.description,
+                                  partyMeta: row.payee_name,
+                                  entries: detail,
+                                  closingBalance: row.balance,
+                                })}>Print</button>
+                              </div>
+                              <table className="l-subtable">
+                                <thead>
+                                  <tr>
+                                    <th>Date</th>
+                                    <th>Description</th>
+                                    <th className="l-num">Debit (Rs.)</th>
+                                    <th className="l-num">Credit (Rs.)</th>
+                                    <th className="l-num">Balance (Rs.)</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {detail.map((entry, i) => {
+                                    const entryBal = Number(entry.running_balance)
+                                    return (
+                                      <tr key={i} className={`l-entry l-entry--${entry.entry_type}`}>
+                                        <td>{formatDate(entry.date)}</td>
+                                        <td>
+                                          <span className="l-entry-desc">{entry.description}</span>
+                                          <span className="l-entry-ref">{entry.ref}</span>
+                                        </td>
+                                        <td className="l-num">{entry.debit > 0 ? `Rs. ${Number(entry.debit).toFixed(0)}` : '—'}</td>
+                                        <td className="l-num">{entry.credit > 0 ? `Rs. ${Number(entry.credit).toFixed(0)}` : '—'}</td>
+                                        <td className={`l-num ${entryBal > 0 ? 'l-due' : entryBal < 0 ? 'l-excess' : ''}`}>
+                                          {entryBal > 0
+                                            ? `Rs. ${entryBal.toFixed(0)}`
+                                            : entryBal < 0
+                                              ? `Rs. ${Math.abs(entryBal).toFixed(0)}`
+                                              : 'Rs. 0'
+                                          }
+                                        </td>
+                                      </tr>
+                                    )
+                                  })}
+                                </tbody>
+                              </table>
+                            </>
                           )}
                         </td>
                       </tr>
