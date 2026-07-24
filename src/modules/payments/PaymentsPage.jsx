@@ -22,6 +22,68 @@ export default function PaymentsPage() {
   const [search, setSearch] = useState('')
   const [dateFrom, setDateFrom] = useState('')
   const [dateTo, setDateTo] = useState('')
+  const [tenant, setTenant] = useState(null)
+
+  useEffect(() => {
+    if (tenantId) fetchTenant(tenantId).then(setTenant).catch(() => {})
+  }, [tenantId])
+
+  const printPayments = () => {
+    const currency = tenant?.currency || 'Rs.'
+    const rows = filtered.map(p => {
+      const customerName = p.customers?.name || p.orders?.customers?.name || '—'
+      return `
+      <tr>
+        <td>${customerName}</td>
+        <td>${p.invoice_number || '—'}</td>
+        <td>${p.orders?.order_number || (p.order_id === null ? '—' : '—')}</td>
+        <td class="num">${currency} ${Number(p.amount).toFixed(0)}</td>
+        <td>${formatDate(p.payment_date)}</td>
+        <td>${p.payment_mode || '—'}</td>
+      </tr>`
+    }).join('')
+    const total = filtered.reduce((s, p) => s + Number(p.amount), 0)
+
+    const html = `<!DOCTYPE html>
+<html><head><title>Customer Payments</title>
+<style>
+  @page { size: A4 landscape; margin: 12mm; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Georgia, 'Times New Roman', serif; font-size: 12px; color: #111; }
+  .identity { text-align: center; margin-bottom: 14px; }
+  .shop-name { font-size: 20px; font-weight: 700; }
+  .meta { font-size: 11px; color: #555; margin-top: 4px; }
+  table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+  th, td { text-align: left; padding: 5px 8px; border-bottom: 1px solid #ddd; font-size: 11px; }
+  th { font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; color: #666; font-family: 'Courier New', monospace; }
+  .num { text-align: right; font-family: 'Courier New', monospace; }
+  .total { font-weight: 700; font-size: 13px; text-align: right; margin-top: 10px; }
+  .footer { text-align: center; font-size: 10px; color: #666; margin-top: 16px; border-top: 1px solid #ccc; padding-top: 8px; }
+</style></head>
+<body>
+  <div class="identity">
+    <div class="shop-name">${tenant?.name || 'Tailor Shop'}</div>
+    <div class="meta">Customer Payments — ${filtered.length} payment${filtered.length !== 1 ? 's' : ''}</div>
+  </div>
+  <table>
+    <thead><tr><th>Customer</th><th>Invoice #</th><th>Order</th><th class="num">Amount</th><th>Date</th><th>Mode</th></tr></thead>
+    <tbody>${rows}</tbody>
+  </table>
+  <div class="total">Total Received: ${currency} ${total.toFixed(0)}</div>
+  <div class="footer">Generated on ${formatDate(new Date().toISOString().slice(0, 10))} · TailorOps</div>
+</body></html>`
+
+    const iframe = document.createElement('iframe')
+    iframe.style.cssText = 'position:fixed;width:0;height:0;border:none;opacity:0;pointer-events:none;'
+    document.body.appendChild(iframe)
+    const doc = iframe.contentDocument || iframe.contentWindow.document
+    doc.open(); doc.write(html); doc.close()
+    iframe.contentWindow.focus()
+    setTimeout(() => {
+      try { iframe.contentWindow.print() } catch {}
+      setTimeout(() => { if (iframe.parentNode) iframe.parentNode.removeChild(iframe) }, 1000)
+    }, 300)
+  }
 
   const load = useCallback(async () => {
     try {
@@ -106,7 +168,10 @@ export default function PaymentsPage() {
       <header className="c-header">
         <div className="c-header-row">
           <h3 className="c-title">Customer Payments</h3>
-          <button className="c-add-btn" onClick={() => setShowForm(true)}>+ Record Payment</button>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button className="c-add-btn" onClick={printPayments}>Print PDF</button>
+            <button className="c-add-btn" onClick={() => setShowForm(true)}>+ Record Payment</button>
+          </div>
         </div>
         <div className="c-header-row" style={{ marginTop: 8, gap: 8 }}>
           <input className="c-search" placeholder="Search by customer name…" value={search} onChange={e => setSearch(e.target.value)} />
