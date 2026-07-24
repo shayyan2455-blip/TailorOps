@@ -7,7 +7,7 @@ export async function fetchProfitSummary(tenantId, start, end) {
     p_end: end,
   })
   if (error) throw error
-  return data
+  return data?.[0] || null
 }
 
 export async function fetchRevenueMetrics(tenantId, start, end) {
