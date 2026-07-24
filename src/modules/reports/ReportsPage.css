@@ -135,7 +135,7 @@
   align-items: center;
   justify-content: center;
   border-radius: 6px;
-  min-width: 40px;
+  min-width: 110px;
   transition: flex 0.3s;
 }
 

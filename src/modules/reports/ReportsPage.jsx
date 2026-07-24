@@ -141,6 +141,9 @@ export default function ReportsPage() {
     )
   }
 
+  const total = (summary?.total_customer_payments || 0) + (summary?.total_tailor_payments || 0) + (summary?.total_expenses_paid || 0) + Math.abs(summary?.net_profit || 0)
+  const floor = (v) => Math.max(v, total * 0.12 || 1)
+
   return (
     <div className="c-module">
       <header className="c-header">
@@ -192,16 +195,16 @@ export default function ReportsPage() {
               <span className="rp-hero-result">Net Profit</span>
             </div>
             <div className="rp-hero-waterfall">
-              <div className="rp-wf-bar rp-wf-positive" style={{ flex: summary?.total_customer_payments || 1 }}>
+              <div className="rp-wf-bar rp-wf-positive" style={{ flex: floor(summary?.total_customer_payments || 0) }}>
                 <span className="rp-wf-label">Rs. {(summary?.total_customer_payments || 0).toFixed(0)}</span>
               </div>
-              <div className="rp-wf-bar rp-wf-negative" style={{ flex: summary?.total_tailor_payments || 1 }}>
+              <div className="rp-wf-bar rp-wf-negative" style={{ flex: floor(summary?.total_tailor_payments || 0) }}>
                 <span className="rp-wf-label">−Rs. {(summary?.total_tailor_payments || 0).toFixed(0)}</span>
               </div>
-              <div className="rp-wf-bar rp-wf-negative" style={{ flex: Math.max(summary?.total_expenses_paid || 0, 1) }}>
+              <div className="rp-wf-bar rp-wf-negative" style={{ flex: floor(summary?.total_expenses_paid || 0) }}>
                 <span className="rp-wf-label">−Rs. {(summary?.total_expenses_paid || 0).toFixed(0)}</span>
               </div>
-              <div className="rp-wf-bar rp-wf-result" style={{ flex: Math.abs(summary?.net_profit || 1) }}>
+              <div className="rp-wf-bar rp-wf-result" style={{ flex: floor(Math.abs(summary?.net_profit || 0)) }}>
                 <span className="rp-wf-label">Rs. {(summary?.net_profit || 0).toFixed(0)}</span>
               </div>
             </div>
