@@ -3,6 +3,7 @@ import { useAuth } from '../../context/AuthContext'
 import { useToast } from '../../context/ToastContext'
 import { useTopbar } from '../../shared/context/TopbarContext'
 import { formatDate } from '../../shared/lib/formatDate'
+import { fetchTenant } from '../settings/api/settingsQueries'
 import { supabase } from '../../shared/lib/supabaseClient'
 import { fetchOrders, createOrder, updateOrder, deleteOrder } from './api/orderQueries'
 import { saveMeasurement } from '../measurements/api/measurementQueries'
@@ -28,6 +29,65 @@ export default function OrdersPage() {
   const [detail, setDetail] = useState(null)
   const [confirmDelete, setConfirmDelete] = useState(null)
   const [invoiceOrderId, setInvoiceOrderId] = useState(null)
+  const [tenant, setTenant] = useState(null)
+
+  useEffect(() => {
+    if (tenantId) fetchTenant(tenantId).then(setTenant).catch(() => {})
+  }, [tenantId])
+
+  const printOrders = () => {
+    const currency = tenant?.currency || 'Rs.'
+    const rows = orders.map(o => `
+      <tr>
+        <td>${o.order_number || '—'}</td>
+        <td>${o.customers?.name || '—'}</td>
+        <td>${o.current_stage || '—'}</td>
+        <td class="num">${currency} ${Number(o.total_amount).toFixed(0)}</td>
+        <td class="num">${o.delivery_date ? formatDate(o.delivery_date) : '—'}</td>
+      </tr>`).join('')
+
+    const total = orders.reduce((s, o) => s + Number(o.total_amount || 0), 0)
+
+    const html = `<!DOCTYPE html>
+<html><head><title>Orders Summary</title>
+<style>
+  @page { size: A4 landscape; margin: 12mm; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: Georgia, 'Times New Roman', serif; font-size: 12px; color: #111; }
+  .identity { text-align: center; margin-bottom: 14px; }
+  .shop-name { font-size: 20px; font-weight: 700; }
+  .meta { font-size: 11px; color: #555; margin-top: 4px; }
+  table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+  th, td { text-align: left; padding: 5px 8px; border-bottom: 1px solid #ddd; font-size: 11px; }
+  th { font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; color: #666; font-family: 'Courier New', monospace; }
+  .num { text-align: right; font-family: 'Courier New', monospace; }
+  .total { font-weight: 700; font-size: 13px; text-align: right; margin-top: 10px; }
+  .footer { text-align: center; font-size: 10px; color: #666; margin-top: 16px; border-top: 1px solid #ccc; padding-top: 8px; }
+</style></head>
+<body>
+  <div class="identity">
+    <div class="shop-name">${tenant?.name || 'Tailor Shop'}</div>
+    <div class="meta">Orders Summary — ${orders.length} order${orders.length !== 1 ? 's' : ''}</div>
+  </div>
+  <table>
+    <thead><tr><th>Order #</th><th>Customer</th><th>Stage</th><th class="num">Total</th><th class="num">Delivery</th></tr></thead>
+    <tbody>${rows}</tbody>
+  </table>
+  <div class="total">Total Amount: ${currency} ${total.toFixed(0)}</div>
+  <div class="footer">Generated on ${formatDate(new Date().toISOString().slice(0, 10))} · TailorOps</div>
+</body></html>`
+
+    const iframe = document.createElement('iframe')
+    iframe.style.cssText = 'position:fixed;width:0;height:0;border:none;opacity:0;pointer-events:none;'
+    document.body.appendChild(iframe)
+    const doc = iframe.contentDocument || iframe.contentWindow.document
+    doc.open(); doc.write(html); doc.close()
+    iframe.contentWindow.focus()
+    setTimeout(() => {
+      try { iframe.contentWindow.print() } catch {}
+      setTimeout(() => { if (iframe.parentNode) iframe.parentNode.removeChild(iframe) }, 1000)
+    }, 300)
+  }
 
   const load = useCallback(async () => {
     try {
@@ -49,7 +109,7 @@ export default function OrdersPage() {
   useEffect(() => { load() }, [load])
 
   useEffect(() => {
-    setTopbar('Orders', <button className="c-add-btn" onClick={() => { setEditing(null); setShowForm(true) }}>+ New Order</button>)
+    setTopbar('Orders', <><button className="c-add-btn" onClick={() => { setEditing(null); setShowForm(true) }}>+ New Order</button><button className="c-add-btn" style={{ marginLeft: 8 }} onClick={printOrders}>Print PDF</button></>)
     return () => setTopbar('', null)
   }, [setTopbar])
 

@@ -205,7 +205,7 @@ export default function ReportsPage() {
                 <span className="rp-wf-label">−Rs. {(summary?.total_expenses_paid || 0).toFixed(0)}</span>
               </div>
               <div className="rp-wf-bar rp-wf-result" style={{ flex: floor(Math.abs(summary?.net_profit || 0)) }}>
-                <span className="rp-wf-label">Rs. {(summary?.net_profit || 0).toFixed(0)}</span>
+                <span className="rp-wf-label">Rs. {(summary?.net_profit || 0).toFixed(0)}</span> 
               </div>
             </div>
           </div>
